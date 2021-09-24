@@ -14,8 +14,8 @@ export default function Home() {
         <h1 className="text-5xl font-bold">
           Welcome to CEC v3 <span className="text-xs">i think?</span>
         </h1>
-        <p className="text-xl"> Doesn&apost matter. </p>
-        <p className="text-xl"> We&aposll try to do it properly this time. </p>
+        <p className="text-xl"> Doesn&apos;t matter. </p>
+        <p className="text-xl"> We&apos;ll try to do it properly this time. </p>
         <h3 className="font-semibold text-2xl">Roadmap </h3>
         <ul className="list-inside list-disc text-gray-500">
           <li className="animate-pulse text-blue-900">Design Homepage UI ← We're here</li>
