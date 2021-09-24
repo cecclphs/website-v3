@@ -18,7 +18,7 @@ export default function Home() {
         <p className="text-xl"> We&apos;ll try to do it properly this time. </p>
         <h3 className="font-semibold text-2xl">Roadmap </h3>
         <ul className="list-inside list-disc text-gray-500">
-          <li className="animate-pulse text-blue-900">Design Homepage UI ← We're here</li>
+          <li className="animate-pulse text-blue-900">Design Homepage UI ← We&apos;re here</li>
           <li>Complete Homepage</li>
           <li>Link Redirects</li>
           <li>Implement Auth</li>
