@@ -9,7 +9,7 @@ const NavbarLink = ({href, label}) => (
 )
 
 const Navbar = () => {
-    return <nav className="h-16 flex flex-row justify-between w-full relative">
+    return <nav className="sticky h-16 flex flex-row justify-between w-full">
         <div className="py-4 w-24">
             <Image src={cecLogo} className="object-fill"/>
         </div>
