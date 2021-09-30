@@ -21,27 +21,27 @@
 The site is published on Vercel, and will be connected to a custom domain soon *hopefully* 🙏🙏🙏🙏.
 
 ## Timeline and To-do list
-[x] Setup NextJS Project
+- [x] Setup NextJS Project
 
-[x] Find hooligans to give support
+- [x] Find hooligans to give support
 
-[x] Initial Paints of Homepage
+- [x] Initial Paints of Homepage
 
-[x] Added Link Shortener Redirects
+- [x] Added Link Shortener Redirects
 
-[] Restructure Firestore to migrate all member's data
+- [ ] Restructure Firestore to migrate all member's data
 
-[] Implement Sign in with clphs.edu.my from Google
+- [ ] Implement Sign in with clphs.edu.my from Google
 
-[] Create Profile Page & Edit Profile
+- [ ] Create Profile Page & Edit Profile
 
-[] Attendance or something?
+- [ ] Attendance or something?
 
-[] 🧂 Sugar 
+- [ ] 🧂 Sugar 
 
-[] 🍛 Spice
+- [ ] 🍛 Spice
 
-[] 🧬 Everything Nice 
+- [ ] 🧬 Everything Nice 
 
 
 ## Contributing
