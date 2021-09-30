@@ -1,34 +1,48 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+![CEC Logo](https://clphscec.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fimage%2Fpublic%2Fcec-logo-gradient-no-text.a040ddd8b237b7b653452b87e09ffb5e.png&w=1920&q=75)
 
-## Getting Started
+# CEC Website V3
+👋👋 Howdy, Welcome aboard. Welcome to the migration of CEC Website for **hopefully** the LAST TIME
 
-First, run the development server:
+## Vision
+🚀 Make A Speedy App
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+🥬 Easy to implement new features in the future
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+🐔 Looks super good. Like really really good. ( Seems Impossible )
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+✨ Just a handy app for members of CEC to use.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Tech Stack
+- Next.Js 
+- Firebase
+- TailwindCSS
 
-## Learn More
+The site is published on Vercel, and will be connected to a custom domain soon *hopefully* 🙏🙏🙏🙏.
 
-To learn more about Next.js, take a look at the following resources:
+## Timeline and To-do list
+[x] Setup NextJS Project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[x] Find hooligans to give support
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+[x] Initial Paints of Homepage
 
-## Deploy on Vercel
+[x] Added Link Shortener Redirects
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+[] Restructure Firestore to migrate all member's data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[] Implement Sign in with clphs.edu.my from Google
+
+[] Create Profile Page & Edit Profile
+
+[] Attendance or something?
+
+[] 🧂 Sugar 
+
+[] 🍛 Spice
+
+[] 🧬 Everything Nice 
+
+
+## Contributing
+Before Contributing or creating any pull requests, Please contact @ImJustChew to make sure you're intentions are in line with our vision. 
