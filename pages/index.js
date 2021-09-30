@@ -11,7 +11,7 @@ export default function Home() {
         <meta name="description" content="CEC on Next.js ??!! WIP" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="w-full max-w-[1140px] px-12">
+      <main className="w-full max-w-[1140px] px-4 md:px-12">
         <Navbar />
         <header className="">
           <div className="flex flex-col md:flex-row pt-12 pb-5 space-y-8 md:space-y-0 md:space-x-12 mb-8">
