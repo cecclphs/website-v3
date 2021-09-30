@@ -19,7 +19,7 @@ export default function Home() {
               <h1 className="text-5xl font-bold text-blue-900 leading-tight">Creative <br/> Electronics <br/>Club</h1>
               <h3 className="text-xl font-bold text-gray-500">@Chung Ling Private High School</h3>
             </div>
-            <h4 className="text-xl text-medium pt-3 flex-1 text-blue-900 leading-relaxed">We are a <span className="font-bold">student led club</span> empowered by passion and curiosity since 2014. Coached by passionate professional parents.</h4>
+            <h4 className="text-xl font-medium pt-3 flex-1 text-blue-900 leading-relaxed">We are a <span className="font-bold">student led club</span> empowered by passion and curiosity since 2014. Coached by passionate professional parents.</h4>
           </div>
           <div className="relative overflow-hidden rounded-xl w-full">
             <Image src={PISF} alt="Penang International Science Fair 2019" className="object-cover" width={1140} height={610} />
