@@ -14,6 +14,9 @@ const Navbar = () => {
             <Image src={cecLogo} className="object-fill"/>
         </div>
         <div className="p-4 w-32"></div>
+        <div className="grid place-items-center">
+            <button className="rounded-full text-lg py-2 px-4 text-blue-50 appearance-none font-medium transition hover:scale-105 bg-gradient-to-br from-sky-400 to-indigo-900">Dashboard</button>
+        </div>
     </nav>
 }
 
