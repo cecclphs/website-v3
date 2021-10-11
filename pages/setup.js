@@ -1,21 +1,39 @@
+import { httpsCallable } from "@firebase/functions";
 import { Button } from "@mui/material";
+import { useEffect, useState } from "react";
 import SlideTransition from "../components/SlideTransition/SlideTransition";
+import { functions } from "../config/firebase";
 
-const Paper = ({children}) => (
+const Paper = ({className, children}) => (
     <SlideTransition in timeout={50}>
-        <div className="bg-white opacity-85 shadow-lg border rounded-md max-w-[990px] p-6 m-4">
+        <div className={`bg-white opacity-85 shadow-lg border rounded-xl p-6 m-4 ${className}`}>
             {children}
         </div>
     </SlideTransition>
 )
 
 const MigrateUser = () => {
-    return <Paper>
+    const [oldUserData, setOldUserData] = useState({});
+    useEffect(() => {
+        const migrateUser = async () => {
+            try {
+                const response = await httpsCallable(functions,'getOldUserData')()
+                console.log(response.data)
+                setOldUserData(response.data)
+            } catch (e) {
+                console.log(e)
+            }
+        }
+        migrateUser();
+    }, []);
+
+    return <Paper className="max-w-[500px]">
         <h1 className="text-2xl font-medium">Migrate User</h1>
         <h3 className="text-lg text-gray-500">We've found that you have a existing account on the old site, Please to see if we have your details correct.</h3>
-        <div className="space-x-2 float-right">
-            <Button variant="contained" color="primary">Edit</Button>
-            <Button variant="contained" color="primary">Continue</Button>
+        
+        <div className="space-x-2 float-right mt-4">
+            <Button variant="contained" color="error" size="medium">Edit</Button>
+            <Button variant="contained" color="info" size="medium">Continue</Button>
         </div>
     </Paper>
 }

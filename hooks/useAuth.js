@@ -76,7 +76,10 @@ const useAuthProvider = () => {
      * @param {firebase.auth.User} user 
      */
     const handleAuthStateChanged = (user) => {
-        if (user) setUser(user);
+        if (user) {
+            setUser(user);
+            console.log('logged in as ', user.email);
+        }
         else setUser(false);
     };
 
