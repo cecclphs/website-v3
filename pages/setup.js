@@ -12,6 +12,13 @@ const Paper = ({className, children}) => (
     </SlideTransition>
 )
 
+const DataRow = ({ title, info}) => ( 
+    <div className="py-1">
+        <h5 className="text-sm font-bold text-gray-600">{title}</h5>
+        <p className="text-base">{info}</p>
+    </div>
+)
+
 const MigrateUser = () => {
     const [oldUserData, setOldUserData] = useState({});
     useEffect(() => {
@@ -27,10 +34,36 @@ const MigrateUser = () => {
         migrateUser();
     }, []);
 
-    return <Paper className="max-w-[500px]">
-        <h1 className="text-2xl font-medium">Migrate User</h1>
+    return <Paper className="max-w-[500px] space-y-2 text-center">
+        <h1 className="text-2xl font-bold">Migrate User</h1>
         <h3 className="text-lg text-gray-500">We've found that you have a existing account on the old site, Please to see if we have your details correct.</h3>
-        
+        {oldUserData && <div className="max-h-[70vh] overflow-y-auto divide-y divide-gray-200 text-left scrollbar scrollbar-thumb-blue-100 hover:scrollbar-thumb-blue-200 scrollbar-track-gray-100 " >
+            <h2 className="text-xl font-medium py-2 text-blue-800">Personal Details</h2>
+            <DataRow title="English Name" info={oldUserData.englishName} />
+            <DataRow title="Chinese Name" info={oldUserData.chineseName} />
+            <DataRow title="Student ID" info={oldUserData.studentid} />
+            <DataRow title="Identification Card/Passport" info={oldUserData.identification} />
+            <DataRow title="Phone" info={oldUserData.phone} />
+            <DataRow title="Facebook URL" info={oldUserData.facebookURL} />
+            <DataRow title="Active Email" info={oldUserData.email} />
+            <DataRow title="Address" info={oldUserData.address} />
+            <DataRow title="Birthday" info={oldUserData.birthday} />
+            <DataRow title="Class" info={oldUserData.class} />
+            <DataRow title="Role" info={oldUserData.committeeRole} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Mother's Details</h2>
+            <DataRow title="Mother's Name" info={oldUserData.motherName} />
+            <DataRow title="Mother's Phone" info={oldUserData.motherPhone} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Father's Details</h2>
+            <DataRow title="Father's Name" info={oldUserData.fatherName} />
+            <DataRow title="Father's Phone" info={oldUserData.fatherPhone} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Emergency Details</h2>
+            <DataRow title="Emergency Phone" info={oldUserData.emergencyphone} />
+            <DataRow title="Emergency Contact Relation (Parent/Guardian)" info={oldUserData.emergencyrelation} />
+            <DataRow title="Specials" info={oldUserData.specials} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Metadata</h2>
+            <DataRow title="Created On" info={new Date(oldUserData.createdOn?._seconds*1000).toDateString()} />
+            <DataRow title="Modified On" info={new Date(oldUserData.modifiedOn?._seconds*1000).toDateString()} />
+        </div>}
         <div className="space-x-2 float-right mt-4">
             <Button variant="contained" color="error" size="medium">Edit</Button>
             <Button variant="contained" color="info" size="medium">Continue</Button>
