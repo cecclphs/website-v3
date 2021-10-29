@@ -39,6 +39,7 @@ let appInstance = Date.now();
 const useAuthProvider = () => {
     const [user, setUser] = useState(null); 
     const [userDetails, setUserDetails] = useState(null);
+    const [userToken, setUserToken] = useState(null);
     const [lastCommitted, setLastCommitted] = useLocalStorage("lastCommited", 0);  //The last committed state of our user claims document, decides if token needs to update if outdated
     const router = useRouter()
 
@@ -98,7 +99,7 @@ const useAuthProvider = () => {
             if(!data?._lastCommitted) return;
 
             if (lastCommitted && !(data?._lastCommitted || {}).isEqual(lastCommitted)) {
-                setUserDetails({ ...(await getUserTokenResult(true)), ...latestUserDetails })
+                setUserToken(await getUserTokenResult(true));
             }
             setLastCommitted(data?._lastCommitted);
         },
@@ -112,7 +113,7 @@ const useAuthProvider = () => {
         if (user?.uid) {
             // Subscribe to user document on mount
             const unsubscribe = onSnapshot(doc(db,'users',user.uid), async (doc) => {
-                latestUserDetails = { ...(await getUserTokenResult()), ...doc.data() }
+                latestUserDetails = doc.data()
                 setUserDetails(latestUserDetails)
             })
             var userStatusDatabaseRef = ref(rtdb,'/status/' + user.uid); 
@@ -154,6 +155,7 @@ const useAuthProvider = () => {
     return {
         user,
         userDetails,
+        userToken,
         getUserTokenResult,
         appInstance,
         signOut: userSignOut,

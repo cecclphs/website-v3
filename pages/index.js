@@ -77,7 +77,7 @@ const achievements = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-blue-50">
+    <div className="min-h-screen flex flex-col justify-center items-center bg-blue-50 landing-page">
       <Head>
         <title>Creative Electronics Club</title>
         <meta name="description" content="CEC on Next.js ??!! WIP" />
@@ -253,6 +253,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      <style jsx>
+        {`
+          .landing-page {
+	          font-family: 'THICCCBOI','Inter', 'Roboto', sans-serif;
+          }
+        `}
+      </style>
     </div>
   )
 }
