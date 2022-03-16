@@ -1,7 +1,7 @@
 import { adminDb } from "../../../config/firebase-admin"
 import { withAuth } from "../../../config/middlewares"
 
-const handler = (req, res) => {
+const handler = async (req, res) => {
     const { uid, email } = req.token;
     //Check if email is student email, else don't give a fck
     if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) throw new Error("You are not a student");
