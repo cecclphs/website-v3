@@ -4,7 +4,9 @@ import '../styles/globals.css'
 
 function MyApp({ Component, pageProps }) {
   return <AuthProvider>
-    <Component {...pageProps} />
+    <div className='flex flex-col w-full items-center'>
+      <Component {...pageProps} />
+    </div>
   </AuthProvider>
 }
 
