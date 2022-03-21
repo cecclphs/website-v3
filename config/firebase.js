@@ -34,3 +34,22 @@ if(process.browser){
 export { firebase, auth, db, now, rtdb, functions, analytics };
 
 console.log(firebase.name ? 'Firebase Mode Activated!' : 'Firebase not working :(');
+
+export const docConverter = {
+    toFirestore(doc) {
+        const { id, ref, ...docWithoutId } = doc;
+        return docWithoutId;
+    },
+    fromFirestore(
+      snapshot,
+      options
+    ) {
+      const data = snapshot.data(options);
+      return {
+        id: snapshot.id,
+        ref: snapshot.ref,
+        ...data,
+      };
+    },
+  };
+  
