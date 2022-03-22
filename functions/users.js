@@ -48,17 +48,19 @@ exports.claimsDocumentUpdate = functions.firestore
 
 exports.initializeUser = functions.auth.user().onCreate(async (user) => {
     const { uid, email } = user;
-    const studentid = email.substr(1,5);
+    const studentid = email.substring(1,5);
     //Create user document
     await db.collection("users").doc(uid).set({
-        _firstLogin: admin.firestore.FieldValue.serverTimestamp(),
+      _firstLogin: admin.firestore.FieldValue.serverTimestamp(),
     })
     //Create user claims
     await updateUserClaims({
-        studentid: studentid,
-        isAdmin: false,
-        isCommittee: false,
-        isStudent: /(s[0-9]{5}@clphs.edu.my)/g.test(email)? true : false,
+      englishName: "",
+      chineseName: "",
+      studentid: studentid,
+      isAdmin: false,
+      isCommittee: false,
+      isStudent: /(s[0-9]{5}@clphs.edu.my)/g.test(email)? true : false,
     });
 })
 
@@ -84,5 +86,19 @@ exports.syncStudentData = functions
             })
 
             await batch.commit();
+
+            //if englishName, chineseName or studentid updates, update user_claims
+            const { engN_after, chiN_after, stuID_after } = studentDetails;
+            const { engN_before, chiN_before, stuID_before } = change.before.data();
+            if(engN_after !== engN_before || chiN_after !== chiN_before || stuID_after !== stuID_before) {
+                await Promise.all(linkedAccounts.map( (uid) => {
+                  return updateUserClaims(uid, {
+                    englishName: engN_after,
+                    chineseName: chiN_after,
+                    studentid: stuID_after
+                  })
+                }
+              )) 
+            }
         }
     });
