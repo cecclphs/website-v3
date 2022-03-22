@@ -139,6 +139,40 @@ const MigrateUser = () => {
     </Paper>
 }
 
+const NewUser = () => {
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    return <Paper className="max-w-[500px] space-y-2 text-center">
+        <h1 className="text-2xl font-bold">New User</h1>
+        <h3 className="text-lg text-gray-500">We've detected that you're a student! Welcome aboard</h3>
+        <form className="max-h-[70vh] overflow-y-auto text-left scrollbar scrollbar-thumb-blue-100 hover:scrollbar-thumb-blue-200 scrollbar-track-gray-100 ">
+            <h2 className="text-xl font-medium py-2 text-blue-800">Personal Details</h2>
+            <DataRowInput {...register("englishName", { required: true })} title="English Name" info={oldUserData.englishName} />
+            <DataRowInput {...register("chineseName", { required: true })} title="Chinese Name" info={oldUserData.chineseName} />
+            <DataRowInput {...register("studentid", { required: true })} title="Student ID" info={oldUserData.studentid} />
+            <DataRowInput {...register("identification", { required: true })} title="Identification Card/Passport" info={oldUserData.identification} />
+            <DataRowInput {...register("phone", { required: true })} title="Phone" info={oldUserData.phone} />
+            <DataRowInput {...register("facebookURL", { required: true })} title="Facebook URL" info={oldUserData.facebookURL} />
+            <DataRowInput {...register("email", { required: true })} title="Active Email" info={oldUserData.email} />
+            <DataRowInput {...register("address", { required: true })} title="Address" info={oldUserData.address} />
+            <DataRowInput {...register("birthday", { required: true })} title="Birthday" info={oldUserData.birthday} />
+            <DataRowInput {...register("class", { required: true })} title="Class" info={oldUserData.class} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Mother's Details</h2>
+            <DataRowInput {...register("motherName", { required: true })} title="Mother's Name" info={oldUserData.motherName} />
+            <DataRowInput {...register("motherPhone", { required: true })} title="Mother's Phone" info={oldUserData.motherPhone} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Father's Details</h2>
+            <DataRowInput {...register("fatherName", { required: true })} title="Father's Name" info={oldUserData.fatherName} />
+            <DataRowInput {...register("fatherPhone", { required: true })} title="Father's Phone" info={oldUserData.fatherPhone} />
+            <h2 className="text-xl font-medium py-2 text-blue-800">Emergency Details</h2>
+            <DataRowInput {...register("emergencyphone", { required: true })} title="Emergency Phone" info={oldUserData.emergencyphone} />
+            <DataRowInput {...register("emergencyrelation", { required: true })} title="Emergency Contact Relation (Parent/Guardian)" info={oldUserData.emergencyrelation} />
+            <DataRowInput {...register("specials", { required: true })} title="Specials" info={oldUserData.specials} />
+        </form>
+        <div className="space-x-2 float-right mt-4">
+            <Button variant="contained" color="info" size="medium" onClick={handleContinue}>{"Submit"}</Button>
+        </div>
+    </Paper>
+}
+
 const SetupComplete = () => {
     const router  = useRouter();
     return <Paper className="max-w-[500px] space-y-2 text-center">
