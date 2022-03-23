@@ -1,17 +1,18 @@
 import { AddRounded, FileOpenRounded, FileOpenTwoTone, FileUploadTwoTone } from "@mui/icons-material";
 import { Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from "@mui/material";
-import { addDoc, collection, Timestamp, WithFieldValue } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc, Timestamp, WithFieldValue } from "firebase/firestore";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
 import { FacilityForm, FacilityOrderData } from "../types/Facility";
-import { db } from "../config/firebase";
+import { db, storage } from "../config/firebase";
 import FormSelect from "./form-components/FormSelect";
 import FormTextField from "./form-components/FormTextField";
 import FormCheckbox from "./form-components/FormCheckbox";
 import FormFilePicker from "./form-components/FormFilePicker";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
 
-const AddFacility = () => {
+const AddFacilityOrder = () => {
     const { user, userDetails } = useAuth();
     const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors } } = useForm<FacilityForm>({
         defaultValues:{
@@ -35,16 +36,22 @@ const AddFacility = () => {
         }
     }
 
-    const onSubmit = (data: FacilityForm) => {
+    const onSubmit = async (data: FacilityForm) => {
         if(!user || !userDetails) return;
         const { title, facility, instructions, selfFab, file } = data;
         const { englishName, studentid } = userDetails;
         console.log(data)
-        addDoc(collection(db, 'fab_orders'), {
+        const newDoc = doc(collection(db, "fab_orders"))
+        const files = await Promise.all(Array.from(data.file).map(async (file) => {
+            const snap = await uploadBytes(ref(storage, `fab_order/${newDoc.id}/${file.name}`), file);
+            return {filename: file.name, url: await getDownloadURL(snap.ref), filesize: file.size};
+        }))
+        await setDoc(newDoc, {
             title,
             facility,
             instructions,
             selfFab,
+            files,
             status: 'pending',
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
@@ -109,4 +116,4 @@ const AddFacility = () => {
     </div>
 }
 
-export default AddFacility;
+export default AddFacilityOrder;

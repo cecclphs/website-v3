@@ -1,6 +1,6 @@
 import { collection, DocumentReference, query, where } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import AddFacility from "../components/AddFacility";
+import AddFacilityOrder from "../components/AddFacilityOrder";
 import FacilityOrder from "../components/FacilityOrder";
 import MemberLayout from "../components/MemberLayout"
 import Page from "../components/Page"
@@ -14,7 +14,7 @@ const Facility = () => {
     console.log(orders)
     return <MemberLayout>
         <Page title="Facility">
-            <AddFacility />
+            <AddFacilityOrder />
             <div className="flex flex-col mt-2 space-y-2">
                 {orders.map(order => <FacilityOrder key={order.id} order={order} isCurrentUser />)}
             </div>

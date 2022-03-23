@@ -15,7 +15,7 @@ export type FacilityOrderData = {
     facility: '3dprinter' | 'lasercutter',
     instructions: string,
     selfFab: boolean,
-    file: { filename: string, url: string, filesize: number }[],
+    files: { filename: string, url: string, filesize: number }[],
     status: 'pending' | 'accepted' | 'rejected' | 'fabricating' | 'cancelled' | 'completed' | 'paid',
     price?: number,
     createdAt: Timestamp,

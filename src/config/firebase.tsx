@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { DocumentData, DocumentReference, FirestoreDataConverter, getFirestore, QueryDocumentSnapshot, SnapshotOptions, Timestamp, WithFieldValue } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getFunctions } from "firebase/functions";
+import { getStorage } from 'firebase/storage';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCpWeoGzDrwoJjnsjBnDu-vVUt6LfGHyxk",
@@ -24,14 +25,15 @@ const auth = getAuth(firebase)
 const db = getFirestore(firebase);
 const rtdb = getDatabase(firebase);
 const functions = getFunctions(firebase);
+const storage = getStorage(firebase);
 const now = Timestamp.now();
 let analytics;
 
 if(process.browser){
-    analytics = getAnalytics(firebase);
+    // analytics = getAnalytics(firebase);
 }
 
-export { firebase, auth, db, now, rtdb, functions, analytics };
+export { firebase, auth, db, now, rtdb, functions, storage };
 
 console.log(firebase.name ? 'Firebase Mode Activated!' : 'Firebase not working :(');
 

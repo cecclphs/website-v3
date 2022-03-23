@@ -12,7 +12,7 @@ const FacilityOrder = ({ order, isCurrentUser=false }: {order: FacilityOrderData
         facility,
         instructions,
         selfFab,
-        file,
+        files,
         status,
         createdAt,
         updatedAt,
