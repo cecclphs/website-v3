@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import Navbar from '../components/navbar'
-import PISF from '../public/images/activities/2019pisf.JPG';
-import HandNotGataiButDissapointed from '../public/images/activities/hand_no_gatai_but_dissapointed.jpg';
-import Activity2016 from '../public/images/activities/2016activity.jpg';
+import PISF from '../../public/images/activities/2019pisf.JPG';
+import HandNotGataiButDissapointed from '../../public/images/activities/hand_no_gatai_but_dissapointed.jpg';
+import Activity2016 from '../../public/images/activities/2016activity.jpg';
 import { Fade, Grow, Slide } from '@mui/material';
 import SlideTransition from '../components/SlideTransition/SlideTransition';
 import { TransitionGroup } from 'react-transition-group';

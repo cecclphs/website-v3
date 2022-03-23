@@ -1,11 +1,14 @@
 import React, { FC, PropsWithChildren, PropsWithoutRef, ReactChildren, useState } from 'react';
-import { AccountCircle, AdminPanelSettingsRounded, Home, LinkRounded, LogoutRounded } from "@mui/icons-material";
+import { AccountCircle, AdminPanelSettingsRounded, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
 import Head from "next/head";
 import SlideTransition from "./SlideTransition/SlideTransition";
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import CECLogo from "./CECLogo";
 import { Collapse, IconButton, Tooltip } from "@mui/material";
+import { useAuth } from '../hooks/useAuth';
+import UserToken from '../types/UserToken';
+import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone';
 
 const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  ({ children }) => {
     const router = useRouter();
@@ -13,13 +16,14 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
     const links = [
         { href: "/dashboard", label: "Dashboard", Icon: Home },
         { href: "/profile", label: "Profile", Icon: AccountCircle },
-        { href: "/links", label: "Links", Icon: LinkRounded },
-        { label: "Admin", href: "/admin", children: [
+        { href: "/facility", label: "Facility", Icon: PrecisionManufacturingTwoTone },
+        { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
+            { href: "/admin/finance", label: "Finance", Icon: AccountBalanceTwoToneIcon },
         ], Icon: AdminPanelSettingsRounded },
     ]
 
-    return <div className="min-h-screen w-screen grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] px-4">
+    return <div className="min-h-screen w-screen grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] px-4 divide-x divide-solid divide-gray-200">
         <Head>
             <title>Member</title>
         </Head>
@@ -36,8 +40,12 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
             </header>
             <h1 className="text-2xl font-semibold">Creative Electronics Club</h1>
             <div className="flex flex-col w-48 space-y-1 py-3">
-                {links.map(({ href, label, children, Icon }) => {
+                {links.map(({ href, label, children, Icon, permission = ['isStudent'] }) => {
                     const [extended, setExtended] = useState(router.asPath.startsWith(href));
+                    const { userToken } = useAuth();
+                    // check if userToken has any one of permission
+                    const hasPermission = permission.some((p) => userToken?.[p as keyof UserToken] == true);
+                    if(!hasPermission) return <></>
                     if(children) {
                         return <div key={href} className="flex flex-col">
                             <div onClick={() => setExtended(!extended)} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex flex-row items-center text-sm font-medium space-x-2 ${router.asPath == href ? 'bg-blue-100 text-blue-600': 'text-neutral-700'}`}>

@@ -18,7 +18,7 @@ const Links = () => {
 
     const handleSubmit = async () => {
         if(!user) return;
-        await setDoc(doc(db, 'links', newLink.id), {url: newLink.url, owner: userToken!.studentid, createdAt: Timestamp.now()});
+        await setDoc(doc(db, 'links', newLink.id), {url: newLink.url, createdAt: Timestamp.now()});
         setNewLink({id: '', url: ''});
     }
 

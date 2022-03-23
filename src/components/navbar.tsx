@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '../hooks/useAuth';
-import cecLogo from '../public/cec-logo-gradient-no-text.png';
+import cecLogo from '../../public/cec-logo-gradient-no-text.png';
 
 const NavbarLink = ({href, label}:{href: string, label: string}) => (
     <Link href={href}> 

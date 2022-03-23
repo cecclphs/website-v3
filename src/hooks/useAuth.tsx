@@ -6,18 +6,19 @@ import React, { useState, useEffect, useContext, createContext } from "react";
 import { auth, db, firebase, rtdb } from "../config/firebase";
 import Merge from "../types/Merge";
 import StudentDetails from "../types/StudentDetails";
+import UserToken from "../types/UserToken";
 import { useLocalStorage } from "./useHooks";
 
 export type AuthHook= {
     user: User | null;
-    userDetails?: UserDetails | null;
-    userToken?: ParsedToken | null;
+    userDetails: UserDetails | undefined;
+    userToken: UserToken | undefined;
     getUserTokenResult: (refresh: boolean) => any;
     appInstance: number;
     signOut: () => Promise<void>;
     initGoogleSignIn: () => Promise<void>;
 }
-const authContext = createContext<AuthHook>({ user: null, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {} });
+const authContext = createContext<AuthHook>({ user: null, userDetails:undefined, userToken: undefined, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {} });
 const { Provider } = authContext;
 
 /**
@@ -59,8 +60,8 @@ type UserDetails = Merge<
 
 const useAuthProvider = (): AuthHook => {
     const [user, setUser] = useState<User | null>(null); 
-    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-    const [userToken, setUserToken] = useState<ParsedToken | undefined>();
+    const [userDetails, setUserDetails] = useState<UserDetails>();
+    const [userToken, setUserToken] = useState<UserToken>();
     const [lastCommitted, setLastCommitted] = useLocalStorage<number>("lastCommited", 0);  //The last committed state of our user claims document, decides if token needs to update if outdated
     const router = useRouter()
 
@@ -82,7 +83,7 @@ const useAuthProvider = (): AuthHook => {
      * @param {boolean} refresh 
      * @returns userClaims
      */
-    const getUserTokenResult = async (refresh: boolean) => {
+    const getUserTokenResult = async (refresh: boolean = false) => {
         if (!user) return;
         let { claims } = await user.getIdTokenResult(refresh);
         
@@ -90,7 +91,7 @@ const useAuthProvider = (): AuthHook => {
         if (router.asPath.startsWith('/')) {
             // history.push('/home');
         }
-        return claims
+        return claims as unknown as UserToken
     };
 
     /**
@@ -114,12 +115,14 @@ const useAuthProvider = (): AuthHook => {
     //Attaches user claims documents to listen for changes in user permissions, if yes update token to ensure no permission errors
     useEffect(() => {
         if (!user) return;
+        (async () => setUserToken(await getUserTokenResult()))();
         return onSnapshot(doc(db,'user_claims',user.uid), async (snap) => {
             const data = snap.data();
             
             if(!data?._lastCommitted) return;
 
             if (lastCommitted && !(data?._lastCommitted || {}).isEqual(lastCommitted)) {
+                console.log('updating user token')
                 setUserToken(await getUserTokenResult(true));
             }
             setLastCommitted(data?._lastCommitted);
