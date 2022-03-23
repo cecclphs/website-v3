@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren, PropsWithoutRef, ReactChildren, useState } from 'react';
-import { AccountCircle, AdminPanelSettingsRounded, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
+import { AccountCircle, AdminPanelSettingsRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
 import Head from "next/head";
 import SlideTransition from "./SlideTransition/SlideTransition";
 import Link from 'next/link';
@@ -19,6 +19,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { href: "/facility", label: "Facility", Icon: PrecisionManufacturingTwoTone },
         { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
+            { href: "/admin/fabrication", label: "Fabrication", Icon: DesignServicesTwoTone },
             { href: "/admin/finance", label: "Finance", Icon: AccountBalanceTwoToneIcon },
         ], Icon: AdminPanelSettingsRounded },
     ]

@@ -6,17 +6,26 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "../hooks/useAuth";
 import { FacilityForm, FacilityOrderData } from "../types/Facility";
 import { db } from "../config/firebase";
+import FormSelect from "./form-components/FormSelect";
+import FormTextField from "./form-components/FormTextField";
+import FormCheckbox from "./form-components/FormCheckbox";
+import FormFilePicker from "./form-components/FormFilePicker";
+
 const AddFacility = () => {
     const { user, userDetails } = useAuth();
-    const { register, handleSubmit, setValue, watch, formState: { isValid, errors } } = useForm<FacilityForm>({
+    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors } } = useForm<FacilityForm>({
         defaultValues:{
+            instructions: "",
+            title: "",
             selfFab: true,
             agree: false
-        }
+        },
+        reValidateMode: 'onChange', // this in pair with mode seems to give the expected result
+        mode: 'onChange',
+    
     })
-    console.log(errors)
-    console.log(isValid)
-    const { title, facility, instructions, agree, selfFab, file: selectedFile } = watch();
+    const facility = watch('facility');
+    const selectedFile = watch('file');
     const acceptFile = () => {
         switch(facility) {
             case '3dprinter':
@@ -26,21 +35,12 @@ const AddFacility = () => {
         }
     }
 
-    useEffect(() => {
-        register('facility', { required: true });
-        register('title', { required: true });
-        register('instructions');
-        register('file', { required: true });
-        register('selfFab', { required: true });
-        register('agree', { value: true });
-    })
-
     const onSubmit = (data: FacilityForm) => {
         if(!user || !userDetails) return;
         const { title, facility, instructions, selfFab, file } = data;
         const { englishName, studentid } = userDetails;
         console.log(data)
-        addDoc(collection(db, 'orders'), {
+        addDoc(collection(db, 'fab_orders'), {
             title,
             facility,
             instructions,
@@ -57,56 +57,52 @@ const AddFacility = () => {
 
     return <div className="flex flex-col rounded-lg shadow-lg p-4 space-y-2">
         <h1 className="text-lg font-medium">Applying as {userDetails?.englishName} {userDetails?.studentid}</h1>
-        <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Apply To Use</InputLabel>
-            <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={facility}
-                label="Apply To Use"
-                onChange={(e) => setValue('facility', e.target.value as '3dprinter' | 'lasercutter')}
-            >
-                <MenuItem value={'3dprinter'}>3D Printer</MenuItem>
-                <MenuItem value={'lasercutter'}>Laser Cutter</MenuItem>
-            </Select>
-        </FormControl>
+        <FormSelect
+            control={control}
+            name="facility"
+            rules={{ required: true }}
+            label="Apply To Use"
+            options={[
+                { label: '3D Printer', value: '3dprinter' },
+                { label: 'Laser Cutter', value: 'lasercutter' },
+            ]}
+        />
         <div className="flex flex-row w-full space-x-2">
             <div className="flex-[2] flex flex-col space-y-2">
-                <TextField
-                    label="Item Name/Description"
-                    variant="filled"
+                <FormTextField
+                    control={control}
                     name="title"
-                    value={title}
-                    onChange={(e) => setValue('title', e.target.value)}
+                    rules={{ required: true }}
+                    label="Item Name/Description"
                     />
-                <TextField
+                <FormTextField
                     multiline
-                    label="Instructions"
-                    variant="outlined"
+                    control={control}
                     name="instructions"
-                    value={instructions}
-                    onChange={(e) => setValue('instructions', e.target.value)}
+                    label="Instructions"
                     />
                 </div>
             <div className="w-[250px] flex flex-col">
-                <label htmlFor="contained-button-file">
-                    <input accept={acceptFile()} className="hidden" id="contained-button-file" multiple type="file" onChange={(e) => { 
-                        if(e.target.files) setValue('file', e.target.files)} 
-                    }/>
-                    <Button variant="contained" component="span" disabled={!facility} startIcon={<AddRounded/>}>
-                        Upload
-                    </Button>
-                </label>
+                <FormFilePicker
+                    control={control}
+                    name="file"
+                    rules={{ required: true }}
+                    label="Upload File"
+                    startIcon={<AddRounded/>}
+                    variant="contained"
+                    accept={acceptFile()}
+                    multiple
+                    />
                 {selectedFile && Array.from(selectedFile).map((file) => 
-                    <div className="flex flex-row justify-start space-x-2 items-center w-full py-2">
+                    <div className="flex flex-row justify-start space-x-2 items-center w-full py-2" key={file.name}>
                         <FileOpenTwoTone className="w-5 h-5 text-blue-800 opacity-80"/>
                         <div className="text-ellipsis overflow-hidden whitespace-nowrap text-gray-600">{file.name}</div>
                     </div>
                 )}
             </div>
         </div>
-        <FormControlLabel control={<Checkbox checked={selfFab} onChange={(e) => setValue('selfFab', e.target.checked)} />} label="I will be fabricating this myself" />
-        <FormControlLabel control={<Checkbox checked={agree} onChange={(e) => setValue('agree', e.target.checked)} />} label="I agree to the conditions for fabricating this object" />
+        <FormCheckbox control={control} name="selfFab" label="I will fabricate this part myself." />
+        <FormCheckbox control={control} rules={{required: true}} name="agree" label="I agree to the terms and conditions" />
         <div className="flex flex-row w-full justify-end">
             <Button disabled={!isValid} variant="contained" onClick={handleSubmit(onSubmit)}>Submit</Button>
         </div>

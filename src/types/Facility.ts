@@ -16,7 +16,8 @@ export type FacilityOrderData = {
     instructions: string,
     selfFab: boolean,
     file: { filename: string, url: string, filesize: number }[],
-    status: 'pending' | 'accepted' | 'rejected' | 'fabricating' | 'cancelled' | 'completed',
+    status: 'pending' | 'accepted' | 'rejected' | 'fabricating' | 'cancelled' | 'completed' | 'paid',
+    price?: number,
     createdAt: Timestamp,
     updatedAt: Timestamp,
     requestedBy: {
