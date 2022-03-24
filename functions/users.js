@@ -88,8 +88,8 @@ exports.syncStudentData = functions
             await batch.commit();
 
             //if englishName, chineseName or studentid updates, update user_claims
-            const { engN_after, chiN_after, stuID_after } = studentDetails;
-            const { engN_before, chiN_before, stuID_before } = change.before.data();
+            const { englishName: engN_after, chineseName: chiN_after, studentid: stuID_after } = studentDetails;
+            const { englishName: engN_before, chineseName: chiN_before, studentid: stuID_before } = change.before.data();
             if(engN_after !== engN_before || chiN_after !== chiN_before || stuID_after !== stuID_before) {
                 await Promise.all(linkedAccounts.map( (uid) => {
                   return updateUserClaims(uid, {

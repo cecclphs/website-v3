@@ -1,10 +1,12 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
-import { DocumentData, DocumentReference, FirestoreDataConverter, getFirestore, QueryDocumentSnapshot, SnapshotOptions, Timestamp, WithFieldValue } from "firebase/firestore";
+import { collection, CollectionReference, DocumentData, DocumentReference, FirestoreDataConverter, getFirestore, QueryDocumentSnapshot, SnapshotOptions, Timestamp, WithFieldValue } from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import { getFunctions } from "firebase/functions";
 import { getStorage } from 'firebase/storage';
+import InventoryItem from '../types/Inventory';
+import { FacilityOrderData } from '../types/Facility';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCpWeoGzDrwoJjnsjBnDu-vVUt6LfGHyxk",
@@ -36,6 +38,10 @@ if(process.browser){
 export { firebase, auth, db, now, rtdb, functions, storage };
 
 console.log(firebase.name ? 'Firebase Mode Activated!' : 'Firebase not working :(');
+
+const createCollection = <T>(collectionName: string) => {
+  return collection(db, collectionName).withConverter(docConverter) as CollectionReference<T>;
+};
 
 export const docConverter = {
     toFirestore(doc: WithFieldValue<any>): DocumentData {
