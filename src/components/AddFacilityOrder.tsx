@@ -69,6 +69,7 @@ const AddFacilityOrder = () => {
             name="facility"
             rules={{ required: true }}
             label="Apply To Use"
+            variant="filled"
             options={[
                 { label: '3D Printer', value: '3dprinter' },
                 { label: 'Laser Cutter', value: 'lasercutter' },
@@ -80,6 +81,7 @@ const AddFacilityOrder = () => {
                     control={control}
                     name="title"
                     rules={{ required: true }}
+                    variant="filled"
                     label="Item Name/Description"
                     />
                 <FormTextField
