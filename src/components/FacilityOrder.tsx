@@ -82,7 +82,7 @@ const FacilityOrder = ({ order, isCurrentUser=false }: {order: FacilityOrderData
         switch(status) {
             case 'pending': return 'bg-gray-500';
             case 'accepted': return 'bg-blue-500';
-            case 'rejected': return 'bg-black-500';
+            case 'rejected': return 'bg-black';
             case 'cancelled': return 'bg-red-500';
             case 'fabricating': return 'bg-orange-500';
             case 'completed': return 'bg-green-500';

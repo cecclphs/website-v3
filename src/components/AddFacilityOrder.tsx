@@ -11,10 +11,12 @@ import FormTextField from "./form-components/FormTextField";
 import FormCheckbox from "./form-components/FormCheckbox";
 import FormFilePicker from "./form-components/FormFilePicker";
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { useSnackbar } from 'notistack';
 
 const AddFacilityOrder = () => {
     const { user, userDetails } = useAuth();
-    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors } } = useForm<FacilityForm>({
+    const { enqueueSnackbar } = useSnackbar();
+    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors }, reset } = useForm<FacilityForm>({
         defaultValues:{
             instructions: "",
             title: "",
@@ -60,9 +62,13 @@ const AddFacilityOrder = () => {
                 studentid
             },
         } as unknown as WithFieldValue<FacilityOrderData>)
+        enqueueSnackbar("Order submitted successfully", {
+            variant: 'success',
+        })
+        reset();
     }
 
-    return <div className="flex flex-col rounded-lg shadow-lg p-4 space-y-2">
+    return <div className="flex flex-col space-y-2">
         <h1 className="text-lg font-medium">Applying as {userDetails?.englishName} {userDetails?.studentid}</h1>
         <FormSelect
             control={control}

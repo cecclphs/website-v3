@@ -3,6 +3,7 @@ import { AppProps } from 'next/app'
 import 'tailwindcss/tailwind.css'
 import { AuthProvider } from '../hooks/useAuth'
 import DialogProvider from '../hooks/useDialog'
+import { SnackbarProvider } from 'notistack';
 import '../styles/globals.css'
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -14,11 +15,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   })
   return <AuthProvider>
     <ThemeProvider theme={theme}>
-      <DialogProvider>
-        <div className='flex flex-col w-full items-center'>
-          <Component {...pageProps} />
-        </div>
-      </DialogProvider>
+      <SnackbarProvider maxSnack={3}>
+        <DialogProvider>
+          <div className='flex flex-col w-full items-center'>
+            <Component {...pageProps} />
+          </div>
+        </DialogProvider>
+      </SnackbarProvider>
     </ThemeProvider>
   </AuthProvider>
 }

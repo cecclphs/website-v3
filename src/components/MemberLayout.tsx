@@ -1,5 +1,5 @@
 import React, { FC, PropsWithChildren, PropsWithoutRef, ReactChildren, useState } from 'react';
-import { AccountCircle, AdminPanelSettingsRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
+import { AccountCircle, AdminPanelSettingsRounded, AppRegistrationTwoTone, AppShortcutTwoTone, AppsTwoTone, ClassRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
 import Head from "next/head";
 import SlideTransition from "./SlideTransition/SlideTransition";
 import Link from 'next/link';
@@ -20,8 +20,13 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
             { href: "/admin/fabrication", label: "Fabrication", Icon: DesignServicesTwoTone },
-            { href: "/admin/finance", label: "Finance", Icon: AccountBalanceTwoToneIcon },
+            { href: "/admin/students", label: "Students", Icon: ClassRounded },
         ], Icon: AdminPanelSettingsRounded },
+        { href: "/finance", permission: ['isAdmin'], label: "Finance", Icon: AccountBalanceTwoToneIcon },
+        { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone, children: [
+            { href: "/inventory", label: "Browse", Icon: AppShortcutTwoTone },
+            { href: "/inventory/create", label: "Create", Icon: AppRegistrationTwoTone },
+        ]},
     ]
 
     return <div className="min-h-screen w-screen grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] px-4 divide-x divide-solid divide-gray-200">
@@ -49,7 +54,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
                     if(!hasPermission) return <></>
                     if(children) {
                         return <div key={href} className="flex flex-col">
-                            <div onClick={() => setExtended(!extended)} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex flex-row items-center text-sm font-medium space-x-2 ${router.asPath == href ? 'bg-blue-100 text-blue-600': 'text-neutral-700'}`}>
+                            <div onClick={() => setExtended(!extended)} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex flex-row items-center text-sm font-medium space-x-2 text-neutral-700`}>
                                 <Icon className="w-5 h-5"/> <span>{label}</span>
                             </div>
                             <Collapse in={extended}>

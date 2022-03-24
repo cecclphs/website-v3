@@ -1,4 +1,5 @@
 export default interface StudentDetails {
+    id: string,
     englishName: string,
     chineseName: string,
     studentid: string,
@@ -17,5 +18,5 @@ export default interface StudentDetails {
     emergencyrelation: string,
     specials: string,
     committeeRole: string,
-
+    linkedAccounts: []
 }
