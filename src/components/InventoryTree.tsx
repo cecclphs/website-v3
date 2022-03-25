@@ -42,7 +42,7 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
             //node closed, remove snapshot
             const id = previousOpen.filter(item => !data.includes(item))[0]
             console.log('removed ', id)
-            if(id) nodeSnapshots[id]();
+            if(id && nodeSnapshots[id]) nodeSnapshots[id]();
             delete nodeSnapshots[id];
         }
         previousOpen = data;
