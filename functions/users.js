@@ -53,6 +53,10 @@ exports.initializeUser = functions.auth.user().onCreate(async (user) => {
     await db.collection("users").doc(uid).set({
       _firstLogin: admin.firestore.FieldValue.serverTimestamp(),
     })
+    //update user photo
+    if(/(s[0-9]{5}@clphs.edu.my)/g.test(email)) await auth.updateUser(uid, {
+      photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`,
+    })
     //Create user claims
     await updateUserClaims({
       englishName: "",

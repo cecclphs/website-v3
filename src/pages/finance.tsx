@@ -1,6 +1,7 @@
 import { collection } from "firebase/firestore";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import MemberLayout from "../components/MemberLayout";
+import NewTransaction from "../components/NewTransaction";
 import Page from "../components/Page";
 import { db, docConverter } from "../config/firebase";
 import { Transaction } from "../types/Finance";
@@ -21,6 +22,7 @@ const Finance = () => {
     console.log(transactions)
     return <MemberLayout>
         <Page title="Financials">
+            <NewTransaction/>
             <table>
                 <thead>
                     <tr>

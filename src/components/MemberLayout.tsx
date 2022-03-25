@@ -12,6 +12,7 @@ import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone
 
 const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  ({ children }) => {
     const router = useRouter();
+    const { user, userToken } = useAuth();
 
     const links = [
         { href: "/dashboard", label: "Dashboard", Icon: Home },
@@ -34,9 +35,12 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
             <title>Member</title>
         </Head>
         <aside className="flex flex-col max-h-screen pt-8 sticky top-0">
-            <header className="flex flex-row justify-between">
+            <header className="flex flex-row justify-between items-center">
                 <CECLogo className="h-10 py-2"/>
-                <div className="flex flex-row space-y-2">
+                <div className="flex flex-row space-x-2 items-center">
+                    <Tooltip title={`${userToken?.englishName} ${userToken?.chineseName}`}>
+                        <img src={user?.photoURL} className="w-10 h-10 rounded-full object-cover" alt="User Profile"/>
+                    </Tooltip>
                     <Tooltip title="Logout">
                         <IconButton>
                             <LogoutRounded />

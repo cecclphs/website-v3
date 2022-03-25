@@ -1,4 +1,4 @@
-import { admin, adminDb } from "../../../config/firebase-admin"
+import { admin, adminAuth, adminDb } from "../../../config/firebase-admin"
 import { withAuth } from "../../../config/middlewares"
 import { NextApiRequest, NextApiResponse } from "next";
 import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
@@ -20,12 +20,18 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         
         //Fetch user existing data, if snapshot is empty, throw error
         const studentid = email.substr(1,5);
-    
+        
+        //update user photoURL
+        await adminAuth.updateUser(uid, {
+            photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`
+        })
+
         //Set Student Data
         await adminDb.doc(`students/${studentid}`).set({
             ...details,
             migrated: true,
             linkedAccounts: [uid],
+            photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`,
             createdOn: admin.firestore.FieldValue.serverTimestamp(),
             modifiedOn: admin.firestore.FieldValue.serverTimestamp()
         })

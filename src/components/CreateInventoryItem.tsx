@@ -95,7 +95,7 @@ const SearchItem = ({ value, onChange }) => {
 
 const CreateInventoryItem = () => {
     const { userToken } = useAuth();
-    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors }, reset } = useForm<InventoryForm>({
+    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors, isSubmitting }, reset } = useForm<InventoryForm>({
         defaultValues:{
             simpleId: null,
             description: "",
@@ -125,7 +125,7 @@ const CreateInventoryItem = () => {
             simpleId: sanitized.simpleId,
             parent: sanitized.parent,
             status: "available",
-            children: [],
+            children: 0,
             type: sanitized.type,
             metadata: sanitized.metadata,
             registeredBy: {
@@ -277,7 +277,7 @@ const CreateInventoryItem = () => {
             render={({ field: { onChange, value }}) => (
                 <SearchItem value={value} onChange={onChange}/>
             )}/> */}
-        <Button variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Create</Button>
+        <Button disabled={isSubmitting} variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Create</Button>
     </div>
 }
 

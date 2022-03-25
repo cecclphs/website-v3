@@ -3,11 +3,13 @@ import {useEffect, useState} from 'react';
 import {useCollectionData} from 'react-firebase-hooks/firestore';
 import {db, docConverter} from '../config/firebase';
 import InventoryItem from '../types/Inventory';
-import {Tree} from '@minoru/react-dnd-treeview';
+import {DragLayerMonitorProps, NodeModel, Tree} from '@minoru/react-dnd-treeview';
 import {CustomNode} from './CustomNode';
+import { CustomDragPreview } from './CustomDragPreview';
 
 const nodeSnapshots: {[parents: string]: Unsubscribe} = {};
 let previousOpen = [];
+
 const InventoryTree = ({ parent = null }: {parent: string | null}) => {
     const [parents = [], loading, error] = useCollectionData<InventoryItem>(query(collection(db, 'inventory').withConverter(docConverter), where('parent', '==', parent)));
     const [nodeData, setNodeData] = useState<{[x:string]: InventoryItem}>({});
@@ -34,9 +36,13 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
                         .withConverter(docConverter), 
                     where('parent', '==', difference[0])
                 ), (snapshot) => {
-                    const newNodeData = {...nodeData};
-                    snapshot.docs.forEach(doc => newNodeData[doc.id] = doc.data());
-                    setNodeData(newNodeData);
+                    setNodeData((state) => {
+                        const newNodeData = {...state};
+                        snapshot.docs.forEach(doc => newNodeData[doc.id] = doc.data());
+                        console.log(newNodeData)
+                        return newNodeData;
+                    });
+                    
                 })
         } else {
             //node closed, remove snapshot
@@ -73,9 +79,16 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
             rootId={parent || 0}
             onDrop={handleDrop}
             onChangeOpen={onChangeOpen}
+            dragPreviewRender={(
+                monitorProps: DragLayerMonitorProps<InventoryItem>
+              ) => <CustomDragPreview monitorProps={monitorProps} />}
             classes={{
+                dropTarget: 'bg-blue-200',
             }}
-            render={(node, { depth, isOpen, onToggle }) => (
+            render={(
+                node:NodeModel<InventoryItem>, 
+                { depth, isOpen, onToggle }
+            ) => (
                 <CustomNode
                     node={node}
                     depth={depth}
