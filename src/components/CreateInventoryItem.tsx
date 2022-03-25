@@ -126,6 +126,7 @@ const CreateInventoryItem = () => {
             parent: sanitized.parent,
             status: "available",
             children: [],
+            type: sanitized.type,
             metadata: sanitized.metadata,
             registeredBy: {
                 studentid: userToken.studentid,

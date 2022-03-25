@@ -24,4 +24,5 @@ module.exports = {
         return rest;
     }),
     ...require("./users.js"),
+    ...require("./inventory.js"),
 }

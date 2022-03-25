@@ -4,7 +4,7 @@ export default interface InventoryItem {
     id: string
     description: string
     parent: string | null
-    children: string[]
+    children: number
     status: 'borrowed' | 'available' | 'lost'
     type: 'location' | 'container' | 'project' | 'item'
     simpleId: string | null
