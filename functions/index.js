@@ -25,4 +25,5 @@ module.exports = {
     }),
     ...require("./users.js"),
     ...require("./inventory.js"),
+    ...require("./finance.js"),
 }

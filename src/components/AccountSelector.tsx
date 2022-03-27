@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db, docConverter } from '../config/firebase';
 import { AutocompleteChangeReason, AutocompleteChangeDetails } from '@mui/material/Autocomplete';
+import { MenuItem } from '@mui/material';
 
 export default function AccountSelector({ hiddenIds=[], label, onChange, value={} }: { hiddenIds?: string[], label: string, onChange: (event: React.SyntheticEvent<Element, Event>, value: any, reason: AutocompleteChangeReason, details?: AutocompleteChangeDetails<any>) => void, value: any }) {
     const [open, setOpen] = React.useState(false);
@@ -19,8 +20,8 @@ export default function AccountSelector({ hiddenIds=[], label, onChange, value={
 
         (async () => {
         if (active) {
-            let sync = await getDocs(collection(db,'financials').withConverter(docConverter))
-            setOptions(sync.docs.map(doc => doc.data()).filter(item => !hiddenIds.includes(item.id)));
+            let sync = await getDocs(collection(db,'accounts').withConverter(docConverter))
+            setOptions(sync.docs.map(doc => doc.data()));
         }
         })();
 
@@ -43,8 +44,8 @@ export default function AccountSelector({ hiddenIds=[], label, onChange, value={
         value={value}
         onChange={onChange}
         isOptionEqualToValue={(option, value) => option.id === value.id}
-        getOptionLabel={(option) => option.accountName || ""}
-        options={options}
+        getOptionLabel={(option) => `${option.accountName || ""} - RM${option.balance?.toFixed(2) || ""}`}
+        options={options.filter(item => !hiddenIds.includes(item.id))}
         loading={loading}
         renderInput={(params) => (
             <TextField
@@ -62,6 +63,11 @@ export default function AccountSelector({ hiddenIds=[], label, onChange, value={
             }}
             />
         )}
+        // renderOption={(option) => (
+        //     <MenuItem>
+        //     {option.accountName}
+        //     </MenuItem>
+        // )}
         />
     );
 }

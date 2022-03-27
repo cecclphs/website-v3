@@ -1,4 +1,5 @@
 import { Timestamp } from 'firebase/firestore'
+import {StudentDetails} from './User';
 
 export default interface InventoryItem {
     id: string
@@ -18,21 +19,12 @@ export default interface InventoryItem {
         purchase: {
             date?: string,
             supplier?: string,
-            purchasedBy?: {
-                studentid: string,
-                englishName: string,
-            }
+            purchasedBy?: StudentDetails
             financeRef?: string,
         },
         notes?: string,
-        borrowedBy?: {
-            studentid: string,
-            englishName: string,
-        }
+        borrowedBy?: StudentDetails
     }
-    registeredBy: {
-        studentid: string,
-        englishName: string,
-    }
+    registeredBy: StudentDetails
     dateRegistered: Timestamp,
 }

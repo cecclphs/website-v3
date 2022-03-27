@@ -1,4 +1,5 @@
 import { Timestamp } from "firebase/firestore"
+import {StudentDetails} from './User';
 
 export type FacilityForm = {
     title: string,
@@ -20,17 +21,8 @@ export type FacilityOrderData = {
     price?: number,
     createdAt: Timestamp,
     updatedAt: Timestamp,
-    requestedBy: {
-        studentid: string,
-        englishName: string,
-    },
-    checkedBy?: {
-        studentid: string,
-        englishName: string,
-    },
-    assignedTo?: {
-        studentid: string,
-        englishName: string,
-    },
+    requestedBy: StudentDetails,
+    checkedBy?: StudentDetails,
+    assignedTo?: StudentDetails,
 }
 

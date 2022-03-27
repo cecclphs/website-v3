@@ -5,6 +5,8 @@ import { AuthProvider } from '../hooks/useAuth'
 import DialogProvider from '../hooks/useDialog'
 import { SnackbarProvider } from 'notistack';
 import '../styles/globals.css'
+import { LocalizationProvider } from '@mui/lab'
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -13,17 +15,19 @@ function MyApp({ Component, pageProps }: AppProps) {
       fontFamily: "'Inter', sans-serif",
     }
   })
-  return <AuthProvider>
-    <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={3}>
-        <DialogProvider>
-          <div className='flex flex-col w-full items-center'>
-            <Component {...pageProps} />
-          </div>
-        </DialogProvider>
-      </SnackbarProvider>
-    </ThemeProvider>
-  </AuthProvider>
+  return <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <SnackbarProvider maxSnack={3}>
+          <DialogProvider>
+            <div className='flex flex-col w-full items-center'>
+              <Component {...pageProps} />
+            </div>
+          </DialogProvider>
+        </SnackbarProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  </LocalizationProvider>
 }
 
 export default MyApp
