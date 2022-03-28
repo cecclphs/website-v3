@@ -27,5 +27,5 @@ export type FinanceAccountType = {
     metadata?: {
         [x: string]: any;
     },
-    lastTransactionAt: Timestamp;
+    lastTransactionAt?: Timestamp;
 }

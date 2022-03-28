@@ -6,22 +6,51 @@ import Page from "../components/Page";
 import { db, docConverter } from "../config/firebase";
 import { FinanceAccountType, Transaction } from "../types/Finance";
 import FinanceAccount from "../components/FinanceAccount";
-import { formatDistance, formatDistanceToNow, subDays } from "date-fns";
-const FinanceRow = ({transaction}: { transaction: Transaction }) => {
-    const { id, type, amount, description, date } = transaction;
-    return <tr>
-        <td className='text-sm font-semibold py-2 w-[200px]'>{id}</td>
-        <td>{type}</td>
-        <td>{amount}</td>
-        <td>{description}</td>
-        <td>{date.toLocaleString()}</td>
-    </tr>
-}
+import { format, formatDistance, formatDistanceToNow, subDays } from "date-fns";
+import { Chip, Tooltip } from "@mui/material";
+import { NoteRounded, ReceiptRounded } from "@mui/icons-material";
+import { useMemo } from "react";
 
 const Finance = () => {
     const [transactions = [], loading, error] = useCollectionData<Transaction>(query(collection(db, 'transactions'), orderBy('date', 'desc')).withConverter(docConverter));
     const [accounts = [], loadingAccounts, errorAccounts] = useCollectionData<FinanceAccountType>(collection(db, 'accounts').withConverter(docConverter));
     console.log(transactions)
+
+    const getTypeColor = (type: string) => {
+        switch (type) {
+            case 'income':
+                return 'bg-green-50';
+            case 'expense':
+                return 'bg-red-100';
+            case 'transfer':
+                return 'bg-blue-100';
+        }
+    }
+
+    const addNumbersFixed = (num1, num2) => {
+        return +(num1 + num2).toFixed(2);
+    }
+
+    const accountsSum = useMemo(() => {
+        return accounts.reduce((sum, account) => {
+            return addNumbersFixed(sum, account.balance);
+        }, 0);
+    }, [accounts]);
+
+    const getColor = (transaction) => {
+        // pending: 'bg-orange-300',
+        // income: 'bg-green-300',
+        // expense: 'bg-red-300',
+        // error: 'bg-red-800 text-red-100'
+        switch (transaction.status) {
+            case 'pending':
+                return getTypeColor(transaction.type) + ' text-gray-700';
+            case 'successful':
+                return getTypeColor(transaction.type)
+            case 'error':
+                return 'bg-red-800 text-red-100';
+        }
+    }
 
     const getAccountName = (id: string) => {
         const account = accounts.find(account => account.id === id);
@@ -32,28 +61,36 @@ const Finance = () => {
         <Page title="Financials">
             <NewTransaction/>
             <div className="flex flex-row space-x-2">
+                <FinanceAccount account={{id: 'all', accountName: 'All', balance: accountsSum, type: "bank"}}/>
                 {accounts.map(account => (<FinanceAccount key={account.id} account={account} />))}
             </div>
-            <table className="w-full">
+            <table className="w-full border-collapse">
                 <thead>
                     <tr>
                         <th></th>
-                        <th>Date</th>
-                        <th>Description</th>
+                        <th className="text-left">Date</th>
+                        <th className="text-left">Description</th>
                         <th></th>
                         <th>Amount</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-solid divide-gray-200">
                 {transactions.map(transaction => (
-                    <tr className="hover:bg-gray-100">
-                        <td className='text-sm font-semibold'>{transaction.registeredBy.studentid}</td>
-                        <td className="text-center">{formatDistanceToNow(transaction.date.toDate(), { addSuffix: true })}</td>
+                    <tr className={`${getColor(transaction)} hover:opacity-80 transition cursor-pointer`} key={transaction.id}>
+                        <td className="text-center p-2">{transaction.type == 'transfer'?`${getAccountName(transaction.account)} -> ${getAccountName(transaction.toAccount)}`:getAccountName(transaction.account)}</td>
+                        <td className="p-2">{
+                            format(transaction.date.toDate(), "yyyy-MM-dd")}
+                        </td>
                         <td>{transaction.description}</td>
-                        <td className="text-center">{transaction.type == 'transfer'?`${getAccountName(transaction.account)} -> ${getAccountName(transaction.toAccount)}`:getAccountName(transaction.account)}</td>
-                        <td className="text-right flex justify-between">
-                            <span>RM</span>
-                            <span>{transaction.amount}</span>
+                        <td className='text-sm font-semibold p-2'>
+                            {<Tooltip title="Receipts">
+                                <Chip icon={<ReceiptRounded />} label={transaction.invoices?.length || 0} size="small"/>
+                            </Tooltip>}
+                            {transaction?.remarks && <Tooltip title="Receipts"><Chip icon={<NoteRounded />} label={1}  size="small"/></Tooltip>}
+                        </td>
+                        <td className="text-right flex justify-between p-2 align-bottom">
+                            <span className="text-gray-700">RM</span>
+                            <span>{transaction.type == 'expense'?'-':''}{transaction.amount.toFixed(2)}</span>
                         </td>
                     </tr>
                 ))}

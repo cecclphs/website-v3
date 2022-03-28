@@ -73,5 +73,5 @@ exports.transactionAdded = functions
   });
 
 const addNumbersFixed = (num1, num2) => {
-  return Math.round((num1 + num2) * 1e12) / 1e12
+  return +(num1 + num2).toFixed(2);
 }
