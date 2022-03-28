@@ -9,6 +9,7 @@ export default interface InventoryItem {
     status: 'borrowed' | 'available' | 'lost'
     type: 'location' | 'container' | 'project' | 'item'
     simpleId: string | null
+    quantity?: number
     metadata: {
         donatedBy?: string,
         donatedOn?: string,

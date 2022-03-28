@@ -10,6 +10,7 @@ import { format, formatDistance, formatDistanceToNow, subDays } from "date-fns";
 import { Chip, Tooltip } from "@mui/material";
 import { NoteRounded, ReceiptRounded } from "@mui/icons-material";
 import { useMemo } from "react";
+import AddAccount from "../components/AddAccount";
 
 const Finance = () => {
     const [transactions = [], loading, error] = useCollectionData<Transaction>(query(collection(db, 'transactions'), orderBy('date', 'desc')).withConverter(docConverter));
@@ -60,18 +61,20 @@ const Finance = () => {
     return <MemberLayout>
         <Page title="Financials">
             <NewTransaction/>
+            <h2 className="text-2xl font-semibold py-1">Accounts</h2>
             <div className="flex flex-row space-x-2">
                 <FinanceAccount account={{id: 'all', accountName: 'All', balance: accountsSum, type: "bank"}}/>
                 {accounts.map(account => (<FinanceAccount key={account.id} account={account} />))}
+                <AddAccount />
             </div>
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse mt-2 border-t border-solid border-gray-300">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th className="text-left">Date</th>
-                        <th className="text-left">Description</th>
-                        <th></th>
-                        <th>Amount</th>
+                        <th className="p-1"></th>
+                        <th className="text-left p-1">Date</th>
+                        <th className="text-left p-1">Description</th>
+                        <th className="p-1"></th>
+                        <th className="p-1">Amount</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-solid divide-gray-200">
@@ -86,7 +89,7 @@ const Finance = () => {
                             {<Tooltip title="Receipts">
                                 <Chip icon={<ReceiptRounded />} label={transaction.invoices?.length || 0} size="small"/>
                             </Tooltip>}
-                            {transaction?.remarks && <Tooltip title="Receipts"><Chip icon={<NoteRounded />} label={1}  size="small"/></Tooltip>}
+                            {transaction?.remarks && <Tooltip title="Notes"><Chip icon={<NoteRounded />} label={1}  size="small"/></Tooltip>}
                         </td>
                         <td className="text-right flex justify-between p-2 align-bottom">
                             <span className="text-gray-700">RM</span>

@@ -22,7 +22,7 @@ const FinanceAccount = ({ account, accountId }: { account?: FinanceAccountType, 
     },[account])
 
     return <div className="flex flex-col rounded-md border border-solid border-gray-300">
-        <div className="flex flex-col justify-between p-3">
+        <div className="flex flex-col justify-between p-3 space-y-1">
             <h4>{accountData?.type == 'bank'? <AccountBalanceTwoToneIcon/>: <MoneyTwoTone/>} {accountData?.accountName}</h4>
             <p>{accountData?.notes}</p>
             <span className="text-2xl"><span className="text-lg">RM</span> {accountData?.balance?.toFixed(2)}</span>
