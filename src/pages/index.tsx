@@ -6,16 +6,17 @@ import { useAuth } from '../hooks/useAuth';
 const Home = () => {
   const { initGoogleSignIn } = useAuth();
   return <div className="flex flex-row w-screen h-screen divide divide-x divide-gray-300 divide-solid">
-    <div className="flex-1 grid place-items-center">
-      <div className="flex flex-col space-y-2">
-        <CECLogo className="h-10 object-contain"/>
-        <h1 className="text-3xl font-bold text-gray-800">
-          Welcome to CEC
-        </h1>
+    <div className="flex-[2] grid place-items-center">
+      <div className="flex flex-col space-y-4">
+        <div className="flex flex-row space-x-3 text-gray-800">
+          <span className="text-6xl font-bold">{"Welcome to "}</span>
+          <CECLogo className="h-14 object-contain"/>
+        </div>
+        <p>Are you a CEC Member? </p>
       </div>
     </div>
     <div className='flex-1 grid place-items-center'>
-      <Button startIcon={<Google/> } onClick={initGoogleSignIn}>Sign In with Google</Button>
+      <Button startIcon={<Google/> } onClick={initGoogleSignIn} size="large">Sign In with Google</Button>
     </div>
   </div>
 }

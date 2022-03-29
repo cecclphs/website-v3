@@ -12,7 +12,7 @@ import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone
 
 const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  ({ children }) => {
     const router = useRouter();
-    const { user, userToken } = useAuth();
+    const { user, userToken, signOut } = useAuth();
 
     const links = [
         { href: "/dashboard", label: "Dashboard", Icon: Home },
@@ -42,7 +42,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
                         <img src={user?.photoURL} className="w-10 h-10 rounded-full object-cover" alt="User Profile"/>
                     </Tooltip>
                     <Tooltip title="Logout">
-                        <IconButton>
+                        <IconButton onClick={signOut}>
                             <LogoutRounded />
                         </IconButton>
                     </Tooltip>

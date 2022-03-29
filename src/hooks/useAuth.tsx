@@ -141,6 +141,7 @@ const useAuthProvider = (): AuthHook => {
             // Subscribe to user document on mount
             const unsubscribe = onSnapshot(doc(db,'users',user.uid), async (doc) => {
                 latestUserDetails = doc.data() as UserDetails
+                if(!latestUserDetails?.migrated) router.push('/setup')
                 setUserDetails(latestUserDetails)
             })
             var userStatusDatabaseRef = ref(rtdb,'/status/' + user.uid); 

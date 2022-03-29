@@ -19,7 +19,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) throw new Error("You are not a student");
         
         //Fetch user existing data, if snapshot is empty, throw error
-        const studentid = email.substr(1,5);
+        const studentid = email.substring(1,6);
         
         //update user photoURL
         await adminAuth.updateUser(uid, {
@@ -35,6 +35,12 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             createdOn: admin.firestore.FieldValue.serverTimestamp(),
             modifiedOn: admin.firestore.FieldValue.serverTimestamp()
         })
+        await adminDb.doc(`user_claims/${uid}`).set({
+            englishName: details.englishName,
+            chineseName: details.chineseName,
+            studentid: studentid,
+            isStudent: true,
+        }, { merge: true })
         res.status(200).send(JSON.stringify({status:200, message: "Migration Successful"}))
     } catch(e) {
         console.error(e)

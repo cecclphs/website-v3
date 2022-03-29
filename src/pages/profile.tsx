@@ -1,3 +1,4 @@
+import { EditRounded } from '@mui/icons-material';
 import { LinearProgress } from '@mui/material';
 import MemberLayout from '../components/MemberLayout';
 import Page from '../components/Page';
@@ -11,7 +12,7 @@ const DataRow = ({title, info}: {title: string, info: string}) => {
 }
 
 const Profile = () => {
-    const { userDetails } = useAuth();
+    const { user, userDetails } = useAuth();
     const isLoading = !userDetails;
     const {
         englishName,
@@ -39,8 +40,18 @@ const Profile = () => {
                 <LinearProgress />
             </div>:
             <div className="flex flex-col">
-                <h1 className='text-2xl font-semibold'>{chineseName} {englishName}</h1>
-                <h2 className='font-semibold'>{className} {studentid}</h2>
+                <div className='flex flex-row space-x-3 items-center'>
+                    <div className='relative w-20 h-20'>
+                        <div className='w-20 h-20 absolute grid place-items-center left-0 top-0 transition opacity-0 bg-black/30 hover:opacity-100 rounded-full cursor-pointer'>
+                            <EditRounded className="text-white"/>
+                        </div>
+                        <img src={user?.photoURL} className="w-20 h-20 rounded-full object-cover border-[6px] border-solid border-white shadow-xl" alt="User Profile"/>
+                    </div>
+                    <div className="flex flex-col">
+                        <h1 className='text-2xl font-semibold'>{chineseName} {englishName}</h1>
+                        <h2 className='font-semibold'>{className} {studentid}</h2>
+                    </div>
+                </div>
                 <table className='table-fixed border-collapse'>
                     <tbody className='divide-y divide-solid divide-gray-300'>
                         <DataRow title="Identification Card/Passport" info={identification!} />

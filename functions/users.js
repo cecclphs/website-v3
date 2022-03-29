@@ -48,7 +48,7 @@ exports.claimsDocumentUpdate = functions.firestore
 
 exports.initializeUser = functions.auth.user().onCreate(async (user) => {
     const { uid, email } = user;
-    const studentid = email.substring(1,5);
+    const studentid = email.substring(1,6);
     //Create user document
     await db.collection("users").doc(uid).set({
       _firstLogin: admin.firestore.FieldValue.serverTimestamp(),
@@ -58,13 +58,13 @@ exports.initializeUser = functions.auth.user().onCreate(async (user) => {
       photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`,
     })
     //Create user claims
-    await updateUserClaims({
+    await updateUserClaims(uid, {
       englishName: "",
       chineseName: "",
-      studentid: studentid,
+      studentid,
       isAdmin: false,
       isCommittee: false,
-      isStudent: /(s[0-9]{5}@clphs.edu.my)/g.test(email)? true : false,
+      isStudent: /(s[0-9]{5}@clphs.edu.my)/g.test(email),
     });
 })
 
