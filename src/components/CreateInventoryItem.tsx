@@ -14,7 +14,8 @@ type InventoryForm = {
     description: string;
     parent: string | null;
     metadata: InventoryItem['metadata'],
-    type: InventoryItem['type']
+    type: InventoryItem['type'],
+    quantity: number;
 }
 
 type InventoryHit = {
@@ -101,12 +102,15 @@ const CreateInventoryItem = () => {
             description: "",
             parent: null,
             metadata: {},
-            type: 'item'
+            type: 'item',
+            quantity: 1
         },
         reValidateMode: 'onChange', // this in pair with mode seems to give the expected result
         mode: 'onChange',
     
     })
+
+    const type = watch('type');
 
     const removeEmpty = (obj) => {
         let newObj = {};
@@ -132,7 +136,8 @@ const CreateInventoryItem = () => {
                 studentid: userToken.studentid,
                 englishName: userToken.englishName,
             },
-            dateRegistered: Timestamp.now()
+            dateRegistered: Timestamp.now(),
+            ...type === 'item' ? { quantity: sanitized.quantity } : {},
         })
         reset();
     }
@@ -168,6 +173,14 @@ const CreateInventoryItem = () => {
                 size="small"
                 label="Description"
                 variant="filled" />
+            {type == 'item' && <FormTextField
+                required
+                control={control}
+                name="quantity"
+                size="small"
+                label="Quantity"
+                variant="filled"
+                type="number" />}
         </div>
         <h3 className="text-xl font-semibold">Metadata - Optional</h3>
         <div className="flex flex-row space-x-2">

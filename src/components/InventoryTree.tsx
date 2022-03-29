@@ -79,9 +79,9 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
             rootId={parent || 0}
             onDrop={handleDrop}
             onChangeOpen={onChangeOpen}
-            dragPreviewRender={(
-                monitorProps: DragLayerMonitorProps<InventoryItem>
-              ) => <CustomDragPreview monitorProps={monitorProps} />}
+            // dragPreviewRender={(
+            //     monitorProps: DragLayerMonitorProps<InventoryItem>
+            //   ) => <CustomDragPreview monitorProps={monitorProps} />}
             classes={{
                 dropTarget: 'bg-blue-200',
             }}

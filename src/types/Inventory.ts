@@ -1,8 +1,9 @@
-import { Timestamp } from 'firebase/firestore'
-import {StudentDetails} from './User';
+import { DocumentReference, Timestamp } from 'firebase/firestore'
+import {ShortStudentInfo} from './User';
 
 export default interface InventoryItem {
     id: string
+    ref: DocumentReference
     description: string
     parent: string | null
     children: number
@@ -20,12 +21,12 @@ export default interface InventoryItem {
         purchase: {
             date?: string,
             supplier?: string,
-            purchasedBy?: StudentDetails
+            purchasedBy?: ShortStudentInfo
             financeRef?: string,
         },
         notes?: string,
-        borrowedBy?: StudentDetails
+        borrowedBy?: ShortStudentInfo
     }
-    registeredBy: StudentDetails
+    registeredBy: ShortStudentInfo
     dateRegistered: Timestamp,
 }

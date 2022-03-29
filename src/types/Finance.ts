@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import {StudentDetails} from './User';
+import {ShortStudentInfo} from './User';
 
 export type Transaction = {
     id: string;
@@ -12,7 +12,7 @@ export type Transaction = {
     account: string,
     toAccount: string,
     remarks?: string;
-    registeredBy: StudentDetails;
+    registeredBy: ShortStudentInfo;
     metadata?: {
         [x: string]: any;
     }

@@ -88,8 +88,8 @@ const useAuthProvider = (): AuthHook => {
         let { claims } = await user.getIdTokenResult(refresh);
         
         //If user on homepage, redirect to dashboard
-        if (router.asPath.startsWith('/')) {
-            // history.push('/home');
+        if (router.asPath == '/') {
+            router.push('/dashboard');
         }
         return claims as unknown as UserToken
     };
@@ -103,7 +103,10 @@ const useAuthProvider = (): AuthHook => {
             setUser(user);
             console.log('logged in as ', user.email);
         }
-        else setUser(null);
+        else {
+            setUser(null);
+            router.push('/');
+        }
     };
 
     //Attaches the onAuthStateChanged to listen for changes in authentication eg: login, signout etc.
