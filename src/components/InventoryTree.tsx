@@ -1,11 +1,12 @@
-import {collection, doc, onSnapshot, query, Unsubscribe, updateDoc, where} from 'firebase/firestore';
-import {useEffect, useState} from 'react';
+import {collection, deleteDoc, doc, onSnapshot, query, Unsubscribe, updateDoc, where} from 'firebase/firestore';
+import {useEffect, useMemo, useState} from 'react';
 import {useCollectionData} from 'react-firebase-hooks/firestore';
 import {db, docConverter} from '../config/firebase';
 import InventoryItem from '../types/Inventory';
 import {DragLayerMonitorProps, NodeModel, Tree} from '@minoru/react-dnd-treeview';
 import {CustomNode} from './CustomNode';
 import { CustomDragPreview } from './CustomDragPreview';
+import { Button } from '@mui/material';
 
 const nodeSnapshots: {[parents: string]: Unsubscribe} = {};
 let previousOpen = [];
@@ -14,6 +15,43 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
     const [parents = [], loading, error] = useCollectionData<InventoryItem>(query(collection(db, 'inventory').withConverter(docConverter), where('parent', '==', parent)));
     const [nodeData, setNodeData] = useState<{[x:string]: InventoryItem}>({});
     const [treeData, setTreeData] = useState([]);
+    const [selectedNodes, setSelectedNodes] = useState<NodeModel<InventoryItem>[]>([]);
+    
+    const handleSelect = (node: NodeModel<InventoryItem>) => {
+        const item = selectedNodes.find((n) => n.id === node.id);
+    
+        if (!item) {
+          setSelectedNodes([...selectedNodes, node]);
+        } else {
+          setSelectedNodes(selectedNodes.filter((n) => n.id !== node.id));
+        }
+      };
+    
+    const handleClear = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget) {
+          setSelectedNodes([]);
+        }
+    };
+
+    const canMergeItems = useMemo(() => {
+        if(selectedNodes.length < 2) return false;
+        //check selected nodes dont have ids and have same descriptions
+        const selectedDescriptions = selectedNodes.map((n) => n.data.description);
+        const selectedIds = selectedNodes.map((n) => n.id);
+        return selectedDescriptions.every((d) => d === selectedDescriptions[0]);
+    }, [selectedNodes])
+    
+    const handleMergeItems = async () => {
+        if(!canMergeItems) return;
+        //get the sum of all quantities
+        const totalQuantity = selectedNodes.reduce((acc, n) => acc + n.data.quantity, 0);
+        //update first node to have the sum of all quantities
+        await updateDoc(selectedNodes[0].data.ref, {
+            quantity: totalQuantity
+        })
+        //delete all other nodes
+        await Promise.all(selectedNodes.slice(1).map((node) => deleteDoc(node.data.ref)))
+    }
 
     const handleDrop = (newTreeData, { dragSourceId, dropTargetId }) => {
         updateDoc(doc(db, 'inventory', dragSourceId), {
@@ -74,29 +112,39 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
     useEffect(() => () => {Object.values(nodeSnapshots).map(unsubscribe => unsubscribe())}, [])
 
     return (
-        <Tree
-            tree={treeData}
-            rootId={parent || 0}
-            onDrop={handleDrop}
-            onChangeOpen={onChangeOpen}
-            // dragPreviewRender={(
-            //     monitorProps: DragLayerMonitorProps<InventoryItem>
-            //   ) => <CustomDragPreview monitorProps={monitorProps} />}
-            classes={{
-                dropTarget: 'bg-blue-200',
-            }}
-            render={(
-                node:NodeModel<InventoryItem>, 
-                { depth, isOpen, onToggle }
-            ) => (
-                <CustomNode
-                    node={node}
-                    depth={depth}
-                    isOpen={isOpen}
-                    onToggle={onToggle}
-                />
-            )}
-        />
+        <div className="flex flex-col space-y-2 mt-2">
+            <div className="rounded-lg bg-gray-50 p-2">
+                <p>{selectedNodes.length} Items Selected</p>
+                <Button disabled={selectedNodes.length == 0} onClick={() => setSelectedNodes([])}>Clear</Button>
+                <Button disabled={!canMergeItems} onClick={handleMergeItems}>Merge</Button>
+
+            </div>
+            <Tree
+                tree={treeData}
+                rootId={parent || 0}
+                onDrop={handleDrop}
+                onChangeOpen={onChangeOpen}
+                // dragPreviewRender={(
+                //     monitorProps: DragLayerMonitorProps<InventoryItem>
+                //   ) => <CustomDragPreview monitorProps={monitorProps} />}
+                classes={{
+                    dropTarget: 'bg-blue-200',
+                }}
+                render={(
+                    node:NodeModel<InventoryItem>, 
+                    { depth, isOpen, onToggle }
+                ) => (
+                    <CustomNode
+                        node={node}
+                        depth={depth}
+                        isOpen={isOpen}
+                        isSelected={!!selectedNodes.find((n) => n.id === node.id)}
+                        onToggle={onToggle}
+                        onSelect={handleSelect}
+                    />
+                )}
+            />
+        </div>
     )
 }
 

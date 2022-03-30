@@ -14,6 +14,7 @@ import {
 import { useDialog } from "../hooks/useDialog";
 import {
   Button,
+  Checkbox,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -39,10 +40,20 @@ export const TypeIcon = (props: { type: InventoryItem["type"] }) => {
   }
 };
 
-export const CustomNode = (props) => {
+type Props = {
+  node: NodeModel<InventoryItem>;
+  depth: number;
+  isOpen: boolean;
+  isSelected: boolean;
+  onToggle: (id: NodeModel["id"]) => void;
+  onSelect: (node: NodeModel) => void;
+};
+
+export const CustomNode = (props : Props) => {
   const [openDialog, closeDialog] = useDialog();
   const { droppable, data, text } = props.node as NodeModel<InventoryItem>;
   const indent = props.depth * 24;
+  const handleSelect = () => props.onSelect(props.node);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,6 +88,14 @@ export const CustomNode = (props) => {
               <ArrowRightIcon />
             </div>
           )}
+        </div>
+        <div>
+          {data.type == 'item' && <Checkbox
+            color="primary"
+            size="small"
+            checked={props.isSelected}
+            onClick={handleSelect}
+          />}
         </div>
         <div>
           <TypeIcon type={data.type} />

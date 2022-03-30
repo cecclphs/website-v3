@@ -28,7 +28,8 @@
     "react-hook-form": "^7.17.2",
     "react-intersection-observer": "^8.32.1",
     "react-medium-image-zoom": "^4.3.5",
-    "use-algolia": "^1.5.3"
+    "use-algolia": "^1.5.3",
+    "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.22",
