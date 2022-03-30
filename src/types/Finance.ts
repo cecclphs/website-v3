@@ -21,7 +21,6 @@ export type Transaction = {
 
 export type FinanceAccountType = {
     id: string;
-    ref: DocumentReference;
     accountName: string;
     balance: number;
     type: 'cash' | 'bank';

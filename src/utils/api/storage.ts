@@ -1,10 +1,9 @@
 import UUID from "uuid-v4";
 import { adminStorage } from '../../config/firebase-admin';
 
-async function UploadFile(localFilePath, destFilePath) {
+async function UploadFile(fileBuffer: Buffer, destFilePath: string) {
     let uuid = UUID()
-    let storageUpload = await adminStorage.upload(localFilePath, {
-        destination: destFilePath,
+    let storageUpload = await adminStorage.file(destFilePath).save(fileBuffer, {
         metadata: {
             metadata: {
                 firebaseStorageDownloadTokens: uuid
@@ -15,18 +14,15 @@ async function UploadFile(localFilePath, destFilePath) {
     return "https://firebasestorage.googleapis.com/v0/b/" + 'cecdbfirebase.appspot.com' + "/o/" + encodeURIComponent(file.name) + "?alt=media&token=" + uuid
 }
 
-async function UploadPublicFile(localFilePath, destFilePath) {
+async function UploadPublicFile(fileBuffer: Buffer, destFilePath: string) {
     let uuid = UUID()
-    let storageUpload = await adminStorage.upload(localFilePath, {
-        destination: destFilePath,
+    let storageUpload = await adminStorage.file(destFilePath).save(fileBuffer, {
         metadata: {
             cacheControl: 'public, max-age=300',
-            metadata: {
-                firebaseStorageDownloadTokens: uuid
-            }
+            firebaseStorageDownloadTokens: uuid
         }
     })
-    await storageUpload[0].makePublic()
+    await adminStorage.file(destFilePath).makePublic()
     return `https://storage.googleapis.com/cecdbfirebase.appspot.com/${destFilePath}`
 }
 

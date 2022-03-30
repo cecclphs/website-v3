@@ -1,21 +1,21 @@
 import sharp from 'sharp'
 
-export async function SavePNG(filepath, filename){
-    await sharp(filepath)
+export function ToPNG(filepath){
+    return sharp(filepath)
         .png()
-        .toFile(`/tmp/${filename}.png`)
+        .toBuffer()
 }
 
-export async function SaveFixedSizePNG(filepath, filename, width, height){
-    await sharp(filepath)
+export function ToFixedSizePNG(filepath, width, height){
+    return sharp(filepath)
         .resize(width, height)
         .png()
-        .toFile(`/tmp/${filename}.png`)
+        .toBuffer()
 }
 
-export async function CreateThumbnail(filepath, filename, prefix="thumb-"){
-    await sharp(filepath)
+export function CreateThumbnail(filepath, prefix="thumb-"){
+    return sharp(filepath)
         .resize(48, 48)
         .png()
-        .toFile(`/tmp/${prefix}${filename}.png`)
+        .toBuffer()
 }

@@ -39,7 +39,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
                 <CECLogo className="h-10 py-2"/>
                 <div className="flex flex-row space-x-2 items-center">
                     <Tooltip title={`${userToken?.englishName} ${userToken?.chineseName}`}>
-                        <img src={user?.photoURL} className="w-10 h-10 rounded-full object-cover" alt="User Profile"/>
+                        <img src={user?.photoURL+'?'+Date.now()} className="w-10 h-10 rounded-full object-cover" alt="User Profile"/>
                     </Tooltip>
                     <Tooltip title="Logout">
                         <IconButton onClick={signOut}>
