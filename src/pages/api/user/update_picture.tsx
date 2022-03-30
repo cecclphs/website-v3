@@ -1,27 +1,38 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { adminDb } from "../../../config/firebase-admin"
+import { admin, adminAuth, adminDb } from "../../../config/firebase-admin"
 import { withAuth } from "../../../config/middlewares"
 import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
+import StudentDetails from "../../../types/StudentDetails";
+import { SaveFixedSizePNG } from "../../../utils/api/image";
+import { UploadPublicFile } from "../../../utils/api/storage";
+import fs from 'fs/promises'
 
-const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
-    const { uid, email } = req.token;
-    //Check if email is student email, else don't give a fck
-    if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) throw new Error("You are not a student");
-    
-    //Fetch user existing data, if snapshot is empty, throw error
-    const studentid = email.substr(1,5);
-    const studentSnap = await adminDb.collection("users")
-                                .where('studentid','==',studentid)
-                                .get();
-    if(studentSnap.empty) throw new Error("Student not found");
+const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
+    const { uid, email, studentid } = req.token;
+    //check if user is logged in, else send 403
+    if(!uid) res.status(403).json({ error: "You are not logged in" });
+    //get new picture
+    const { image } = req.body;
+    const base64EncodedImageString = image.replace(/^data:image\/\w+;base64,/, '');
+    const imageBuffer = Buffer.from(base64EncodedImageString, 'base64');
+    console.log('generating profile picture...');
+    SaveFixedSizePNG(imageBuffer, `tmp/${studentid}.png`, 512, 512);
+    console.log('uploading profile picture...');
+    const imageUrl = await UploadPublicFile(`tmp/${studentid}.png`, `profiles/${studentid}.png`);
+    //get student document
+    const studentSnap = await adminDb.collection("students").doc(studentid).get();
+    const { linkedAccounts } = studentSnap.data() as StudentDetails
+    //update user photoURL for each user
+    for(const linkedAccount of linkedAccounts) {
+        await adminAuth.updateUser(linkedAccount, { photoURL: imageUrl });
+    }
+    studentSnap.ref.update({ photoURL: imageUrl });
+    //delete tmp file
+    console.log('deleting tmp file...');
+    fs.unlink(`tmp/${studentid}.png`);
+    res.json({ message: "success" });
 
-    //If user document id is the same as this uid, throw same user error
-    if(studentSnap.docs[0].id === uid) throw new Error("You are the same user");
-    
-    //Get user and omit useless data
-    const studentData = studentSnap.docs[0].data();
-    const { _ft_updatedAt, _ft_updatedBy, photoURL, userGroup, permission, ...rest } = studentData; 
-    res.json(rest)
+    // UploadPublicFile()
 }
 
-export default withAuth(handler)
+export default withAuth(updatePicture)

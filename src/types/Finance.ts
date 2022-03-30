@@ -1,8 +1,9 @@
-import { Timestamp } from "firebase/firestore";
+import { DocumentReference, Timestamp } from "firebase/firestore";
 import {ShortStudentInfo} from './User';
 
 export type Transaction = {
     id: string;
+    ref: DocumentReference;
     type: 'income' | 'expense' | 'transfer';
     amount: number;
     description: string;
@@ -20,6 +21,7 @@ export type Transaction = {
 
 export type FinanceAccountType = {
     id: string;
+    ref: DocumentReference;
     accountName: string;
     balance: number;
     type: 'cash' | 'bank';

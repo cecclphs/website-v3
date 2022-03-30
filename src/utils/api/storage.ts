@@ -12,7 +12,7 @@ async function UploadFile(localFilePath, destFilePath) {
         }
     })
     let file = storageUpload[0]
-    return "https://firebasestorage.googleapis.com/v0/b/" + 'speer-education-dev.appspot.com' + "/o/" + encodeURIComponent(file.name) + "?alt=media&token=" + uuid
+    return "https://firebasestorage.googleapis.com/v0/b/" + 'cecdbfirebase.appspot.com' + "/o/" + encodeURIComponent(file.name) + "?alt=media&token=" + uuid
 }
 
 async function UploadPublicFile(localFilePath, destFilePath) {
@@ -27,7 +27,7 @@ async function UploadPublicFile(localFilePath, destFilePath) {
         }
     })
     await storageUpload[0].makePublic()
-    return `https://storage.googleapis.com/speer-education-dev.appspot.com/${destFilePath}`
+    return `https://storage.googleapis.com/cecdbfirebase.appspot.com/${destFilePath}`
 }
 
 export { UploadFile, UploadPublicFile }

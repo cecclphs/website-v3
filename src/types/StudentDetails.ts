@@ -1,5 +1,8 @@
+import { DocumentReference } from "firebase/firestore";
+
 export default interface StudentDetails {
     id: string,
+    ref: DocumentReference
     englishName: string,
     chineseName: string,
     studentid: string,
@@ -18,5 +21,6 @@ export default interface StudentDetails {
     emergencyrelation: string,
     specials: string,
     committeeRole: string,
-    linkedAccounts: []
+    linkedAccounts: string[],
+    photoURL: string,
 }

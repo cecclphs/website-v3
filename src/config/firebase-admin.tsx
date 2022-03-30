@@ -14,6 +14,6 @@ if (!admin.apps.length) {
 const adminDb = admin.firestore();
 const adminAuth = admin.auth();
 const adminRtdb = admin.database();
-const adminStorage = admin.storage();
+const adminStorage = admin.storage().bucket('gs://cecdbfirebase.appspot.com');
 
 export { adminDb, adminAuth, adminRtdb, adminStorage, admin }

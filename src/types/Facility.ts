@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore"
+import {Timestamp, DocumentReference} from 'firebase/firestore';
 import {ShortStudentInfo} from './User';
 
 export type FacilityForm = {
@@ -12,6 +12,7 @@ export type FacilityForm = {
 
 export type FacilityOrderData = {
     id: string,
+    ref: DocumentReference;
     title: string,
     facility: '3dprinter' | 'lasercutter',
     instructions: string,
