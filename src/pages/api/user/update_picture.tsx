@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import fs from 'fs/promises'
 import { admin, adminAuth, adminDb } from "../../../config/firebase-admin"
 import { withAuth } from "../../../config/middlewares"
 import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
 import StudentDetails from "../../../types/StudentDetails";
 import { UploadPublicFile } from "../../../utils/api/storage";
-import fs from 'fs/promises'
 import { ToFixedSizePNG } from "../../../utils/api/image";
 
 const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
