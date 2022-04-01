@@ -124,6 +124,7 @@ const MigrateUser = () => {
                 <DataRow title="Modified On" info={oldUserData.modifiedOn.toDate().toDateString()} />
             </div>:<form className="max-h-[70vh] overflow-y-auto text-left scrollbar scrollbar-thumb-blue-100 hover:scrollbar-thumb-blue-200 scrollbar-track-gray-100 ">
                 <h2 className="text-xl font-medium py-2 text-blue-800">Personal Details</h2>
+                {/* @ts-ignore */}
                 <DataRowInput {...register("englishName", { required: true })} title="English Name" info={oldUserData.englishName} />
                 <DataRowInput {...register("chineseName", { required: true })} title="Chinese Name" info={oldUserData.chineseName} />
                 <DataRowInput {...register("studentid", { required: true })} title="Student ID" info={oldUserData.studentid} />

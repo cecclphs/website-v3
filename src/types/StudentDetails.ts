@@ -21,6 +21,8 @@ export default interface StudentDetails {
     emergencyrelation: string,
     specials: string,
     committeeRole: string,
+    enrollmentDate: string,
     linkedAccounts: string[],
     photoURL: string,
+    status: 'enrolled' | 'transfered' | 'graduated'
 }
