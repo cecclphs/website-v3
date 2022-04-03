@@ -23,7 +23,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         
         //update user photoURL
         await adminAuth.updateUser(uid, {
-            photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`
+            photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`
         })
 
         //Set Student Data
@@ -31,7 +31,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             ...details,
             migrated: true,
             linkedAccounts: [uid],
-            photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`,
+            photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
             createdOn: admin.firestore.FieldValue.serverTimestamp(),
             modifiedOn: admin.firestore.FieldValue.serverTimestamp()
         })

@@ -5,6 +5,7 @@ export default interface StudentDetails {
     ref: DocumentReference
     englishName: string,
     chineseName: string,
+    gender: 'Male' | 'Female',
     studentid: string,
     identification: string,
     phone: string,

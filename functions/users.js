@@ -55,8 +55,8 @@ exports.initializeUser = functions.auth.user().onCreate(async (user) => {
     })
     //update user photo
     if(/(s[0-9]{5}@clphs.edu.my)/g.test(email)) await auth.updateUser(uid, {
-      photoURL: `https://sms.clphs.edu.my/sms/images/data/student/student-${studentid}.jpg`,
-    })
+      photoURL: `https://http://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
+    }).catch(err => console.log(err));
     //Create user claims
     await updateUserClaims(uid, {
       englishName: "",

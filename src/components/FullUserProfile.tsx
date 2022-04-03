@@ -23,6 +23,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
         chineseName,
         class: className,
         studentid,
+        gender,
         identification,
         phone,
         facebookURL,
@@ -97,6 +98,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
             </div>
             <table className='table-fixed border-collapse'>
                 <tbody className='divide-y divide-solid divide-gray-300'>
+                    <DataRow title="Gender" info={gender} />
                     <DataRow title="Identification Card/Passport" info={identification!} />
                     <DataRow title="Phone" info={phone!} />
                     <DataRow title="Facebook URL" info={facebookURL!} />
