@@ -165,6 +165,7 @@ const CreateInventoryItem = () => {
                     { label: "Item", value: "item" },
                 ]} />
             <FormTextField
+                autoFocus
                 required
                 fullWidth
                 control={control}

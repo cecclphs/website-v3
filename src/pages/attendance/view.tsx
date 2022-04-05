@@ -7,6 +7,10 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import { useMemo } from "react";
 import StudentDetails from "../../types/StudentDetails";
 import { ShortStudentInfo } from "../../types/User";
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { TextField } from "@mui/material";
+import useAPIFetch from "../../hooks/useAPIFetch";
+import { useAuth } from "../../hooks/useAuth";
 
 interface AttendanceRecord {
     id: string,
@@ -19,60 +23,55 @@ interface AttendanceRecord {
     students: {[studentid: number]: string}
 }
 
+
+
 const ViewAttendance = () => {
-    const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
+    const { user } = useAuth()
+    // const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
+    const { error, data: students = []} = useAPIFetch<StudentDetails[]>('/students',{}, user)
     const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter)));
-    //TODO: Cache Students so doesn't have to load everytime.
-    const baseColumns = [
+    const baseColumns: GridColDef[] = [
+        { field: 'studentid', headerName: 'Student ID', width: 90 },
         {
-            name: "studentid",
-            label: "Student ID",
-            options: {
-                filter: true,
-                sort: true,
-            }
+            field: 'chineseName',
+            headerName: 'Chinese Name',
+            width: 150,
         },
         {
-            name: "class",
-            label: "Class",
-            options: {
-                filter: true,
-                sort: true,
-            }
+            field: 'englishName',
+            headerName: 'English Name',
+            width: 150,
         },
         {
-            name: "chineseName",
-            label: "Chinese Name",
-            options: {
-                filter: true,
-                sort: false,
-            }
+            field: 'class',
+            headerName: 'Class',
+            width: 110,
         },
         {
-            name: "englishName",
-            label: "English Name",
-            options: {
-                filter: true,
-                sort: true,
-            }
+            field: 'gender',
+            headerName: 'Gender',
+            width: 110
         },
-    ];
+        {
+            field: 'enrollmentDate',
+            headerName: 'Enrolled',
+        }
+      ];
+      
 
     const [columns, data] = useMemo(() => {
         if(students.length == 0) return [[] ,[]];
         const combined = {} as {[studentid: number]: StudentDetails};
         students.forEach(student => {
-            combined[student.id] = student;
+            combined[student.studentid] = student;
         });
+        console.log(combined)
         records.forEach(record => {
             const { id, ref, recordType, recordName, createdBy, createdOn, updatedOn, students } = record;
             baseColumns.push({
-                name: recordName,
-                label: recordName,
-                options: {
-                    filter: true,
-                    sort: false,
-                }
+                field: recordName,
+                headerName: recordName,
+                editable: true
             })
             Object.keys(students).forEach(studentid => {
                 if(!combined[studentid]) return;
@@ -83,18 +82,22 @@ const ViewAttendance = () => {
         return [baseColumns, Object.values(combined)];
         
     }, [records, students]);
-    console.log([columns, data]);
-    const options = {
-        filterType: 'checkbox',
-    };
+    
+    const processRowUpdate = (newRow) => {
+        
+    }
 
     return <MemberLayout>
         <Page title="View Attendance">
-            <MUIDataTable
-                title={"Attendance Records"}
-                data={data}
+            <DataGrid
+                autoHeight
+                rows={data}
                 columns={columns}
-                options={options}
+                checkboxSelection
+                disableSelectionOnClick
+                getRowId={(row) => row.studentid}
+                experimentalFeatures={{ newEditingApi: true }} 
+                processRowUpdate={processRowUpdate}
             />
         </Page>
     </MemberLayout>

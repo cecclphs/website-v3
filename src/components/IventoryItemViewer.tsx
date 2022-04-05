@@ -1,5 +1,6 @@
 import { Edit, ErrorOutline, SplitscreenOutlined } from '@mui/icons-material';
-import {Button, DialogActions, DialogContent, Divider, TextField} from '@mui/material';
+import { Button, DialogActions, DialogContent, Divider, TextField } from '@mui/material';
+import { updateDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { useDialog } from '../hooks/useDialog';
 import InventoryItem from '../types/Inventory';
@@ -8,8 +9,8 @@ import StudentDetailsChip from './StudentDetailsChip';
 
 const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
     const [openDialog, closeDialog] = useDialog();
-    if(!item) return <></>
-    const { 
+    if (!item) return <></>
+    const {
         id,
         description,
         type,
@@ -24,19 +25,25 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
 
     const handleSplit = () => {
         openDialog({
-            children: <SplitInventoryDialog closeDialog={closeDialog} item={item}/>
+            children: <SplitInventoryDialog closeDialog={closeDialog} item={item} />
         });
+    }
+
+    const reportLost = () => {
+        updateDoc(item.ref, {
+            status: 'lost'
+        })
     }
 
     return <div className="flex flex-col w-[400px]">
         <div className="space-y-1 py-1">
-            <h1 className="text-3xl font-bold text-gray-800">{description} {type=='item'?`×${quantity || 1}`:""}</h1>
+            <h1 className="text-3xl font-bold text-gray-800">{description} {type == 'item' ? `×${quantity || 1}` : ""}</h1>
             <p className="text-sm">{simpleId}</p>
             <p className="text-sm">Type: {type}</p>
             <p className="text-sm">Status: {status}</p>
             <p className="text-sm">Children: {children || 1}</p>
         </div>
-        <Divider/>
+        <Divider />
         <div className="space-y-1 py-1">
             <h2 className="text-xl font-bold text-gray-800">Metadata</h2>
             {metadata.donatedBy && <p className="text-sm">Donated by: {metadata.donatedBy}</p>}
@@ -52,13 +59,32 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
             {metadata.notes && <p className="text-sm">Notes: {metadata.notes}</p>}
             {metadata.borrowedBy && <p className="text-sm">Borrowed by: {metadata.borrowedBy}</p>}
         </div>
-        <Divider/>
+        <Divider />
         <div className='space-y-1 py-1'>
             <h2 className="text-xl font-bold text-gray-800">Actions</h2>
             <div className="flex flex-row space-x-2">
-                <Button color="error" startIcon={<ErrorOutline/>}>Report Lost</Button>
-                {type == 'item' && <Button disabled={quantity <= 1} startIcon={<SplitscreenOutlined/>} onClick={handleSplit}>Split Item</Button>}
-                <Button color='info' startIcon={<Edit/>}>Edit Item</Button>
+                <Button
+                    color="error"
+                    startIcon={<ErrorOutline />}
+                    onClick={reportLost}
+                >
+                    Report Lost
+                </Button>
+                {type == 'item' && 
+                <Button 
+                    disabled={quantity <= 1} 
+                    startIcon={<SplitscreenOutlined />} 
+                    onClick={handleSplit}
+                >
+                    Split Item
+                </Button>}
+                <Button 
+                    disabled
+                    color='info' 
+                    startIcon={<Edit />}
+                >
+                    Edit Item
+                </Button>
             </div>
         </div>
         <p>Registered by: <StudentDetailsChip student={registeredBy} /></p>

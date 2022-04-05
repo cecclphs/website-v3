@@ -21,27 +21,28 @@
 The site is published on Vercel, and will be connected to a custom domain soon *hopefully* 🙏🙏🙏🙏.
 
 ## Timeline and To-do list
-- [x] Setup NextJS Project
-
-- [x] Find hooligans to give support
-
-- [x] Initial Paints of Homepage
-
-- [x] Added Link Shortener Redirects
-
-- [ ] Restructure Firestore to migrate all member's data
-
-- [ ] Implement Sign in with clphs.edu.my from Google
-
-- [ ] Create Profile Page & Edit Profile
-
-- [ ] Attendance or something?
-
-- [ ] 🧂 Sugar 
-
-- [ ] 🍛 Spice
-
-- [ ] 🧬 Everything Nice 
+- Inventory
+    - [X] Create Item
+    - [X] Show Item Heirarchy
+    - [ ] Update Item Status
+    - [ ] Borrow Item
+    - [ ] Generate General Affairs Report
+- Attendance
+    - [ ] Create Event
+    - [ ] Key in Attendance & Swipe Attendance Interface
+    - [ ] Student Apply Leave & Approval
+    - [ ] Absentee List Generator
+    - [ ] Editing Attendance
+    - [ ] RFID Attendance
+- Finance
+    - [X] Adding New Transactions and Transfer
+    - [ ] Claiming and Approval System
+    - [ ] Generating Monthy Financial Reports
+    - [ ] Link Projects and Inventory Items to Finance
+- Facility
+    - [X] Allow Upload of Files
+    - [X] Change Status of files
+    - [ ] Specify which Machine used to fabricate
 
 
 ## Contributing
