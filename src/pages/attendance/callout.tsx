@@ -18,10 +18,10 @@ const AttendanceCallout = () => {
     const [calloutIndex, setCalloutIndex] = useState(0);
 
     useEffect(() => {
-        if (!urlquery?.event) {
-            router.push('/attendance/view');
+        if (!eventid) {
+            // router.push('/attendance/view');
         }
-    }, [urlquery])
+    }, [eventid])
 
     const updateRecord = (student: StudentDetails, present:boolean) => {
         updateDoc(doc(db, `attendanceRecords/${eventid}`), {
@@ -30,29 +30,31 @@ const AttendanceCallout = () => {
         setCalloutIndex(calloutIndex+1);
     }
 
-    const { studentid, englishName, chineseName, class: className, gender } = students[calloutIndex]
+    const { studentid, englishName, chineseName, class: className, gender } = students[calloutIndex] || {};
 
     return <MemberLayout>
         <Page title="Attendance Callout">
+            <h1>Attendance for {"12/11"}</h1>
             <Grow
                 in={true}
                 style={{ transformOrigin: '0 0 0' }}
                 unmountOnExit
             >
-                <div className="flex flex-col p-3 rounded-lg shadow-md items-center">
+                <div className="flex flex-col p-3 rounded-lg shadow-md items-center space-y-2">
                     <img 
-                        className="rounded-full h-12 w-12"
+                        className="rounded-full h-28 w-28"
                         src={`https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`}
                         />
-                    <div className="flex flex-col space-y-2">
-                        <h1 className="text-lg font-medium">{englishName}</h1>
-                        <h2 className="text-sm font-medium">{chineseName}</h2>
-                        <h3 className="text-sm font-medium">{className}</h3>
+                    <div className="flex flex-col space-y-2 items-center">
+                        <h1 className="text-lg font-semibold">{englishName} {chineseName}</h1>
+                    </div>
+                    <div className="flex flex-col space-y-2 items-center">
+                        <h3 className="text-sm font-medium">{studentid} {className}</h3>
                         <h3 className="text-sm font-medium">{gender}</h3>
                     </div>
                     <div className="flex flex-row justify-around">
-                        <Button>Absent</Button>
-                        <Button>Present</Button>
+                        <Button color="error" size="large" onClick={() => updateRecord(students[calloutIndex], false)}>Absent</Button>
+                        <Button color="success" size="large" onClick={() => updateRecord(students[calloutIndex], true)}>Present</Button>
                     </div>
                 </div>
             </Grow>
