@@ -12,17 +12,7 @@ import { MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import useAPIFetch from "../../hooks/useAPIFetch";
 import { useAuth } from "../../hooks/useAuth";
 import { update } from "firebase/database";
-
-interface AttendanceRecord {
-    id: string,
-    ref: DocumentReference,
-    recordName: string,
-    recordType: string,
-    createdBy: ShortStudentInfo,
-    createdOn: Timestamp,
-    updatedOn: Timestamp
-    students: {[studentid: number]: string}
-}
+import { AttendanceRecord } from "../../types/Attendance";
 
 const SelectCell = ({options, ...props}:GridRenderEditCellParams) => {
     const { id, value, field } = props;
