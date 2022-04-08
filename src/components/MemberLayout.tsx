@@ -1,4 +1,4 @@
-import React, { FC, PropsWithChildren, PropsWithoutRef, ReactChildren, useState } from 'react';
+import React, { Component, FC, PropsWithChildren, PropsWithoutRef, ReactChildren, ReactElement, useState } from 'react';
 import { AccountCircle, AdminPanelSettingsRounded, AppRegistrationTwoTone, AppShortcutTwoTone, AppsTwoTone, ClassRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
 import Head from "next/head";
 import SlideTransition from "./SlideTransition/SlideTransition";
@@ -9,6 +9,40 @@ import { Collapse, IconButton, Tooltip } from "@mui/material";
 import { useAuth } from '../hooks/useAuth';
 import UserToken from '../types/UserToken';
 import AccountBalanceTwoToneIcon from '@mui/icons-material/AccountBalanceTwoTone';
+
+type LinkData = {
+    href?: string, 
+    label: string, 
+    children?: LinkData[], 
+    Icon: FC<{className:  string}>, 
+    permission?: string[]
+}
+
+const LinkItem = ({ href, label, children, Icon, permission = ['isStudent'] }: LinkData) => {
+    const router = useRouter();
+    const [extended, setExtended] = useState(router.asPath.startsWith(href));
+    const { userToken } = useAuth();
+    // check if userToken has any one of permission
+    const hasPermission = permission.some((p) => userToken?.[p as keyof UserToken] == true);
+    if(!hasPermission) return <></>
+    if(children) {
+        return <div key={href} className="flex flex-col">
+            <div onClick={() => setExtended(!extended)} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex sm:flex-row flex-col items-center text-sm font-medium sm:space-x-2`}>
+                <Icon className="w-5 h-5 text-sm sm:text-base"/> <span>{label}</span>
+            </div>
+            <Collapse in={extended}>
+                <div className="flex flex-col pl-4">
+                    {children.map((props) => <LinkItem {...props}/>)}
+                </div>
+            </Collapse>
+        </div>
+    }
+    return <Link href={href} key={href}>
+        <div className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex sm:flex-row flex-col items-center text-sm font-medium sm:space-x-2 ${router.asPath == href ? 'bg-blue-100 text-blue-600': 'text-neutral-700'}`}>
+            <Icon className="w-5 h-5 text-sm sm:text-base"/> <span>{label}</span>
+        </div>
+    </Link>
+}
 
 const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  ({ children }) => {
     const router = useRouter();
@@ -48,36 +82,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
             </header>
             <h1 className="text-2xl font-semibold sm:block hidden">Creative Electronics Club</h1>
             <div className="flex sm:flex-col flex-row space-x-1 sm:space-x-0 w-48 sm:space-y-1 py-3">
-                {links.map(({ href, label, children, Icon, permission = ['isStudent'] }) => {
-                    const [extended, setExtended] = useState(router.asPath.startsWith(href));
-                    const { userToken } = useAuth();
-                    // check if userToken has any one of permission
-                    const hasPermission = permission.some((p) => userToken?.[p as keyof UserToken] == true);
-                    if(!hasPermission) return <></>
-                    if(children) {
-                        return <div key={href} className="flex flex-col">
-                            <div onClick={() => setExtended(!extended)} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex sm:flex-row flex-col items-center text-sm font-medium sm:space-x-2`}>
-                                <Icon className="w-5 h-5"/> <span>{label}</span>
-                            </div>
-                            <Collapse in={extended}>
-                                <div className="flex flex-col pl-4">
-                                    {children.map(({ href, label, Icon }) => {
-                                        return <Link href={href} key={href}>
-                                            <div key={href} className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex sm:flex-row flex-col items-center text-sm font-medium sm:space-x-2 ${router.asPath == href ? 'bg-blue-100 text-blue-600': 'text-neutral-700'}`}>
-                                                <Icon className="w-5 h-5"/> <span>{label}</span>
-                                            </div>
-                                        </Link>
-                                    })}
-                                </div>
-                            </Collapse>
-                        </div>
-                    }
-                    return <Link href={href} key={href}>
-                        <div className={`cursor-pointer px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors flex sm:flex-row flex-col items-center text-sm font-medium sm:space-x-2 ${router.asPath == href ? 'bg-blue-100 text-blue-600': 'text-neutral-700'}`}>
-                            <Icon className="w-5 h-5"/> <span>{label}</span>
-                        </div>
-                    </Link>
-                })}
+                {links.map((props) => <LinkItem {...props}/>)}
             </div>
         </aside>
         <SlideTransition in timeout={150}>
