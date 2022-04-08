@@ -21,13 +21,11 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
             { href: "/admin/fabrication", label: "Fabrication", Icon: DesignServicesTwoTone },
-            { href: "/admin/students", label: "Students", Icon: ClassRounded },
         ], Icon: AdminPanelSettingsRounded },
+        { href: "/students", label: "Students", permission: ['isAdmin'], Icon: ClassRounded },
+        { href: "/attendance/view", permission: ['isAdmin'], label: "Attendance", Icon: AppsTwoTone},
         { href: "/finance", permission: ['isAdmin'], label: "Finance", Icon: AccountBalanceTwoToneIcon },
-        { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone, children: [
-            { href: "/inventory", label: "Browse", Icon: AppShortcutTwoTone },
-            { href: "/inventory/create", label: "Create", Icon: AppRegistrationTwoTone },
-        ]},
+        { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone},
     ]
 
     return <div className="min-h-screen w-screen pb-12 sm:grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] sm:px-4 divide-x divide-solid divide-gray-200">
@@ -49,7 +47,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
                 </div>
             </header>
             <h1 className="text-2xl font-semibold sm:block hidden">Creative Electronics Club</h1>
-            <div className="flex sm:flex-col flex-row space-x-1 w-48 sm:space-y-1 py-3">
+            <div className="flex sm:flex-col flex-row space-x-1 sm:space-x-0 w-48 sm:space-y-1 py-3">
                 {links.map(({ href, label, children, Icon, permission = ['isStudent'] }) => {
                     const [extended, setExtended] = useState(router.asPath.startsWith(href));
                     const { userToken } = useAuth();

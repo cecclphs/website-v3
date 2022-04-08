@@ -6,8 +6,13 @@ export interface AttendanceRecord {
     ref: DocumentReference,
     recordName: string,
     recordType: string,
-    createdBy: ShortStudentInfo,
-    createdOn: Timestamp,
+    startTimestamp?: Timestamp,
+    endTimestamp?: Timestamp,
+    notes?: string,
+    metadata?: {
+        createdBy?: ShortStudentInfo,
+        createdOn?: Timestamp,
+    }
     updatedOn: Timestamp
     students: {[studentid: number]: string}
 }

@@ -1,14 +1,15 @@
+import { DateTimePicker } from "@mui/lab";
 import DatePicker from "@mui/lab/DatePicker"
 import TextField from "@mui/material/TextField"
 import { Controller } from "react-hook-form";
 
-const FormDatePicker = ({name, control, rules = {}, label, ...props}) => {
+const FormDateTimePicker = ({name, control, rules = {}, label, ...props}) => {
     return <Controller
         control={control}
         name={name}
         rules={rules}
         render={({ field: { onChange, value } }) => 
-            <DatePicker
+            <DateTimePicker
                 label={label}
                 renderInput={(params) =>  
                     <TextField 
@@ -23,4 +24,4 @@ const FormDatePicker = ({name, control, rules = {}, label, ...props}) => {
     />
 }
 
-export default FormDatePicker;
+export default FormDateTimePicker;
