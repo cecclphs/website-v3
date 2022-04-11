@@ -1,12 +1,22 @@
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
-import { collection, CollectionReference, DocumentData, DocumentReference, FirestoreDataConverter, getFirestore, QueryDocumentSnapshot, SnapshotOptions, Timestamp, WithFieldValue } from "firebase/firestore";
-import { getAnalytics } from "firebase/analytics";
+import {
+  CACHE_SIZE_UNLIMITED,
+  collection,
+  CollectionReference,
+  DocumentData,
+  DocumentReference,
+  enableMultiTabIndexedDbPersistence,
+  getFirestore,
+  initializeFirestore,
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+  Timestamp,
+  WithFieldValue,
+} from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import { getStorage } from 'firebase/storage';
-import InventoryItem from '../types/Inventory';
-import { FacilityOrderData } from '../types/Facility';
 
 export const firebaseConfig = {
     apiKey: "AIzaSyCpWeoGzDrwoJjnsjBnDu-vVUt6LfGHyxk",
@@ -21,7 +31,6 @@ export const firebaseConfig = {
 
 // Initialize Firebase
 const firebase = initializeApp(firebaseConfig);
-
 // Get all the services we'll use in this app, then export them
 const auth = getAuth(firebase)
 const db = getFirestore(firebase);
@@ -29,11 +38,7 @@ const rtdb = getDatabase(firebase);
 const functions = getFunctions(firebase);
 const storage = getStorage(firebase);
 const now = Timestamp.now();
-let analytics;
 
-if(process.browser){
-    // analytics = getAnalytics(firebase);
-}
 
 export { firebase, auth, db, now, rtdb, functions, storage };
 

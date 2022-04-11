@@ -1,6 +1,7 @@
-import { Edit, ErrorOutline, SplitscreenOutlined } from '@mui/icons-material';
+import { Edit, ErrorOutline, InfoRounded, SplitscreenOutlined, DeleteRounded } from '@mui/icons-material';
 import { Button, DialogActions, DialogContent, Divider, TextField } from '@mui/material';
-import { updateDoc } from 'firebase/firestore';
+import { updateDoc, deleteDoc } from 'firebase/firestore';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { useDialog } from '../hooks/useDialog';
 import InventoryItem from '../types/Inventory';
@@ -9,6 +10,7 @@ import StudentDetailsChip from './StudentDetailsChip';
 
 const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
     const [openDialog, closeDialog] = useDialog();
+    const router = useRouter();
     if (!item) return <></>
     const {
         id,
@@ -29,10 +31,39 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
         });
     }
 
+    const handleDeleteItem = () => {
+        openDialog({
+            children: <>
+                <DialogContent>
+                    <p>Are you sure you want to delete this item?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={closeDialog}>Cancel</Button>
+                    <Button onClick={() => {
+                        closeDialog();
+                        deleteDoc(item.ref);
+                        closeDialog();
+                    }}>Delete</Button>
+                </DialogActions>
+            </>
+        });
+    }
+
     const reportLost = () => {
         updateDoc(item.ref, {
             status: 'lost'
         })
+    }
+
+    const reportFound = () => {
+        updateDoc(item.ref, {
+            status: "available"
+        })
+    }
+    
+    const handleSetParent = () => {
+        router.push('/inventory?parent=' + id);
+        closeDialog();
     }
 
     return <div className="flex flex-col w-[400px]">
@@ -63,13 +94,20 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
         <div className='space-y-1 py-1'>
             <h2 className="text-xl font-bold text-gray-800">Actions</h2>
             <div className="flex flex-row space-x-2">
-                <Button
+                {status == 'lost' && <Button
+                    color="success"
+                    startIcon={<ErrorOutline />}
+                    onClick={reportFound}
+                >
+                    Item Found
+                </Button>}
+                {status != 'lost' && <Button
                     color="error"
                     startIcon={<ErrorOutline />}
                     onClick={reportLost}
                 >
                     Report Lost
-                </Button>
+                </Button>}
                 {type == 'item' && 
                 <Button 
                     disabled={quantity <= 1} 
@@ -85,6 +123,20 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
                 >
                     Edit Item
                 </Button>
+                {type != "item" && <Button 
+                    color='info' 
+                    startIcon={<InfoRounded />}
+                    onClick={handleSetParent}
+                >
+                    Set Parent
+                </Button>}
+                {type == 'item' && <Button 
+                    color='error' 
+                    startIcon={<DeleteRounded />}
+                    onClick={handleDeleteItem}
+                >
+                    Delete Item
+                </Button>}
             </div>
         </div>
         <p>Registered by: <StudentDetailsChip student={registeredBy} /></p>

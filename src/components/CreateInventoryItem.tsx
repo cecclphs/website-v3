@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import FormTextField from "./form-components/FormTextField";
 import { useAlgolia } from "use-algolia";
@@ -8,6 +8,7 @@ import { addDoc, collection, CollectionReference, Timestamp } from "firebase/fir
 import { db, docConverter } from "../config/firebase";
 import { useAuth } from "../hooks/useAuth";
 import FormSelect from "./form-components/FormSelect";
+import useKeyPress from '../hooks/useKeyPress';
 
 type InventoryForm = {
     simpleId: string | null;
@@ -94,13 +95,14 @@ const SearchItem = ({ value, onChange }) => {
     );  
 }
 
-const CreateInventoryItem = () => {
+const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
     const { userToken } = useAuth();
+    const pressSubmit = useKeyPress('Enter');
     const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors, isSubmitting }, reset } = useForm<InventoryForm>({
         defaultValues:{
             simpleId: null,
             description: "",
-            parent: null,
+            parent,
             metadata: {},
             type: 'item',
             quantity: 1
@@ -109,6 +111,10 @@ const CreateInventoryItem = () => {
         mode: 'onChange',
     
     })
+
+    useEffect(() => {
+        if(pressSubmit) handleSubmit(onSubmit)();
+    }, [pressSubmit])
 
     const type = watch('type');
 
@@ -127,7 +133,7 @@ const CreateInventoryItem = () => {
         await addDoc((collection(db, 'inventory') as CollectionReference<InventoryItem>).withConverter(docConverter), {
             description: sanitized.description,
             simpleId: sanitized.simpleId,
-            parent: sanitized.parent,
+            parent,
             status: "available",
             children: 0,
             type: sanitized.type,
@@ -291,7 +297,7 @@ const CreateInventoryItem = () => {
             render={({ field: { onChange, value }}) => (
                 <SearchItem value={value} onChange={onChange}/>
             )}/> */}
-        <Button disabled={isSubmitting} variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Create</Button>
+        <Button disabled={!isValid || isSubmitting} variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Create</Button>
     </div>
 }
 

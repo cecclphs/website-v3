@@ -1,21 +1,22 @@
-import {collection, deleteDoc, doc, onSnapshot, query, Unsubscribe, updateDoc, where} from 'firebase/firestore';
+import {collection, deleteDoc, doc, getDoc, onSnapshot, query, Unsubscribe, updateDoc, where} from 'firebase/firestore';
 import {useEffect, useMemo, useState} from 'react';
 import {useCollectionData} from 'react-firebase-hooks/firestore';
 import {db, docConverter} from '../config/firebase';
 import InventoryItem from '../types/Inventory';
-import {DragLayerMonitorProps, NodeModel, Tree} from '@minoru/react-dnd-treeview';
+import { NodeModel, Tree } from '@minoru/react-dnd-treeview';
 import {CustomNode} from './CustomNode';
-import { CustomDragPreview } from './CustomDragPreview';
 import { Button } from '@mui/material';
+import { useRouter } from 'next/router';
 
 const nodeSnapshots: {[parents: string]: Unsubscribe} = {};
 let previousOpen = [];
 
-const InventoryTree = ({ parent = null }: {parent: string | null}) => {
+const InventoryTree = ({ parent }: {parent: string}) => {
     const [parents = [], loading, error] = useCollectionData<InventoryItem>(query(collection(db, 'inventory').withConverter(docConverter), where('parent', '==', parent)));
     const [nodeData, setNodeData] = useState<{[x:string]: InventoryItem}>({});
     const [treeData, setTreeData] = useState([]);
     const [selectedNodes, setSelectedNodes] = useState<NodeModel<InventoryItem>[]>([]);
+    const router = useRouter();
     
     const handleSelect = (node: NodeModel<InventoryItem>) => {
         const item = selectedNodes.find((n) => n.id === node.id);
@@ -119,6 +120,14 @@ const InventoryTree = ({ parent = null }: {parent: string | null}) => {
                 <Button disabled={!canMergeItems} onClick={handleMergeItems}>Merge</Button>
 
             </div>
+            {parent != null && <div className="flex flex-row items-center space-x-2 py-1 px-2 rounded-md hover:bg-gray-200" onClick={async () => {
+                //get this item
+                const item = await getDoc(doc(db, 'inventory', parent).withConverter(docConverter));
+                const { newParent } = item.data() || {}
+                router.push('/inventory?parent=' + (newParent == null)?"":newParent)
+            }}>
+                ...
+            </div>}
             <Tree
                 tree={treeData}
                 rootId={parent || 0}
