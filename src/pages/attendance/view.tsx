@@ -1,6 +1,6 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, DocumentReference, query, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, DocumentReference, query, Timestamp, updateDoc, where, deleteDoc, doc } from "firebase/firestore";
 import { db, docConverter } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import React, { forwardRef, useMemo, useRef } from "react";
@@ -112,10 +112,25 @@ const GridColumnMenu = forwardRef<
   HTMLUListElement,
   GridColumnMenuProps
 >(function GridColumnMenu(props: GridColumnMenuProps, ref) {
+    const [openDialog, closeDialog] = useDialog()
     const { hideMenu, currentColumn } = props;
     const router = useRouter();
     const isRecord = !['studentid','chineseName','englishName','class','gender','enrollmentDate'].includes(currentColumn.field)
     
+    const confirmDelete = () => {
+        openDialog({
+            children: <>
+                <DialogContent>Are you sure you want to delete this record?</DialogContent>
+                <DialogActions>
+                    <Button color="error" variant="contained" onClick={() => {
+                        deleteDoc(doc(collection(db, 'attendanceRecords'), currentColumn.description))
+                            .then(() => closeDialog())
+                    }}>Delete</Button>
+                </DialogActions>
+            </>
+        })
+    }
+
     return (
         <GridColumnMenuContainer ref={ref} {...props}>
             <SortGridMenuItems onClick={hideMenu} column={currentColumn!} />
@@ -125,6 +140,7 @@ const GridColumnMenu = forwardRef<
             {isRecord&&<>
             <Divider/>
             <MenuItem onClick={() => router.push(`/attendance/callout?eventid=${currentColumn.description}`)}>Callout</MenuItem>
+            <MenuItem onClick={confirmDelete} color="error">Delete</MenuItem>
             {/* <MenuItem>Edit</MenuItem> */}
             </>}
         </GridColumnMenuContainer>
