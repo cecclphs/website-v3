@@ -17,8 +17,9 @@ export type AuthHook= {
     appInstance: number;
     signOut: () => Promise<void>;
     initGoogleSignIn: () => Promise<void>;
+    refreshUserToken: () => Promise<void>;
 }
-const authContext = createContext<AuthHook>({ user: null, userDetails:undefined, userToken: undefined, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {} });
+const authContext = createContext<AuthHook>({ user: null, userDetails:undefined, userToken: undefined, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {}, refreshUserToken: async () => {} });
 const { Provider } = authContext;
 
 /**
@@ -109,11 +110,26 @@ const useAuthProvider = (): AuthHook => {
         }
     };
 
+    const refreshUserToken = async () => {
+        const userToken = await getUserTokenResult(true);
+        setUserToken(userToken);
+    };
+
+    /**
+     * Signs out the current user
+     * @returns null
+     */
+     const userSignOut = () => {
+        return signOut(auth).then(() => {
+            setUser(null);
+        });
+    };
+
     //Attaches the onAuthStateChanged to listen for changes in authentication eg: login, signout etc.
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, handleAuthStateChanged);
         return () => unsub();
-        }, []);
+    }, []);
     
     //Attaches user claims documents to listen for changes in user permissions, if yes update token to ensure no permission errors
     useEffect(() => {
@@ -168,17 +184,7 @@ const useAuthProvider = (): AuthHook => {
                 unsubscribe();
             }
         }
-    }, [user]);
-
-    /**
-     * Signs out the current user
-     * @returns null
-     */
-    const userSignOut = () => {
-        return signOut(auth).then(() => {
-            setUser(null);
-        });
-    };
+    }, [user, userToken]);
 
     return {
         user,
@@ -187,6 +193,7 @@ const useAuthProvider = (): AuthHook => {
         getUserTokenResult,
         appInstance,
         signOut: userSignOut,
-        initGoogleSignIn
+        initGoogleSignIn,
+        refreshUserToken
     };
 };

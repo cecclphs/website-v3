@@ -20,7 +20,7 @@ const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     
     //Get user and omit useless data
     const studentData = studentSnap.docs[0].data();
-    const { _ft_updatedAt, _ft_updatedBy, photoURL, userGroup, permission, ...rest } = studentData; 
+    const { _ft_updatedAt, _ft_updatedBy, _updatedOn, photoURL, userGroup, permission, ...rest } = studentData; 
     res.json(rest)
 }
 

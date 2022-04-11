@@ -32,7 +32,7 @@ const LinkItem = ({ href, label, children, Icon, permission = ['isStudent'] }: L
             </div>
             <Collapse in={extended}>
                 <div className="flex flex-col pl-4">
-                    {children.map((props) => <LinkItem {...props}/>)}
+                    {children.map((props) => <LinkItem key={props.href} {...props}/>)}
                 </div>
             </Collapse>
         </div>
@@ -82,7 +82,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
             </header>
             <h1 className="text-2xl font-semibold sm:block hidden">Creative Electronics Club</h1>
             <div className="flex sm:flex-col flex-row space-x-1 sm:space-x-0 w-48 sm:space-y-1 py-3">
-                {links.map((props) => <LinkItem {...props}/>)}
+                {links.map((props) => <LinkItem key={props.href} {...props}/>)}
             </div>
         </aside>
         <SlideTransition in timeout={150}>

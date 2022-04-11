@@ -2,9 +2,8 @@ import { admin, adminAuth, adminDb } from "../../../config/firebase-admin"
 import { withAuth } from "../../../config/middlewares"
 import { NextApiRequest, NextApiResponse } from "next";
 import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
-import {Timestamp} from 'firebase/firestore';
 
-const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
+const createUser = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     try {
         const { userDetails:{
             createdOn,
@@ -26,24 +25,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         await adminAuth.updateUser(uid, {
             photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`
         })
-        // englishName: string,
-        // chineseName: string,
-        // gender: 'Male' | 'Female',
-        // studentid: string,
-        // identification: string,
-        // phone: string,
-        // facebookURL: string,
-        // email: string,
-        // address: string,
-        // birthday: string,
-        // class: string,
-        // motherName: string,
-        // motherPhone: string,
-        // fatherName: string,
-        // fatherPhone: string,
-        // emergencyphone: string,
-        // emergencyrelation: string,
-        // specials: string,
+
         //Set Student Data
         await adminDb.doc(`students/${studentid}`).set({
             ...details,
@@ -53,18 +35,18 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             status: "enrolled",
             createdOn: admin.firestore.FieldValue.serverTimestamp(),
             modifiedOn: admin.firestore.FieldValue.serverTimestamp()
-        }, { merge: true })
+        })
         await adminDb.doc(`user_claims/${uid}`).set({
             englishName: details.englishName,
             chineseName: details.chineseName,
             studentid: studentid,
             isStudent: true,
         }, { merge: true })
-        res.status(200).send(JSON.stringify({status:200, message: "Migration Successful"}))
+        res.status(200).send(JSON.stringify({status:200, message: "Create Account Successful"}))
     } catch(e) {
         console.error(e)
         throw new Error("An Error Occurred")
     }
 }
 
-export default withAuth(migrate)
+export default withAuth(createUser)

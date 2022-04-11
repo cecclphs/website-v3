@@ -1,4 +1,4 @@
-import { DocumentReference } from "firebase/firestore";
+import { DocumentReference, Timestamp } from "firebase/firestore";
 
 export default interface StudentDetails {
     id: string,
@@ -25,5 +25,7 @@ export default interface StudentDetails {
     enrollmentDate: string,
     linkedAccounts: string[],
     photoURL: string,
-    status: 'enrolled' | 'transfered' | 'graduated'
+    status: 'enrolled' | 'transfered' | 'graduated',
+    createdOn: Timestamp,
+    modifiedOn: Timestamp,
 }
