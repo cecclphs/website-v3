@@ -53,12 +53,14 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
         updateDoc(item.ref, {
             status: 'lost'
         })
+        closeDialog();
     }
 
     const reportFound = () => {
         updateDoc(item.ref, {
             status: "available"
         })
+        closeDialog();
     }
     
     const handleSetParent = () => {
