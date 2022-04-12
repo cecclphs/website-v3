@@ -5,7 +5,9 @@ import MemberLayout from '../components/MemberLayout';
 const Dashboard = () => {
     return (
         <MemberLayout>
-            <p>Work In Progress</p>
+            <Head>
+                <title>Creative Electronics Club</title>
+            </Head>
         </MemberLayout>
     );
 }
