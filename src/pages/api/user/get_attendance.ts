@@ -1,4 +1,7 @@
+import { NextApiResponse } from "next";
 import { adminDb } from "../../../config/firebase-admin";
+import { withAuth } from "../../../config/middlewares";
+import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
 
 export default withAuth(async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     const { studentid } = req.token;

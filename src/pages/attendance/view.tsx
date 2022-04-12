@@ -95,7 +95,7 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
                         />
                     <FormDateTimePicker
                         control={control}
-                        name="startTimestamp"
+                        name="endTimestamp"
                         label="End Time"
                         rules={{required: true}}
                         />

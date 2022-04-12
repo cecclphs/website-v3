@@ -1,3 +1,4 @@
+import { sub } from "date-fns";
 import { NextApiRequest, NextApiResponse } from "next";
 import { admin, adminDb, adminRtdb } from "../../../config/firebase-admin";
 import {withTerminalAPI} from '../../../config/middlewares';
@@ -22,6 +23,7 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
         if(!req.token.attendance)  throw new Error("You are not a student");
         const { cardId } = req.body as { cardId: number };
         //get the cardId Record
+        console.log(req.body)
         const cardRecordSnap = await adminRtdb.ref(`/cards/${cardId}`).once('value');
         if(!cardRecordSnap.exists()) throw new Error("Card not found");
         const cardRecord = cardRecordSnap.val() as CardRecord;
@@ -30,21 +32,36 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
         //get the studentid
         const studentid = cardRecord.studentid;
 
-        //get the attendance record that is currently active or starts in 30 minutes
-        const attdDoc = await adminDb.collection('attendanceRecords').where('endTimestamp', '>', admin.firestore.Timestamp.now()).where('startTimestamp', '<', admin.firestore.Timestamp.now().toMillis() + 30 * 60 * 1000).get();
+        //get the attendance record that is has started or starts in 30 minutes
+        const attdDoc = await adminDb.collection('attendanceRecords').where('startTimestamp', '>=', admin.firestore.Timestamp.fromDate(sub(new Date(), { minutes: 30 }))).limit(1).get();
         if(attdDoc.empty) throw new Error("No active attendance");
-        const attdRecord = attdDoc.docs[0].data() as AttendanceRecord;
+        const attdRecord = {
+            id: attdDoc.docs[0].id,
+            ref: attdDoc.docs[0].ref,
+            ...attdDoc.docs[0].data()
+        } as unknown as AttendanceRecord;
 
         //Check if is newly scanned and is late or not
         const newlyScanned = attdRecord.students[studentid] === undefined;
         const isLate = admin.firestore.Timestamp.now().toMillis() - attdRecord.startTimestamp.toMillis() > 0;
 
-        if(newlyScanned) await adminDb.doc(`attendanceRecords/${attdRecord.id}`).update({
-            [`students.${studentid}`]: isLate?'1': "迟",
-        }) 
+        if(newlyScanned) {
+            await adminDb.doc(`attendanceRecords/${attdRecord.id}`).update({
+                [`students.${studentid}`]: isLate?"迟":'1',
+            }) 
+            res.status(200).json({status: 200, data: {
+                studentid,
+                direction: 'in',
+                isLate,
+                newRecord: true,
+                recordName: attdRecord.recordName,
+                startTimestamp: attdRecord.startTimestamp.toMillis(),
+                endTimestamp: attdRecord.endTimestamp.toMillis(),
+            }})
+        }
         else {
             //check if the student has already scanned in
-            await adminDb
+            const direction = await adminDb
                 .collection('attendanceRecords').doc(attdRecord.id)
                 .collection('scanned')
                 .where('studentid', '==', studentid)
@@ -60,7 +77,16 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
                         studentid,
                         type: scannedRecord.type === 'in' ? 'out' : 'in'
                     } as CardScannedRecord)
+                    return scannedRecord.type === 'in' ? 'out' : 'in'
                 })
+            res.status(200).json({status: 200, data: {
+                studentid,
+                direction,
+                newRecord: false,
+                recordName: attdRecord.recordName,
+                startTimestamp: attdRecord.startTimestamp.toMillis(),
+                endTimestamp: attdRecord.endTimestamp.toMillis(),
+            }})
         }
     }
     catch(e) {

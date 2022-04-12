@@ -48,7 +48,7 @@ export function withTerminalAPI(handler: (req: ApiRequestWithAuth, res: NextApiR
         //get the token
         const token = authHeader.split(' ')[1];
         //check db for the token and its corresponding doc
-        const doc = await adminRtdb.ref(`/accessToken/${token}`).once('value');
+        const doc = await adminRtdb.ref(`/accessTokens/${token}`).once('value');
         if (!doc.exists() || !doc.val()) {
             return res.status(401).end('Not authenticated');
         }

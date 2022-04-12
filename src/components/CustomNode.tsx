@@ -21,7 +21,7 @@ import {
   Divider,
 } from "@mui/material";
 import InventoryItem from "../types/Inventory";
-import InventoryItemViewer from "./IventoryItemViewer";
+import InventoryItemViewer from "./InventoryItemViewer";
 
 export const TypeIcon = (props: { type: InventoryItem["type"] }) => {
   // if (props.droppable) {
