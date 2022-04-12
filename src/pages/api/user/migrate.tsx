@@ -15,9 +15,10 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             ...details
         } } = JSON.parse(req.body)
         const { email, uid } = req.token
-    
+        //TODO: API IS OUTDATED
         //Check if email is student email, else don't give a fck
-        if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) throw new Error("You are not a student");
+        if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) 
+            return res.status(404).json({status: 404, success: false, message: "You are not a student"});
         
         //Fetch user existing data, if snapshot is empty, throw error
         const studentid = email.substring(1,6);
@@ -26,24 +27,6 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         await adminAuth.updateUser(uid, {
             photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`
         })
-        // englishName: string,
-        // chineseName: string,
-        // gender: 'Male' | 'Female',
-        // studentid: string,
-        // identification: string,
-        // phone: string,
-        // facebookURL: string,
-        // email: string,
-        // address: string,
-        // birthday: string,
-        // class: string,
-        // motherName: string,
-        // motherPhone: string,
-        // fatherName: string,
-        // fatherPhone: string,
-        // emergencyphone: string,
-        // emergencyrelation: string,
-        // specials: string,
         //Set Student Data
         await adminDb.doc(`students/${studentid}`).set({
             ...details,
@@ -60,7 +43,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             studentid: studentid,
             isStudent: true,
         }, { merge: true })
-        res.status(200).send(JSON.stringify({status:200, message: "Migration Successful"}))
+        res.status(200).send(JSON.stringify({status:200, success: true, message: "Migration Successful"}))
     } catch(e) {
         console.error(e)
         throw new Error("An Error Occurred")

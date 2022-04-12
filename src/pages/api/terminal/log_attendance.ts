@@ -1,4 +1,4 @@
-import { sub } from "date-fns";
+import { add, sub } from "date-fns";
 import { NextApiRequest, NextApiResponse } from "next";
 import { admin, adminDb, adminRtdb } from "../../../config/firebase-admin";
 import {withTerminalAPI} from '../../../config/middlewares';
@@ -8,7 +8,9 @@ import {AttendanceRecord} from '../../../types/Attendance';
 type CardRecord = {
     active: boolean,
     createdOn: number,
-    displayName: string,
+    englishName: string,
+    chineseName: string,
+    class: string,
     studentid: string,
 }
 
@@ -20,21 +22,29 @@ type CardScannedRecord = {
 
 export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     try {
-        if(!req.token.attendance)  throw new Error("You are not a student");
+        if(!req.token.attendance)  
+            return res.status(403).json({status: 403, success: false, message: "You are not allowed to access this page"})
         const { cardId } = req.body as { cardId: number };
         //get the cardId Record
-        console.log(req.body)
         const cardRecordSnap = await adminRtdb.ref(`/cards/${cardId}`).once('value');
-        if(!cardRecordSnap.exists()) throw new Error("Card not found");
+        if(!cardRecordSnap.exists()) 
+            return res.status(200).json({status: 200, success: false, message: "Card not found"})
         const cardRecord = cardRecordSnap.val() as CardRecord;
-        if(!cardRecord.active) throw new Error("Card is not active");
-
+        if(!cardRecord.active) 
+            return res.status(200).json({status: 200, success: false, message: "Card is not active"})
+        
         //get the studentid
         const studentid = cardRecord.studentid;
+        if(!studentid) throw new Error('Studentid is not defined')
+        //get the attendance record that hasn't ended
+        const attdDoc = await adminDb.collection('attendanceRecords').where('endTimestamp', '>', admin.firestore.Timestamp.now()).limit(1).get(); 
+        if(attdDoc.empty)  
+            return res.status(200).json({status: 200, success: false, message: "Attendance Record not found"})
+        //check the startTimestamp and make sure it is starting in 30 minutes or has already started
+        const startTimestampIn30Minutes = sub(attdDoc.docs[0].data().startTimestamp.toDate(), { minutes: 30 });
 
-        //get the attendance record that is has started or starts in 30 minutes
-        const attdDoc = await adminDb.collection('attendanceRecords').where('startTimestamp', '>=', admin.firestore.Timestamp.fromDate(sub(new Date(), { minutes: 30 }))).limit(1).get();
-        if(attdDoc.empty) throw new Error("No active attendance");
+        if(startTimestampIn30Minutes > new Date())
+            return res.status(200).json({status: 200, success: false, message: "Attendance Record not started yet"})
         const attdRecord = {
             id: attdDoc.docs[0].id,
             ref: attdDoc.docs[0].ref,
@@ -49,8 +59,16 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
             await adminDb.doc(`attendanceRecords/${attdRecord.id}`).update({
                 [`students.${studentid}`]: isLate?"迟":'1',
             }) 
-            res.status(200).json({status: 200, data: {
+            await adminDb.collection('attendanceRecords').doc(attdRecord.id).collection('scanned').add({
+                ...cardRecord,
+                scannedOn: admin.firestore.Timestamp.now(),
                 studentid,
+                type: 'in'
+            } as CardScannedRecord)
+            res.status(200).json({status: 200, success: true, data: {
+                studentid,
+                englishName: cardRecord.englishName,
+                chineseName: cardRecord.chineseName,
                 direction: 'in',
                 isLate,
                 newRecord: true,
@@ -73,14 +91,17 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
                     if(snap.empty) throw new Error("Student has been scanned in yet newlyScanned gone wrong");
                     const scannedRecord = snap.docs[0].data() as CardScannedRecord;
                     await adminDb.collection('attendanceRecords').doc(attdRecord.id).collection('scanned').add({
+                        ...cardRecord,
                         scannedOn: admin.firestore.Timestamp.now(),
                         studentid,
                         type: scannedRecord.type === 'in' ? 'out' : 'in'
                     } as CardScannedRecord)
                     return scannedRecord.type === 'in' ? 'out' : 'in'
                 })
-            res.status(200).json({status: 200, data: {
+            res.status(200).json({status: 200, success: true, data: {
                 studentid,
+                englishName: cardRecord.englishName,
+                chineseName: cardRecord.chineseName,
                 direction,
                 newRecord: false,
                 recordName: attdRecord.recordName,
@@ -92,6 +113,7 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
     catch(e) {
         console.error(e)
         throw new Error("An Error Occurred")
+        res.status(500).json({status: 500, success: false, message: "An Error Occurred"})
     }
 })
 
