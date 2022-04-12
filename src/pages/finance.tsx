@@ -6,7 +6,7 @@ import Page from "../components/Page";
 import { db, docConverter } from "../config/firebase";
 import { FinanceAccountType, Transaction } from "../types/Finance";
 import FinanceAccount from "../components/FinanceAccount";
-import { format, formatDistance, formatDistanceToNow, subDays } from "date-fns";
+import { format } from "date-fns";
 import { Chip, Tooltip } from "@mui/material";
 import { NoteRounded, ReceiptRounded } from "@mui/icons-material";
 import { useMemo } from "react";

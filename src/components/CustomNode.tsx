@@ -2,24 +2,12 @@ import React from "react";
 import ArrowRightIcon from "@mui/icons-material/ArrowRightRounded";
 import { NodeModel } from "@minoru/react-dnd-treeview";
 import {
-  DescriptionTwoTone,
-  Folder,
-  GifBoxTwoTone,
-  Image,
   IndeterminateCheckBoxRounded,
-  ListAltTwoTone,
   LocationOnTwoTone,
   PrecisionManufacturingTwoTone,
 } from "@mui/icons-material";
 import { useDialog } from "../hooks/useDialog";
-import {
-  Button,
-  Checkbox,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-} from "@mui/material";
+import { Button, Checkbox, DialogActions, DialogContent } from "@mui/material";
 import InventoryItem from "../types/Inventory";
 import InventoryItemViewer from "./InventoryItemViewer";
 
@@ -101,11 +89,11 @@ export const CustomNode = (props : Props) => {
           <TypeIcon type={data.type} />
         </div>
         <div className={`flex flex-col`} onClick={handleClicked}>
-          <p className="text-lg">
+          <p className="text-base">
             {text} {data?.type == "item" ? `×${data?.quantity}` : ""}
           </p>
-          {data?.simpleId && <p className="text-sm">{data.simpleId}</p>}
-          {data?.type != "item" && <p className="text-sm">{data.type}</p>}
+          {data?.simpleId && <p className="text-sm text-gray-600">{data.simpleId}</p>}
+          {/* {data?.type != "item" && <p className="text-xs text-gray-600">{data.type}</p>} */}
         </div>
       </div>
     </div>

@@ -3,8 +3,9 @@ export const fetchAPI = async (apiMethod: string, user: User, options?: RequestI
     if(!user) throw new Error('User is not defined')
     return fetch(`/api/${apiMethod}`, {
         headers: {
-            authorization: `Bearer ${await user.getIdToken()}`,
-            ...options.headers
+            ...options.headers,
+            'Content-Type': 'application/json',
+            authorization: `Bearer ${await user.getIdToken()}`
         },
         ...options
     }).then(res => res.json())

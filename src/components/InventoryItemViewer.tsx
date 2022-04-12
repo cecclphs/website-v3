@@ -1,14 +1,16 @@
 import { Edit, ErrorOutline, InfoRounded, SplitscreenOutlined, DeleteRounded } from '@mui/icons-material';
-import { Button, DialogActions, DialogContent, Divider, TextField } from '@mui/material';
+import { Button, DialogActions, DialogContent, Divider } from '@mui/material';
 import { updateDoc, deleteDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { useDialog } from '../hooks/useDialog';
 import InventoryItem from '../types/Inventory';
+import { fetchAPI } from '../utils/fetchAPI';
 import SplitInventoryDialog from './SplitInventoryDialog';
 import StudentDetailsChip from './StudentDetailsChip';
 
 const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
+    const { user } = useAuth();
     const [openDialog, closeDialog] = useDialog();
     const router = useRouter();
     if (!item) return <></>
@@ -39,9 +41,14 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={closeDialog}>Cancel</Button>
-                    <Button onClick={() => {
-                        closeDialog();
-                        deleteDoc(item.ref);
+                    <Button onClick={async () => {
+                        if(item.type == 'item') await deleteDoc(item.ref)
+                        else await fetchAPI('/inventory/purge', user, { 
+                            method: 'POST',
+                            body: JSON.stringify({
+                                deleteNode: item.id
+                            })
+                        })
                         closeDialog();
                     }}>Delete</Button>
                 </DialogActions>
@@ -132,13 +139,13 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
                 >
                     Set Parent
                 </Button>}
-                {type == 'item' && <Button 
+                <Button 
                     color='error' 
                     startIcon={<DeleteRounded />}
                     onClick={handleDeleteItem}
                 >
                     Delete Item
-                </Button>}
+                </Button>
             </div>
         </div>
         <p>Registered by: <StudentDetailsChip student={registeredBy} /></p>
