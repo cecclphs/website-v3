@@ -16,10 +16,6 @@ const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
                                 .get();
     if(studentSnap.empty) 
         return res.status(404).json({status: 404, success: false, message: "Student Not Found"});
-
-    //If user document id is the same as this uid, throw same user error
-    if(studentSnap.docs[0].id === uid) 
-        return res.status(200).json({status: 200, success: false, message: "You're the same user"});
     
     //Get user and omit useless data
     const studentData = studentSnap.docs[0].data();
