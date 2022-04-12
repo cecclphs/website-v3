@@ -1,7 +1,8 @@
 import { Button, DialogActions, DialogContent } from "@mui/material";
-import { Timestamp, updateDoc } from "firebase/firestore";
+import { doc, Timestamp, updateDoc } from "firebase/firestore";
 import { forwardRef, PropsWithChildren, Ref } from "react";
 import { useForm } from "react-hook-form";
+import { db } from "../config/firebase";
 import { useAuth } from "../hooks/useAuth";
 import StudentDetails from "../types/StudentDetails";
 
@@ -22,7 +23,7 @@ const EditStudentProfile = ({ student, onClose }: { student: StudentDetails, onC
     });
     
     const submit = async (data: Omit<StudentDetails, 'id' | 'ref' | 'createdOn' | 'modifiedOn'>) => {
-        await updateDoc(ref, {
+        await updateDoc(doc(db, 'students', student.studentid), {
             ...data,
             modifiedOn: Timestamp.now()
         });
