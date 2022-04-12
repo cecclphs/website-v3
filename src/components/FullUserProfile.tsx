@@ -1,11 +1,13 @@
 import { EditRounded } from '@mui/icons-material';
-import {LinearProgress, Button} from '@mui/material';
+import {LinearProgress, IconButton} from '@mui/material';
 import MemberLayout from '../components/MemberLayout';
 import Page from '../components/Page';
 import { useAuth } from '../hooks/useAuth';
 import imageCompression from 'browser-image-compression';
 import { useRouter } from 'next/router';
 import StudentDetails from '../types/StudentDetails';
+import { useDialog } from '../hooks/useDialog';
+import EditStudentProfile from './EditStudentProfile';
 
 const DataRow = ({title, info}: {title: string, info: string}) => {
     return <tr>
@@ -17,6 +19,7 @@ const DataRow = ({title, info}: {title: string, info: string}) => {
 const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentDetails, isUser?: boolean}) => {
     const { user } = useAuth();
     const router = useRouter();
+    const [openDialog, closeDialog] = useDialog();
     const isLoading = !userDetails;
     const {
         englishName,
@@ -69,6 +72,12 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
         }
     }
 
+    const handleEdit = () => {
+        openDialog({
+            children: <EditStudentProfile student={userDetails} onClose={closeDialog}/>
+        })
+    }
+
     return <>
         {isLoading?<div className="grid place-items-center">
             <LinearProgress />
@@ -92,7 +101,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                     <img src={userDetails?.photoURL+'?'+Date.now()} className="w-20 h-20 rounded-full object-cover border-[6px] border-solid border-white shadow-xl" alt="User Profile"/>
                 </div>
                 <div className="flex flex-col">
-                    <h1 className='text-2xl font-semibold'>{chineseName} {englishName}</h1>
+                    <h1 className='text-2xl font-semibold'>{chineseName} {englishName} <IconButton onClick={handleEdit}><EditRounded/></IconButton></h1>
                     <h2 className='font-semibold'>{className} {studentid}</h2>
                 </div>
             </div>
