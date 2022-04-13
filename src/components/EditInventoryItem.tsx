@@ -3,7 +3,7 @@ import {useForm} from 'react-hook-form';
 import FormTextField from './form-components/FormTextField';
 import {Button} from '@mui/material';
 import InventoryItem from '../types/Inventory';
-import {addDoc, collection, CollectionReference, Timestamp} from 'firebase/firestore';
+import {updateDoc, collection, CollectionReference, Timestamp} from 'firebase/firestore';
 import {db, docConverter} from '../config/firebase';
 import {useAuth} from '../hooks/useAuth';
 import FormSelect from './form-components/FormSelect';
@@ -16,7 +16,7 @@ type InventoryForm = {
     metadata: InventoryItem['metadata'],
     quantity: number;
 }
-error commit 
+
 const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: InventoryItem, onComplete: () => void}) => {
     const { userToken } = useAuth();
     const pressSubmit = useKeyPress('Enter');
@@ -50,14 +50,14 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
 
     const onSubmit = async (data: InventoryForm) => {
         const sanitized = removeEmpty(data) as InventoryForm
-        await addDoc((collection(db, 'inventory') as CollectionReference<InventoryItem>).withConverter(docConverter), {
+        await updateDoc(inventoryItem.ref, {
             description: sanitized.description,
             simpleId: sanitized.simpleId,
             metadata: sanitized.metadata,
             ...(type === 'item' ? { quantity: sanitized.quantity } : {}),
         })
-        reset();
         onComplete();
+        reset();
     }
 
     return <div className="flex flex-col space-y-2 p-4 rounded-lg shadow-lg">

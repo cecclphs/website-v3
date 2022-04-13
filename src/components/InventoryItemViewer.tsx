@@ -60,11 +60,7 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
 
     const handleEditItem = () => {
         openDialog({
-            children: <>
-                <DialogContent>
-                    <EditInventoryItem inventoryItem={item} onComplete={closeDialog} />
-                </DialogContent>
-            </>
+            children: <EditInventoryItem inventoryItem={item} onComplete={onClose} />
         })
     }
 
