@@ -1,13 +1,10 @@
 import {Controller, useForm} from 'react-hook-form';
-import {FacilityForm, FacilityOrderData} from '../types/Facility';
-import {AddRounded, CloudUploadRounded, FileOpenTwoTone} from '@mui/icons-material';
+import { AddRounded, CloudUploadRounded } from '@mui/icons-material';
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from '@mui/material';
 import {collection, doc, setDoc, Timestamp, WithFieldValue} from 'firebase/firestore';
 import {db, storage} from '../config/firebase';
 import FormSelect from './form-components/FormSelect';
 import FormTextField from './form-components/FormTextField';
-import FormCheckbox from './form-components/FormCheckbox';
-import FormFilePicker from './form-components/FormFilePicker';
 import {getDownloadURL, ref, uploadBytes} from 'firebase/storage';
 import { useAuth } from '../hooks/useAuth';
 import { useSnackbar } from 'notistack';
@@ -69,7 +66,7 @@ const NewTransaction = () => {
         const { englishName, studentid } = userToken;
         const { description, amount, type, account, toAccount, date, invoices, remarks } = data;
         console.log(data)
-        const newDoc = doc(collection(db, "transactions"));
+        const newDoc = doc(collection(db, 'finance', 'CEC', "transactions"));
         const files = await Promise.all(Array.from(invoices).map(async (invoice) => {
             const snap = await uploadBytes(ref(storage, `transactions/${newDoc.id}/${invoice.file.name}`), invoice.file);
             return {url: await getDownloadURL(snap.ref), caption: invoice.caption};
@@ -87,8 +84,8 @@ const NewTransaction = () => {
                 englishName,
                 studentid
             },
-            ...remarks?{remarks}:{},
-            ...toAccount?{ toAccount: toAccount.id}: {},
+            ...(remarks ? {remarks} : {}),
+            ...(toAccount ? { toAccount: toAccount.id} : {}),
         } as unknown as WithFieldValue<Transaction>)
         enqueueSnackbar("Transaction created successfully", {
             variant: 'success',

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import FormTextField from "./form-components/FormTextField";
 import { useAlgolia } from "use-algolia";
 import { Autocomplete, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
@@ -143,7 +143,7 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                 englishName: userToken.englishName,
             },
             dateRegistered: Timestamp.now(),
-            ...type === 'item' ? { quantity: sanitized.quantity } : {},
+            ...(type === 'item' ? { quantity: sanitized.quantity } : {}),
         })
         reset();
     }

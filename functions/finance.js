@@ -3,7 +3,7 @@ const { db, admin } = require("./admin");
 
 exports.transactionAdded = functions
   .firestore
-  .document('transactions/{transactionId}')
+  .document('finance/CEC/transactions/{transactionId}')
   .onWrite(async (change, context) => {
     const before = change.before.data();
     const after = change.after.data();
@@ -11,7 +11,7 @@ exports.transactionAdded = functions
     if (change.after.exists && after && !before) {
       const accountId = after.account
       try {
-        const accountRef = db.doc(`accounts/${accountId}`);
+        const accountRef = db.doc(`finance/CEC/accounts/${accountId}`);
         const transactionRef = change.after.ref;
         await db.runTransaction(async (transaction) => {
           const accountDoc = await transaction.get(accountRef)
@@ -45,7 +45,7 @@ exports.transactionAdded = functions
           }
           else if(after.type === "transfer") {
             console.log(`transfer transaction added, updating account balance to ${accountId} with ${after.toAccount} with amount ${after.amount}`);
-            const targetAccountDoc = await transaction.get(db.doc(`accounts/${after.toAccount}`));
+            const targetAccountDoc = await transaction.get(db.doc(`finance/CEC/accounts/${after.toAccount}`));
             const targetAccount = targetAccountDoc.data();
             transaction.update(transactionRef, {
               balanceBefore: account.balance,

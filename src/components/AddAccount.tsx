@@ -1,8 +1,8 @@
 import { AddRounded } from "@mui/icons-material";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useForm } from "react-hook-form";
 import useToggle from "../hooks/useToggle";
-import {addDoc, collection, Timestamp, WithFieldValue} from 'firebase/firestore';
+import { addDoc, collection, Timestamp } from 'firebase/firestore';
 import FormTextField from "./form-components/FormTextField";
 import FormSelect from "./form-components/FormSelect";
 import { db } from "../config/firebase";
@@ -22,18 +22,19 @@ type AccountForm = {
 const AddAccount = () => {
     const { userToken } = useAuth();
     const [open, setOpen] = useToggle();
-    const { register, handleSubmit, setValue, control, watch, formState: { isValid, errors }, reset } = useForm<AccountForm>({
+    const { handleSubmit, setValue, control, watch, formState: { isValid, errors }, reset } = useForm<AccountForm>({
         defaultValues: {
-        }
+        },
+        mode: 'onChange'
     });
     
     const handleCreate = async (data: AccountForm) => {
         console.log(data)
-        await addDoc(collection(db, 'accounts'), {
+        await addDoc(collection(db, 'finance', 'CEC', 'accounts'), {
             accountName: data.accountName,
             type: data.type,
             balance: parseFloat(data.initialBalance),
-            notes: data.notes,
+            ...data.notes?{notes: data.notes}: {},
             metadata: {
                 createdAt: Timestamp.now(),
                 createdBy: {
@@ -95,7 +96,7 @@ const AddAccount = () => {
             </DialogContent>
             <DialogActions>
                 <Button onClick={setOpen}>Cancel</Button>
-                <Button onClick={handleSubmit(handleCreate)}>Create</Button>
+                <Button disabled={!isValid} onClick={handleSubmit(handleCreate)}>Create</Button>
             </DialogActions>
         </Dialog>
         </>

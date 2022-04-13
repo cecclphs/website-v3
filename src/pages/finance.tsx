@@ -13,8 +13,8 @@ import { useMemo } from "react";
 import AddAccount from "../components/AddAccount";
 
 const Finance = () => {
-    const [transactions = [], loading, error] = useCollectionData<Transaction>(query(collection(db, 'transactions'), orderBy('date', 'desc')).withConverter(docConverter));
-    const [accounts = [], loadingAccounts, errorAccounts] = useCollectionData<FinanceAccountType>(collection(db, 'accounts').withConverter(docConverter));
+    const [transactions = [], loading, error] = useCollectionData<Transaction>(query(collection(db, 'finance', 'CEC', 'transactions'), orderBy('date', 'desc')).withConverter(docConverter));
+    const [accounts = [], loadingAccounts, errorAccounts] = useCollectionData<FinanceAccountType>(collection(db, 'finance', 'CEC', 'accounts').withConverter(docConverter));
     console.log(transactions)
 
     const getTypeColor = (type: string) => {
@@ -63,7 +63,7 @@ const Finance = () => {
         <Page title="Financials">
             <NewTransaction/>
             <h2 className="text-2xl font-semibold py-1">Accounts</h2>
-            <div className="flex flex-row space-x-2">
+            <div className="flex flex-row space-x-2 overflow-x-auto w-full">
                 <FinanceAccount account={{id: 'all', accountName: 'All', balance: accountsSum, type: "bank"}}/>
                 {accounts.map(account => (<FinanceAccount key={account.id} account={account} />))}
                 <AddAccount />

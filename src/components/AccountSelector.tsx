@@ -20,7 +20,7 @@ export default function AccountSelector({ hiddenIds=[], label, onChange, value={
 
         (async () => {
         if (active) {
-            let sync = await getDocs(collection(db,'accounts').withConverter(docConverter))
+            let sync = await getDocs(collection(db,'finance', 'CEC', 'accounts').withConverter(docConverter))
             setOptions(sync.docs.map(doc => doc.data()));
         }
         })();

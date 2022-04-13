@@ -62,7 +62,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone},
     ]
 
-    return <div className="min-h-screen w-screen pb-12 sm:grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] sm:px-4 divide-x divide-solid divide-gray-200">
+    return <div className="min-h-screen w-screen pb-12 sm:pb-0 sm:grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] sm:px-4 divide-x divide-solid divide-gray-200">
         <Head>
             <title>Member</title>
         </Head>
@@ -86,7 +86,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
             </div>
         </aside>
         <SlideTransition in timeout={150}>
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-hidden">
                 {children}
             </div>
         </SlideTransition>

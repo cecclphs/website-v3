@@ -6,7 +6,6 @@ import { useDialog } from "../hooks/useDialog";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import FileOpenTwoTone from "@mui/icons-material/FileOpenTwoTone";
-import Link from "next/link";
 
 const FacilityOrder = ({ order, isCurrentUser=false }: {order: FacilityOrderData, isCurrentUser?: boolean }) => {
     const {
