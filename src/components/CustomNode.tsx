@@ -53,7 +53,7 @@ export const CustomNode = (props : Props) => {
       children: (
         <>
           <DialogContent>
-            <InventoryItemViewer item={data}/>
+            <InventoryItemViewer item={data} onClose={closeDialog}/>
           </DialogContent>
           <DialogActions>
             <Button onClick={closeDialog}>Close</Button>

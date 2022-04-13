@@ -8,8 +8,9 @@ import InventoryItem from '../types/Inventory';
 import { fetchAPI } from '../utils/fetchAPI';
 import SplitInventoryDialog from './SplitInventoryDialog';
 import StudentDetailsChip from './StudentDetailsChip';
+import EditInventoryItem from './EditInventoryItem';
 
-const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
+const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: () => void }) => {
     const { user } = useAuth();
     const [openDialog, closeDialog] = useDialog();
     const router = useRouter();
@@ -50,29 +51,40 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
                             })
                         })
                         closeDialog();
+                        onClose();
                     }}>Delete</Button>
                 </DialogActions>
             </>
         });
     }
 
+    const handleEditItem = () => {
+        openDialog({
+            children: <>
+                <DialogContent>
+                    <EditInventoryItem inventoryItem={item} onComplete={closeDialog} />
+                </DialogContent>
+            </>
+        })
+    }
+
     const reportLost = () => {
         updateDoc(item.ref, {
             status: 'lost'
         })
-        closeDialog();
+        onClose();
     }
 
     const reportFound = () => {
         updateDoc(item.ref, {
             status: "available"
         })
-        closeDialog();
+        onClose();
     }
     
     const handleSetParent = () => {
         router.push('/inventory?parent=' + id);
-        closeDialog();
+        onClose();
     }
 
     return <div className="flex flex-col w-[400px]">
@@ -126,9 +138,9 @@ const InventoryItemViewer = ({ item }: { item: InventoryItem }) => {
                     Split Item
                 </Button>}
                 <Button 
-                    disabled
                     color='info' 
                     startIcon={<Edit />}
+                    onClick={handleEditItem}
                 >
                     Edit Item
                 </Button>

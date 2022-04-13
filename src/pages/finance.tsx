@@ -46,7 +46,7 @@ const Finance = () => {
         // error: 'bg-red-800 text-red-100'
         switch (transaction.status) {
             case 'pending':
-                return getTypeColor(transaction.type) + ' text-gray-700';
+                return getTypeColor(transaction.type) + ' text-gray-400 animate-pulse';
             case 'successful':
                 return getTypeColor(transaction.type)
             case 'error':
@@ -85,7 +85,7 @@ const Finance = () => {
                         <td className="p-2">{
                             format(transaction.date.toDate(), "yyyy-MM-dd")}
                         </td>
-                        <td>{transaction.description}</td>
+                        <td>{transaction.status == "pending"? "PENDING:":""} {transaction.description}</td>
                         <td className='text-sm font-semibold p-2'>
                             {<Tooltip title="Receipts">
                                 <Chip icon={<ReceiptRounded />} label={transaction.invoices?.length || 0} size="small"/>

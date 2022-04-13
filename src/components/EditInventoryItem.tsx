@@ -1,115 +1,35 @@
-import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import FormTextField from "./form-components/FormTextField";
-import { useAlgolia } from "use-algolia";
-import { Autocomplete, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
-import InventoryItem from "../types/Inventory";
-import { addDoc, collection, CollectionReference, Timestamp } from "firebase/firestore";
-import { db, docConverter } from "../config/firebase";
-import { useAuth } from "../hooks/useAuth";
-import FormSelect from "./form-components/FormSelect";
+import {useEffect, useMemo} from 'react';
+import {useForm} from 'react-hook-form';
+import FormTextField from './form-components/FormTextField';
+import {Button} from '@mui/material';
+import InventoryItem from '../types/Inventory';
+import {addDoc, collection, CollectionReference, Timestamp} from 'firebase/firestore';
+import {db, docConverter} from '../config/firebase';
+import {useAuth} from '../hooks/useAuth';
+import FormSelect from './form-components/FormSelect';
 import useKeyPress from '../hooks/useKeyPress';
-
-type InventoryHit = {
-    simpleId: InventoryItem['simpleId'];
-    description: InventoryItem['description'];
-    parent: InventoryItem['parent'];
-    status: InventoryItem['status'];
-    objectID: string;
-}
-
-const SearchItem = ({ value, onChange }) => {
-    const [open, setOpen] = React.useState(false);
-    const [inputValue, setInputValue] = React.useState('');
-    const [searchState, requestDispatch, getMore] = useAlgolia<InventoryHit>(
-        'UCUWLZ1S98',
-        '4b8223c4366da4889262234911b1349f',
-        'inventory',
-        { hitsPerPage: 5 }
-    );
-    const { hits: options, response, loading, hasMore } = searchState;
-    // const loading = open && options.length === 0;
-    
-    React.useEffect(() => {
-        if(open) requestDispatch({ query: '', filter: ''})
-    }, [open]);
-    
-    React.useEffect(() => {
-        console.log(inputValue)
-        requestDispatch({ query: inputValue, filter: ''});
-    }, [inputValue]);
-    
-    return (
-        <Autocomplete
-            id="asynchronous-demo"
-            sx={{ width: 300 }}
-            open={open}
-            onOpen={() => {
-                setOpen(true);
-            }}
-            onClose={() => {
-                setOpen(false);
-            }}
-            isOptionEqualToValue={(option, value) => option?.objectID === value?.objectID}
-            getOptionLabel={(option) => option.name}
-            onInputChange={(event, newInputValue) => {
-                setInputValue(newInputValue);
-            }}
-            autoComplete    
-            options={options}
-            loading={loading}
-            value={value}
-            onChange={onChange}
-            renderOption={(params, option: InventoryHit) => (
-                <MenuItem key={option?.objectID} {...params}>
-                    {option.description}
-                    {option.simpleId}
-                </MenuItem>
-            )}
-            renderInput={(params) => (
-                <TextField
-                {...params}
-                size="small"
-                label="Parent"
-                InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                    <React.Fragment>
-                        {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                    </React.Fragment>
-                    ),
-                }}
-                />
-            )}
-        />
-    );  
-}
 
 type InventoryForm = {
     simpleId: string | null;
     description: string;
-    parent: string | null;
+    type: InventoryItem['type']
     metadata: InventoryItem['metadata'],
-    type: InventoryItem['type'],
     quantity: number;
 }
-
-const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
+error commit 
+const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: InventoryItem, onComplete: () => void}) => {
     const { userToken } = useAuth();
     const pressSubmit = useKeyPress('Enter');
-    const { register, handleSubmit, setValue, control,  watch, formState: { isValid, errors, isSubmitting }, reset } = useForm<InventoryForm>({
-        defaultValues:{
-            simpleId: null,
-            description: "",
-            parent,
-            metadata: {},
-            type: 'item',
-            quantity: 1
-        },
+    const { handleSubmit, control,  setValue, watch, formState: { isValid, isSubmitting }, reset } = useForm<InventoryForm>({
+        defaultValues: useMemo(() => ({
+            simpleId: inventoryItem.simpleId,
+            description: inventoryItem.description,
+            type: inventoryItem.type,
+            metadata: inventoryItem.metadata,
+            quantity: inventoryItem.quantity,
+        }), [inventoryItem]),
         reValidateMode: 'onChange', // this in pair with mode seems to give the expected result
         mode: 'onChange',
-    
     })
 
     useEffect(() => {
@@ -133,23 +53,15 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
         await addDoc((collection(db, 'inventory') as CollectionReference<InventoryItem>).withConverter(docConverter), {
             description: sanitized.description,
             simpleId: sanitized.simpleId,
-            parent,
-            status: "available",
-            children: 0,
-            type: sanitized.type,
             metadata: sanitized.metadata,
-            registeredBy: {
-                studentid: userToken.studentid,
-                englishName: userToken.englishName,
-            },
-            dateRegistered: Timestamp.now(),
             ...(type === 'item' ? { quantity: sanitized.quantity } : {}),
         })
         reset();
+        onComplete();
     }
 
     return <div className="flex flex-col space-y-2 p-4 rounded-lg shadow-lg">
-        <h3 className="text-xl font-bold">Adding Item</h3>
+        <h3 className="text-xl font-bold">Editing {inventoryItem.description}</h3>
         <div className="flex flex-row space-x-1">
             <FormTextField
                 control={control}
@@ -157,7 +69,7 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                 size="small"
                 label="Simple ID"
                 variant="filled" />
-            <FormSelect
+            {inventoryItem.type != 'item' && <FormSelect
                 control={control}
                 name="type"
                 size="small"
@@ -168,8 +80,7 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                     { label: "Location", value: "location" },
                     { label: "Container", value: "container" },
                     { label: "Project", value: "project" },
-                    { label: "Item", value: "item" },
-                ]} />
+                ]} />}
             <FormTextField
                 autoFocus
                 required
@@ -290,15 +201,8 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                     variant="outlined" />
             </div>
         </div>
-        
-        {/* <Controller
-            control={control}
-            name="parent"
-            render={({ field: { onChange, value }}) => (
-                <SearchItem value={value} onChange={onChange}/>
-            )}/> */}
-        <Button disabled={!isValid || isSubmitting} variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Create</Button>
+        <Button disabled={!isValid || isSubmitting} variant="outlined" color="primary" onClick={handleSubmit(onSubmit)}>Edit</Button>
     </div>
 }
 
-export default CreateInventoryItem;
+export default EditInventoryItem;
