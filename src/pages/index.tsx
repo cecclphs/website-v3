@@ -13,6 +13,7 @@ const Home = () => {
           <CECLogo className="h-14 object-contain"/>
         </div>
         <p>Are you a CEC Member? </p>
+        <p className="text-sm text-gray-500">If you have issues logging in, make sure that you have 3rd party cookies turned on. </p>
       </div>
     </div>
     <div className='flex-1 grid place-items-center'>

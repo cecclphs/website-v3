@@ -36,3 +36,4 @@ mutate.ts
 namelist.csv
 .gitignore
 migrate.ts
+cardlist.csv

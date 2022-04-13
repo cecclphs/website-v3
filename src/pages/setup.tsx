@@ -265,7 +265,7 @@ const Setup = () => {
         const isSchoolEmail = /(s[0-9]{5}@clphs.edu.my)/g.test(user.email);
         (async () => {
             if(userDetails && userDetails.migrated) setActiveSetup('completed');
-            else if((userDetails && userDetails.migrated) || (await fetchAPI('/user/getOldUserData', user, {}))) {
+            else if((userDetails && !userDetails.migrated) || (await fetchAPI('/user/getOldUserData', user, {}) && isSchoolEmail)) {
                 setActiveSetup('migrate');
             }
             else if(isSchoolEmail) setActiveSetup('newUser');

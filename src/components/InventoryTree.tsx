@@ -97,7 +97,13 @@ const InventoryTree = ({ parent }: {parent: string}) => {
     useEffect(() => {
         if(parents.length == 0) return;
         //merge the objects of parent and nodeData into one objcet
-        const inventory = [...parents, ...Object.values(nodeData)];
+        //convert parents into object
+        const parentsObj = parents.reduce((acc, p) => {
+            acc[p.id] = p;
+            return acc;
+        }, {})
+        const inventoryObj: {[x: string]: InventoryItem} = { ...parentsObj, ...nodeData };
+        const inventory = Object.values(inventoryObj);
         const tree = inventory.map(item => ({
             id: item.id,
             parent: item.parent || 0,
@@ -105,7 +111,7 @@ const InventoryTree = ({ parent }: {parent: string}) => {
             droppable: item.type != 'item',
             data: item
         }))
-        // console.log(tree)
+        console.log(tree)
         setTreeData(tree)
     }, [parents, nodeData])
     
@@ -129,6 +135,7 @@ const InventoryTree = ({ parent }: {parent: string}) => {
                 ...
             </div>}
             <Tree
+                key={parent}
                 tree={treeData}
                 rootId={parent || 0}
                 onDrop={handleDrop}
