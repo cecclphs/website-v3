@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import StudentDetails from '../types/StudentDetails';
 import { useDialog } from '../hooks/useDialog';
 import EditStudentProfile from './EditStudentProfile';
+import { useSnackbar } from 'notistack';
 
 const DataRow = ({title, info}: {title: string, info: string}) => {
     return <tr>
@@ -20,6 +21,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
     const { user } = useAuth();
     const router = useRouter();
     const [openDialog, closeDialog] = useDialog();
+    const { enqueueSnackbar } = useSnackbar();
     const isLoading = !userDetails;
     const {
         englishName,
@@ -66,8 +68,12 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                 body: JSON.stringify({
                     image: reader.result as string,
                 })
-            }).then(res => {
-                router.reload()
+            }).then(async res => {
+                const { error } = await res.json()
+                if(res.status == 200) router.reload()
+                else {
+                    enqueueSnackbar('Failed to upload picture: '+ error, { variant: 'error' });
+                }
             })
         }
     }

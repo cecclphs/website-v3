@@ -6,6 +6,7 @@ import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
 import StudentDetails from "../../../types/StudentDetails";
 import { UploadPublicFile } from "../../../utils/api/storage";
 import { ToFixedSizePNG } from "../../../utils/api/image";
+import vision from '@google-cloud/vision';
 
 const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     const { uid, email, studentid } = req.token;
@@ -13,8 +14,24 @@ const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     if(!uid) res.status(403).json({ error: "You are not logged in" });
     //get new picture
     const { image } = req.body;
+
     const base64EncodedImageString = image.replace(/^data:image\/\w+;base64,/, '');
     const imageBuffer = Buffer.from(base64EncodedImageString, 'base64');
+
+    const client = new vision.ImageAnnotatorClient({
+        credentials: {
+            client_email: process.env.FIREBASE_CLIENT_EMAIL,
+            private_key: process.env.FIREBASE_PRIVATE_KEY,
+        },
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    });
+    const [result] = await client.faceDetection(imageBuffer);
+    const faces = result.faceAnnotations;
+    console.log('Faces:', faces);
+    if(faces.length == 0) {
+        res.status(400).json({ error: "This picture is unusable, please select one with your visible face." });
+        return;
+    }
     console.log('generating profile picture...');
     console.log('uploading profile picture...');
     const imageUrl = await UploadPublicFile(await ToFixedSizePNG(imageBuffer, 512, 512), `profiles/${studentid}.png`);
