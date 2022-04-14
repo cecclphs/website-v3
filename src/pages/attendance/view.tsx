@@ -140,6 +140,7 @@ const GridColumnMenu = forwardRef<
             {isRecord&&<>
             <Divider/>
             <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/callout`)}>Callout</MenuItem>
+            <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/liveview`)}>Live View</MenuItem>
             <MenuItem onClick={confirmDelete} color="error">Delete</MenuItem>
             {/* <MenuItem>Edit</MenuItem> */}
             </>}
