@@ -81,7 +81,7 @@ const LiveAttendance = () => {
             <div className="space-y-1 overflow-y-auto">
                 <h3 className='font-semibold text-xl'>Absentees</h3>
                 <div className="flex flex-col">
-                    {absentees.map(({studentid, englishName, chineseName}) => <p><span className="font-mono">{studentid}</span> {chineseName} {englishName}</p>)}
+                    {absentees.map(({studentid, englishName, chineseName, class: className}) => <p><span className="font-mono">{studentid}</span> {chineseName} {className}</p>)}
                 </div>
             </div>
         </div>
