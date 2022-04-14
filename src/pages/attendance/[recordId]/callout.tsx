@@ -1,33 +1,27 @@
 import { collection, query, where, updateDoc, doc } from 'firebase/firestore';
-import { db, docConverter } from '../../config/firebase';
+import { db, docConverter } from '../../../config/firebase';
 import { useCollectionData, useDocumentDataOnce } from 'react-firebase-hooks/firestore';
-import StudentDetails from '../../types/StudentDetails';
-import { useAuth } from '../../hooks/useAuth';
-import MemberLayout from '../../components/MemberLayout';
-import Page from '../../components/Page';
+import StudentDetails from '../../../types/StudentDetails';
+import { useAuth } from '../../../hooks/useAuth';
+import MemberLayout from '../../../components/MemberLayout';
+import Page from '../../../components/Page';
 import { Button, Grow } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import preloadImage from '../../utils/preloadImage';
-import { AttendanceRecord } from '../../types/Attendance';
+import preloadImage from '../../../utils/preloadImage';
+import { AttendanceRecord } from '../../../types/Attendance';
 
 const AttendanceCallout = () => {
     const { user } = useAuth()
     const router = useRouter();
+    const { recordId } = router.query;
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
-    const urlquery = router.query;
-    const eventid = urlquery.eventid;
     const [calloutIndex, setCalloutIndex] = useState(0);
     const [absents, setAbsents] = useState<number>(0);
-    const [attendance, loading, error] = useDocumentDataOnce<AttendanceRecord>(eventid && doc(db, `attendanceRecords/${eventid}`).withConverter(docConverter));
+    const [attendance, loading, error] = useDocumentDataOnce<AttendanceRecord>(recordId && doc(db, `attendanceRecords/${recordId}`).withConverter(docConverter));
     const { students: alreadyCalled, recordName } = attendance || { };
 
-    const calloutStudents = useMemo(() => alreadyCalled?students.filter(s => !Object.keys(alreadyCalled || {}).includes(s.id)): [], [students, alreadyCalled]);
-    useEffect(() => {
-        if (!eventid) {
-            // router.push('/attendance/view');
-        }
-    }, [eventid, loading, studentsLoad])
+    const calloutStudents = useMemo(() => alreadyCalled?students.filter(s => !Object.keys(alreadyCalled || {}).includes(s.id)): students, [students, alreadyCalled]);
 
     useEffect(() => {
         calloutStudents.forEach(({studentid}) => {
@@ -36,7 +30,7 @@ const AttendanceCallout = () => {
     },[calloutStudents])
 
     const updateRecord = (student: StudentDetails, present:boolean) => {
-        updateDoc(doc(db, `attendanceRecords/${eventid}`), {
+        updateDoc(doc(db, `attendanceRecords/${recordId}`), {
             [`students.${student.studentid}`]: present?'1':'0'
         })
         setAbsents(absents + (present?0:1))
@@ -46,7 +40,7 @@ const AttendanceCallout = () => {
     const isFinished = calloutIndex == calloutStudents.length
     useEffect(() => {
         if(loading && studentsLoad && isFinished) {
-            router.push('/attendance/view');
+            // router.push('/attendance/view');
         }
     }, [calloutIndex, studentsLoad, loading, isFinished])
     const { studentid, englishName, chineseName, class: className, gender } = calloutStudents[calloutIndex] || {};

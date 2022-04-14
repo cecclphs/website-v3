@@ -1,6 +1,5 @@
 import {DocumentReference, Timestamp} from 'firebase/firestore';
 import {ShortStudentInfo} from './User';
-
 export interface AttendanceRecord {
     id: string,
     ref: DocumentReference,
@@ -14,5 +13,5 @@ export interface AttendanceRecord {
         createdOn?: Timestamp,
     }
     updatedOn: Timestamp
-    students: {[studentid: number]: string}
+    students: {[studentid: number]: '1'|'0'|'迟'|'特'|'事'|'公'}
 }
