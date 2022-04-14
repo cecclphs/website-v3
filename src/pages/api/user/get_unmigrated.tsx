@@ -14,12 +14,13 @@ const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     const studentSnap = await adminDb.collection("users")
                                 .where('studentid','==',studentid)
                                 .get();
-    if(studentSnap.empty) 
+    const studentDocs = studentSnap.docs.slice().filter(doc => doc.id !== uid);
+    if(studentDocs.length == 0) 
         return res.status(404).json({status: 404, success: false, message: "Student Not Found"});
     
     //Get user and omit useless data
-    const studentDocs = studentSnap.docs.slice().filter(doc => doc.id !== uid);
     const studentData = studentDocs[0].data();
+    console.log('found student for user: '+ studentDocs[0].id)
     const { _ft_updatedAt, _ft_updatedBy, _updatedOn, photoURL, userGroup, permission, ...rest } = studentData; 
     res.status(200).json(rest)
 }

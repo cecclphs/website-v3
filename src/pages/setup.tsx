@@ -59,13 +59,12 @@ const MigrateUser = () => {
         const migrateUser = async () => {
             try {
                 setLoading(true);
-                const response = await fetchAPI('/user/getOldUserData', user, {})
-                console.log(response.data)
-                const data = response.data;
+                const data = await fetchAPI('/user/get_unmigrated', user)
+                console.log(data)
                 setOldUserData({...data, createdOn: new Timestamp(data.createdOn._seconds, data.createdOn._nanoseconds), modifiedOn: new Timestamp(data.modifiedOn._seconds, data.modifiedOn._nanoseconds)})
                 setLoading(false)
             } catch (e) {
-                console.log(e)
+                console.error(e)
             }
         }
         migrateUser();
@@ -167,7 +166,7 @@ const NewUser = () => {
     const { enqueueSnackbar } = useSnackbar();
 
     const handleCreate = async (data: NewUserForm) => {
-        const res = await fetchAPI("/user/create_user", user, { body: JSON.stringify(data)})
+        const res = await fetchAPI("/user/create_user", user, { method: 'POST', body: JSON.stringify(data)})
         if (res.status === 200) {
             enqueueSnackbar("Your account has been created", { variant: "success" });
             reset();
@@ -265,7 +264,7 @@ const Setup = () => {
         const isSchoolEmail = /(s[0-9]{5}@clphs.edu.my)/g.test(user.email);
         (async () => {
             if(userDetails && userDetails.migrated) setActiveSetup('completed');
-            else if((userDetails && !userDetails.migrated) || (await fetchAPI('/user/getOldUserData', user, {}) && isSchoolEmail)) {
+            else if((userDetails && !userDetails.migrated) || (await fetchAPI('/user/get_unmigrated', user) && isSchoolEmail)) {
                 setActiveSetup('migrate');
             }
             else if(isSchoolEmail) setActiveSetup('newUser');
