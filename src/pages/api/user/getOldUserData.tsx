@@ -18,7 +18,8 @@ const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         return res.status(404).json({status: 404, success: false, message: "Student Not Found"});
     
     //Get user and omit useless data
-    const studentData = studentSnap.docs[0].data();
+    const studentDocs = studentSnap.docs.slice().filter(doc => doc.id !== uid);
+    const studentData = studentDocs[0].data();
     const { _ft_updatedAt, _ft_updatedBy, _updatedOn, photoURL, userGroup, permission, ...rest } = studentData; 
     res.status(200).json(rest)
 }

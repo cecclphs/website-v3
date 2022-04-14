@@ -59,7 +59,7 @@ const MigrateUser = () => {
         const migrateUser = async () => {
             try {
                 setLoading(true);
-                const response = await httpsCallable<undefined, StudentDetails & { createdOn: SerializedTimestamp, modifiedOn: SerializedTimestamp}> (functions,'getOldUserData')()
+                const response = await fetchAPI('/user/getOldUserData', user, {})
                 console.log(response.data)
                 const data = response.data;
                 setOldUserData({...data, createdOn: new Timestamp(data.createdOn._seconds, data.createdOn._nanoseconds), modifiedOn: new Timestamp(data.modifiedOn._seconds, data.modifiedOn._nanoseconds)})
@@ -69,7 +69,7 @@ const MigrateUser = () => {
             }
         }
         migrateUser();
-    }, []);
+    }, [user]);
 
     const handleEditButton = () => setEditing(true);
 
