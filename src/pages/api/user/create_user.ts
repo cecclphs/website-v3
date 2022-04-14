@@ -12,7 +12,7 @@ const createUser = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             status,
             permission,
             ...details
-        } } = JSON.parse(req.body)
+        } } = req.body
         const { email, uid } = req.token
     
         //Check if email is student email, else don't give a fck

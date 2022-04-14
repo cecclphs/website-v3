@@ -13,15 +13,16 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             status,
             permission,
             ...details
-        } } = JSON.parse(req.body)
+        } } = req.body
         const { email, uid } = req.token
-        //TODO: API IS OUTDATED
-        //Check if email is student email, else don't give a fck
-        if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) 
-            return res.status(404).json({status: 404, success: false, message: "You are not a student"});
-        
+        console.log(req.body)
+        //TODO: API MIGHT BE ABUSED
+        //Check if student is already migrated,
+        const studentSnap = await adminDb.collection("students").doc(details.studentid).get();
+        if(studentSnap.data()?.migrated)
+            return res.status(409).json({status: 409, success: false, message: "Student already migrated"});
         //Fetch user existing data, if snapshot is empty, throw error
-        const studentid = email.substring(1,6);
+        const studentid = details.studentid
         
         //update user photoURL
         await adminAuth.updateUser(uid, {

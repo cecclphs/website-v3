@@ -51,6 +51,7 @@ const MigrateUser = () => {
     const [submitting, setSubmitting] = useState(false);
     const [loading, setLoading] = useState(false);
     const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm<StudentData>({
+        defaultValues: oldUserData,
         mode: 'onChange'
     });
     const onSubmit = (data: StudentData) => console.log(data);
@@ -72,12 +73,13 @@ const MigrateUser = () => {
 
     const handleEditButton = () => setEditing(true);
 
-    const handleContinue = async () => {
+    const handleContinue = async (data: StudentData) => {
         let newUserData = Object.assign({}, oldUserData);
         if(!user) return;
         await fetchAPI('/user/migrate', user, {
+            method: 'POST',
             body: JSON.stringify({
-                userDetails: newUserData
+                userDetails: editing?data:newUserData,
             })
         })
     }
