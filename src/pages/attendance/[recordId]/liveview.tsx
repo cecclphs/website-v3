@@ -9,17 +9,6 @@ import { useEffect, useMemo, useState } from 'react';
 import {useRouter} from 'next/router';
 import { Tooltip } from '@mui/material';
 
-const Time = () => {
-    const [now, setNow] = useState(new Date());
-    useEffect(() => {
-        const intv = setInterval(() => setNow(new Date()), 1000);
-        return () => clearInterval(intv)
-    },[])
-    return <div className="font-mono text-2xl">
-        {format(now, 'hh:mm:ss a')}
-    </div>
-}
-
 const MatrixDot = ({studentid, englishName, chineseName, attendance = null}: {studentid: string, englishName: string, chineseName: string, attendance: AttendanceRecord['students'][0] | null}) => {
     const color = {
         '1': 'bg-green-600/80',
@@ -53,6 +42,12 @@ const LiveAttendance = () => {
             return students.filter(s => !attendees.includes(s))
     }, [students, attendees, loading, studentsLoad]);
 
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const intv = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(intv)
+    },[])
+
     if(loading || studentsLoad || !recStud) return <div className="w-screen h-screen grid place-items-center">
         <h1 className="text-4xl text-gray-400">Loading...</h1>
     </div>
@@ -68,7 +63,9 @@ const LiveAttendance = () => {
                 <h2 className="text-base font-medium">Activity start {attendance?.startTimestamp?formatDistanceToNow(attendance?.startTimestamp?.toDate(), { addSuffix: true}):""}</h2>
             </div>
             <div className="w-48 text-right">
-                <Time/>
+                <div className="font-mono text-2xl">
+                    {format(now, 'hh:mm:ss a')}
+                </div>
             </div>
         </div>
         <div className="flex flex-row w-full justify-evenly space-x-4 h-full overflow-hidden">
@@ -78,7 +75,7 @@ const LiveAttendance = () => {
                     {sortedRec.map(s => <MatrixDot key={s.id} studentid={s.id} englishName={s.englishName} chineseName={s.chineseName} attendance={recStud[s.id] || null}/>)}
                 </div>
             </div>
-            <div className="space-y-1 overflow-y-auto">
+            <div className="space-y-1 overflow-y-auto min-w-[300px]">
                 <h3 className='font-semibold text-xl'>Absentees</h3>
                 <div className="flex flex-col">
                     {absentees.map(({studentid, englishName, chineseName, class: className}) => <p><span className="font-mono">{studentid}</span> {chineseName} {className}</p>)}
