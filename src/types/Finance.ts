@@ -14,6 +14,8 @@ export type Transaction = {
     toAccount: string,
     remarks?: string;
     registeredBy: ShortStudentInfo;
+    balanceBefore?: number;
+    balanceAfter?: number;
     metadata?: {
         [x: string]: any;
     }

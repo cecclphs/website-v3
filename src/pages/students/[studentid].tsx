@@ -4,15 +4,35 @@ import {useAuth} from '../../hooks/useAuth';
 import FullUserProfile from '../../components/FullUserProfile';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useRouter } from 'next/router';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db, docConverter } from '../../config/firebase';
-import { Button } from '@mui/material';
+import { Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
 import UserToken from '../../types/UserToken';
 import StudentDetails from '../../types/StudentDetails';
+import { useEffect, useState } from 'react';
 const StudentProfile = () => {
     const { userToken } = useAuth();
     const router = useRouter();
     const [studentDetails, loading, error] = useDocumentData<StudentDetails>(doc(db, 'students/' + router.query.studentid).withConverter(docConverter));
+    const [studentPerm, setStudentPerm] = useState<UserToken>({
+        studentid: '',
+        englishName: '',
+        chineseName: '',
+        isAdmin: false,
+        isCommittee: false,
+        isStudent: false,
+    });
+    const noAccounts = !studentDetails?.linkedAccounts || studentDetails?.linkedAccounts.length === 0 || !studentPerm;
+    useEffect(() => {
+        (async () => {
+            if (!loading && studentDetails.linkedAccounts?.length > 0) {;
+                const firstAcc = studentDetails.linkedAccounts[0];
+                return onSnapshot(doc(db, 'user_claims', firstAcc), (snapshot) => {
+                    setStudentPerm(snapshot.data() as UserToken);
+                });
+            }
+        })();
+    },[studentDetails, loading, router.query.studentid])
 
     const setPerm = (perm: keyof Omit<UserToken, 'englishName' | 'chineseName' | 'studentid'>, enabled: boolean) => {
         if(!studentDetails.linkedAccounts) return;
@@ -23,13 +43,35 @@ const StudentProfile = () => {
         })
     }
 
+    const setStatus = (status: StudentDetails['status']) => {
+        updateDoc(doc(db, `students/${router.query.studentid}`), {
+            status
+        })
+    }
+
     return <MemberLayout>
-        <Page title={`${studentDetails?.englishName}'s Profile`}>
-            <div className='flex flex-row space-x-2'>
-                <Button onClick={() => setPerm('isAdmin', true)}>Make Admin</Button>
-                <Button onClick={() => setPerm('isAdmin', false)}>Remove Admin</Button>
-                <Button onClick={() => setPerm('isCommittee', true)}>Make Comittee</Button>
-                <Button onClick={() => setPerm('isCommittee', false)}>Remove Comittee</Button>
+        <Page title={`${studentDetails?.englishName || "Member"}'s Profile`}>
+            <div className="flex flex-row overflow-hidden">
+                {noAccounts?<div className='flex flex-col'>
+                    <h3 className="font-semibold text-lg">User has no accounts linked</h3>
+                </div>:<div className='flex flex-col'>
+                    <h3 className="font-semibold text-lg">User Permissions</h3>
+                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)}/>} label="Admin Priviliges" />
+                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)}/>} label="Committee Priviliges" />
+                </div>}
+                <FormControl fullWidth size="small" margin='normal'>
+                    <InputLabel id="status-label">Enrollment Status</InputLabel>
+                    <Select
+                        labelId="status-label"
+                        label="Enrollment Status"
+                        value={studentDetails?.status || ""}
+                        size="small"
+                        onChange={e => setStatus(e.target.value as StudentDetails['status'])}>
+                        <MenuItem value="enrolled">Enrolled</MenuItem>
+                        <MenuItem value="graduated">Graduated</MenuItem> 
+                        <MenuItem value="transfered">Transfered</MenuItem>
+                    </Select>
+                </FormControl>
             </div>
             <FullUserProfile userDetails={studentDetails}/>
         </Page>

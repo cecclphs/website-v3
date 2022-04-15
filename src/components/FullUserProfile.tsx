@@ -27,8 +27,10 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
         englishName,
         chineseName,
         class: className,
+        status,
         studentid,
         gender,
+        enrollmentDate,
         identification,
         phone,
         facebookURL,
@@ -121,6 +123,8 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                     <DataRow title="Address" info={address!} />
                     <DataRow title="Birthday" info={birthday!} />
                     <DataRow title="Role" info={committeeRole!} />
+                    <DataRow title="Enrollment Date" info={enrollmentDate}/>
+                    <DataRow title="Enrollment Status" info={status} />
                 </tbody>
             </table>
             <h2 className="text-xl font-medium py-2 text-blue-800">Mother's Details</h2>
