@@ -12,6 +12,7 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             updatedOn,
             status,
             permission,
+            englishName,
             ...details
         } } = req.body
         const { email, uid } = req.token
@@ -23,7 +24,6 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             return res.status(409).json({status: 409, success: false, message: "Student already migrated"});
         //Fetch user existing data, if snapshot is empty, throw error
         const studentid = details.studentid
-        
         //update user photoURL
         await adminAuth.updateUser(uid, {
             photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`
@@ -31,15 +31,16 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         //Set Student Data
         await adminDb.doc(`students/${studentid}`).set({
             ...details,
+            englishName: englishName.toUpperCase(),
             migrated: true,
             linkedAccounts: admin.firestore.FieldValue.arrayUnion(uid),
             photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
-            status: "enrolled",
+            status: (studentid.substring(0, 2) <= "16")?"graduated":"enrolled",
             createdOn: admin.firestore.FieldValue.serverTimestamp(),
             modifiedOn: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true })
         await adminDb.doc(`user_claims/${uid}`).set({
-            englishName: details.englishName,
+            englishName: englishName.toUpperCase(),
             chineseName: details.chineseName,
             studentid: studentid,
             isStudent: true,
