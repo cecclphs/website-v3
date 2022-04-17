@@ -25,6 +25,7 @@ export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiRespo
         if(!req.token.attendance)  
             return res.status(403).json({status: 403, success: false, message: "You are not allowed to access this page"})
         const { cardId } = req.body as { cardId: number };
+        console.log('cardId', cardId)
         //get the cardId Record
         const cardRecordSnap = await adminRtdb.ref(`/cards/${cardId}`).once('value');
         if(!cardRecordSnap.exists()) 

@@ -31,6 +31,7 @@ const EditStudentProfile = ({ student, onClose }: { student: StudentDetails, onC
     }
 
     const editable = userToken.isAdmin
+    const fillall = !userToken.isAdmin
 
     return <>
         <DialogContent>
@@ -39,23 +40,24 @@ const EditStudentProfile = ({ student, onClose }: { student: StudentDetails, onC
                 {/* @ts-ignore */}
                 {editable && <DataRowInput {...register("englishName", { required: true })} title="English Name"/>}
                 {editable && <DataRowInput {...register("chineseName", { required: true })} title="Chinese Name"/>}
-                {editable && <DataRowInput {...register("studentid", { required: true })} title="Student ID"/>}
-                <DataRowInput {...register("identification", { required: true })} title="Identification Card/Passport"/>
-                <DataRowInput {...register("phone", { required: true })} title="Phone"/>
-                <DataRowInput {...register("facebookURL", { required: true })} title="Facebook URL"/>
-                <DataRowInput {...register("email", { required: true })} title="Active Email"/>
-                <DataRowInput {...register("address", { required: true })} title="Address"/>
-                <DataRowInput {...register("birthday", { required: true })} title="Birthday"/>
-                <DataRowInput {...register("class", { required: true })} title="Class"/>
+                {editable && <DataRowInput {...register("gender", { required: true })} title="Gender (Male or Female)"/>}
+                {editable && <DataRowInput {...register("enrollmentDate", { required: true })} title="Enrollment Date (yyyy-mm-dd)"/>}
+                <DataRowInput {...register("class", { required: fillall })} title="Class"/>
+                <DataRowInput {...register("identification", { required: fillall })} title="Identification Card/Passport"/>
+                <DataRowInput {...register("phone", { required: fillall })} title="Phone"/>
+                <DataRowInput {...register("facebookURL", { required: fillall })} title="Facebook URL"/>
+                <DataRowInput {...register("email", { required: fillall })} title="Active Email"/>
+                <DataRowInput {...register("address", { required: fillall })} title="Address"/>
+                <DataRowInput {...register("birthday", { required: fillall })} title="Birthday"/>
                 <h2 className="text-xl font-medium py-2 text-blue-800">Mother's Details</h2>
-                <DataRowInput {...register("motherName", { required: true })} title="Mother's Name"/>
-                <DataRowInput {...register("motherPhone", { required: true })} title="Mother's Phone"/>
+                <DataRowInput {...register("motherName", { required: fillall })} title="Mother's Name"/>
+                <DataRowInput {...register("motherPhone", { required: fillall })} title="Mother's Phone"/>
                 <h2 className="text-xl font-medium py-2 text-blue-800">Father's Details</h2>
-                <DataRowInput {...register("fatherName", { required: true })} title="Father's Name"/>
-                <DataRowInput {...register("fatherPhone", { required: true })} title="Father's Phone"/>
+                <DataRowInput {...register("fatherName", { required: fillall })} title="Father's Name"/>
+                <DataRowInput {...register("fatherPhone", { required: fillall })} title="Father's Phone"/>
                 <h2 className="text-xl font-medium py-2 text-blue-800">Emergency Details</h2>
-                <DataRowInput {...register("emergencyphone", { required: true })} title="Emergency Phone"/>
-                <DataRowInput {...register("emergencyrelation", { required: true })} title="Emergency Contact Relation (Parent/Guardian)"/>
+                <DataRowInput {...register("emergencyphone", { required: fillall })} title="Emergency Phone"/>
+                <DataRowInput {...register("emergencyrelation", { required: fillall })} title="Emergency Contact Relation (Parent/Guardian)"/>
                 <DataRowInput {...register("specials")} title="Specials"/>
             </form>
         </DialogContent>
