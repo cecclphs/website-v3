@@ -13,7 +13,8 @@ const MatrixDot = ({studentid, englishName, chineseName, attendance = null}: {st
     const color = {
         '1': 'bg-green-600/80',
         '0': 'bg-red-500',
-        null: 'bg-gray-300'
+        '迟': 'bg-yellow-400',
+        null: 'bg-gray-300',
     }
     return <Tooltip title={`${studentid} ${chineseName} ${englishName}`}>
         <div className={`w-6 h-6 ${color[attendance]}`}></div>

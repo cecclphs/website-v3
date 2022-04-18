@@ -43,32 +43,31 @@ const RFIDAttend = () => {
     }
     
     return <div className="h-screen w-screen grid place-items-center">
-        <form className="p-4 rounded-lg border border-solid border-gray-400 min-w-[400px]" onSubmit={handleSubmit}>
-            <h1 className="font-bold text-xl">Scan to Attend</h1>
-            {result?.success ? <div className="flex flex-row">
+        <div className="flex flex-col space-y-2 p-2">
+            {result?.success ? <div className={`p-4 rounded-lg flex flex-row ${result.data.isLate?'bg-orange-100':'bg-green-100'} items-center justify-between`}>
                 {/* <StudentImage studentid={result.data.studentid}/> */}
-                <div className={`${result.data.isLate?'bg-orange-300':''}`}>
-                    <h2 className="text-lg font-semibold">{result.data.chineseName} {result.data.englishName} {result.data.studentid}</h2>
-                    <p className="text-green-500 font-semibold">Success!</p>
+                <div>
+                    <h2 className="text-xl font-semibold">{result.data.chineseName} {result.data.englishName} {result.data.studentid}</h2>
                     <p>Attending {result.data.recordName}</p>
-                    <p>Going {result.data.direction}</p>
                     <p>{result.data.isLate? "Late": "On Time"}</p>
                 </div>
-                <KeyboardArrowLeftRounded className={`h-24 w-24 ${result.data.direction == 'in'?"":"rotate-180"}`}/>
-            </div>: <>
+                <h2 className="capitalize text-4xl p-2">{result.data.direction}</h2>
+            </div>: (result.message && <div className="p-4 rounded-lg bg-red-100">
                 <p>{result?.message}</p>
-            </>}
-            <TextField
-                autoFocus
-                label="RFID number"
-                variant="standard"
-                size="small"
-                fullWidth
-                margin="normal"
-                value={cardId}
-                onChange={(e) => setCardId(e.target.value)}
-            />
-        </form>
+            </div>)}
+            <form className="p-4 rounded-lg border border-solid border-gray-400 min-w-[400px]" onSubmit={handleSubmit}>
+                <h1 className="font-bold text-sm">Scan to Attend</h1>
+                <TextField
+                    autoFocus
+                    label="RFID number"
+                    variant="standard"
+                    size="small"
+                    fullWidth
+                    value={cardId}
+                    onChange={(e) => setCardId(e.target.value)}
+                />
+            </form>
+        </div>
     </div>
 }
 
