@@ -1,4 +1,5 @@
 import { Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { collection, DocumentReference, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useCollectionData } from "react-firebase-hooks/firestore";
@@ -9,17 +10,6 @@ import { db, docConverter } from "../../config/firebase";
 import { useDialog } from "../../hooks/useDialog";
 import StudentDetails from "../../types/StudentDetails";
 
-const StudentData = ({ student }: {student: StudentDetails}) => {
-    const router = useRouter()
-    return <tr className="text-center transition hover:bg-gray-100" onClick={() => router.push('/students/'+ student.studentid)}>
-        <td className="p-1">{student.studentid}</td>
-        <td className="p-1">{student.chineseName}</td>
-        <td className="p-1 text-left">{student.englishName}</td>
-        <td className="p-1 text-left">{student.phone}</td>
-        <td className="p-1 text-left">{student.emergencyphone}</td>
-        <td className="p-1">{student.linkedAccounts?.length || 0}</td>
-    </tr>
-}
 
 const Students = () => {
     const [students = [], loading, error] = useCollectionData<StudentDetails>(query(collection(db, 'students').withConverter(docConverter), where('status', '==', 'enrolled')));
@@ -31,23 +21,100 @@ const Students = () => {
         })
     }
 
+    const columns: GridColDef[] = [
+        { field: 'studentid', headerName: 'ID', width: 70 },
+        {
+            field: 'chineseName',
+            headerName: '名字',
+            width: 80,
+        },
+        {
+            field: 'englishName',
+            headerName: 'Name',
+            width: 150,
+        },
+        {
+            field: 'class',
+            headerName: 'Class',
+            width: 80,
+        },
+        {
+            field: 'gender',
+            headerName: 'Gender',
+            width: 80
+        },
+        {
+            field: 'enrollmentDate',
+            headerName: 'Enrolled',
+            width: 110
+        },
+        { field: 'phone', headerName: 'Phone' },
+        { field: 'emergencyphone', headerName: 'Emergency Phone' },
+        { field: 'identification', headerName: 'Identification' },
+        { field: 'email', headerName: 'Email' },
+        { field: 'address', headerName: 'Address' },
+        { field: 'birthday', headerName: 'Birthday' },
+        { field: 'motherName', headerName: 'Mother Name' },
+        { field: 'motherPhone', headerName: 'Mother Phone' },
+        { field: 'fatherName', headerName: 'Father Name' },
+        { field: 'fatherPhone', headerName: 'Father Phone' },
+        { field: 'emergencyrelation', headerName: 'Emergency Relation' },
+        { field: 'specials', headerName: 'Specials' },
+        { field: 'committeeRole', headerName: 'Committee Role' },
+        { field: 'linkedAccounts', headerName: 'Accounts', valueGetter: (params) => params.row.linkedAccounts.length },
+        { field: 'photoURL', headerName: 'Photo', valueGetter: (params) => params.row.photoURL ? <img src={params.row.photoURL} className="w-8 h-8 rounded-full" /> : null },
+        { field: 'status', headerName: 'Status' },
+      ];
+      
+
     return <MemberLayout>
         <Page title="Students">
             <Button onClick={handleCreateStudent}>Add Student</Button>
             <table className="w-full table-auto">
-                <thead>
-                    <tr>
-                        <th>Student ID</th>
-                        <th>名字</th>
-                        <th className="text-left">Name</th>
-                        <th className="text-left">Phone</th>
-                        <th className="text-left">Emergency Contact</th>
-                        <th>Accounts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {students.map(student => <StudentData key={student.id} student={student}/>)}
-                </tbody>
+            <DataGrid
+                loading={loading}
+                autoHeight
+                rows={students}
+                columns={columns}
+                checkboxSelection
+                disableSelectionOnClick
+                getRowId={(row) => row.studentid}
+                density="compact"
+                components={{
+                    Toolbar: GridToolbar
+                }}
+                initialState={{
+                    columns: {
+                      columnVisibilityModel: {
+                        englishName: true,
+                        chineseName: true,
+                        gender: true,
+                        studentid: true,
+                        identification: false,
+                        phone: true,
+                        facebookURL: false,
+                        email: false,
+                        address: false,
+                        birthday: false,
+                        class: true,
+                        motherName: false,
+                        motherPhone: false,
+                        fatherName: false,
+                        fatherPhone: false,
+                        emergencyphone: true,
+                        emergencyrelation: false,
+                        specials: false,
+                        committeeRole: false,
+                        enrollmentDate: true,
+                        linkedAccounts: true,
+                        photoURL: false,
+                        status: false,
+                      },
+                    },
+                  }}
+                
+                />
+
             </table>
         </Page>
     </MemberLayout>

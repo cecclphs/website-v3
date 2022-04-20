@@ -248,9 +248,9 @@ const ViewAttendance = () => {
             <Button onClick={handleAddDialog}>New Record</Button>
             <DataGrid
                 autoHeight
+                loading={studentsLoad || recordsLoad}
                 rows={data}
                 columns={columns}
-                checkboxSelection
                 disableSelectionOnClick
                 getRowId={(row) => row.studentid}
                 experimentalFeatures={{ newEditingApi: true }} 
