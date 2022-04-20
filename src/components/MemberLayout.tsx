@@ -31,7 +31,7 @@ const LinkItem = ({ href, label, children, Icon, permission = ['isStudent'] }: L
                 <Icon className="w-5 h-5 text-sm sm:text-base"/> <span>{label}</span>
             </div>
             <Collapse in={extended}>
-                <div className="flex flex-col pl-4">
+                <div className="flex flex-col sm:pl-4">
                     {children.map((props) => <LinkItem key={props.href} {...props}/>)}
                 </div>
             </Collapse>
@@ -62,11 +62,11 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone},
     ]
 
-    return <div className="min-h-screen w-screen pb-12 sm:pb-0 sm:grid grid-cols-[13rem_1fr] gap-1 max-w-[84rem] sm:px-4 divide-x divide-solid divide-gray-200">
+    return <div className="min-h-screen w-screen pb-12 sm:pb-0 sm:grid grid-cols-[14rem_1fr] gap-1 max-w-[84rem] sm:px-4">
         <Head>
             <title>Member</title>
         </Head>
-        <aside className="flex flex-col w-screen fixed sm:w-auto sm:max-h-screen sm:pt-8 sm:sticky bottom-0 top-auto sm:top-0 sm:bottom-auto">
+        <aside className="flex flex-col w-screen fixed sm:w-auto sm:max-h-screen sm:pt-8 sm:sticky bottom-0 top-auto sm:top-0 sm:bottom-auto print:hidden shadow-lg z-50 sm:px-4">
             <header className="flex-row justify-between items-center sm:flex hidden">
                 <CECLogo className="h-10 py-2"/>
                 <div className="flex flex-row space-x-2 items-center">
@@ -81,7 +81,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
                 </div>
             </header>
             <h1 className="text-2xl font-semibold sm:block hidden">Creative Electronics Club</h1>
-            <div className="flex sm:flex-col flex-row space-x-1 sm:space-x-0 w-48 sm:space-y-1 py-3">
+            <div className="flex sm:flex-col flex-row space-x-1 sm:space-x-0 w-screen sm:w-48 sm:space-y-1 sm:py-3 bg-white/80 backdrop-blur overflow-hidden">
                 {links.map((props) => <LinkItem key={props.href} {...props}/>)}
             </div>
         </aside>
