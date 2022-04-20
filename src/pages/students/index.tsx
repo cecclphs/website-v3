@@ -14,7 +14,7 @@ import StudentDetails from "../../types/StudentDetails";
 const Students = () => {
     const [students = [], loading, error] = useCollectionData<StudentDetails>(query(collection(db, 'students').withConverter(docConverter), where('status', '==', 'enrolled')));
     const [openDialog, closeDialog] = useDialog();
-
+    const router = useRouter();
     const handleCreateStudent = () => {
         openDialog({
             children: <AddStudentProfile onClose={closeDialog}/>
@@ -64,6 +64,17 @@ const Students = () => {
         { field: 'linkedAccounts', headerName: 'Accounts', valueGetter: (params) => params.row.linkedAccounts.length },
         { field: 'photoURL', headerName: 'Photo', valueGetter: (params) => params.row.photoURL ? <img src={params.row.photoURL} className="w-8 h-8 rounded-full" /> : null },
         { field: 'status', headerName: 'Status' },
+        { field: 'actions', headerName: "", renderCell: (params) => (
+            <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                    router.push(`/students/${params.row.studentid}`)
+                }}
+            >
+                Open
+            </Button>
+        )}
       ];
       
 
