@@ -1,6 +1,6 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy } from "firebase/firestore";
 import { db, docConverter } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import { forwardRef, useMemo } from "react";
@@ -159,7 +159,7 @@ const ViewAttendance = () => {
     const { user } = useAuth()
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
     // const { error, data: students = []} = useAPIFetch<StudentDetails[]>('students',{}, user)
-    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter)));
+    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','asc')));
     const [openDialog, closeDialog] = useDialog();
     
     const handleAddDialog = () => {
