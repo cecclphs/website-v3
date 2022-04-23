@@ -13,7 +13,11 @@ const MatrixDot = ({studentid, englishName, chineseName, attendance = null}: {st
     const color = {
         '1': 'bg-green-600/80',
         '0': 'bg-red-500',
-        '迟': 'bg-yellow-400',
+        '迟': 'bg-yellow-300',
+        '病': 'bg-rose-300',
+        '特': 'bg-blue-300',
+        '事': 'bg-purple-300',
+        '公': 'bg-indigo-300',
         null: 'bg-gray-300',
     }
     return <Tooltip title={`${studentid} ${chineseName} ${englishName}`}>
@@ -27,7 +31,7 @@ const LiveAttendance = () => {
     const [attendance, loading, error] = useDocumentData<AttendanceRecord>(recordId && doc(db, `attendanceRecords/${recordId}`).withConverter(docConverter));
     const { students: recStud, recordName } = attendance || { };
 
-    const attendsort = ['1','迟','特','事','公','0', null]
+    const attendsort = ['1','迟','病','特','事','公','0', null]
     const sortedRec = useMemo(() => {
         if(!loading && !studentsLoad && recStud) 
         return students.slice().sort((a,b) => {

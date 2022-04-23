@@ -1,20 +1,26 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, DocumentReference, query, Timestamp, updateDoc, where, deleteDoc, doc } from "firebase/firestore";
+import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc } from "firebase/firestore";
 import { db, docConverter } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import React, { forwardRef, useMemo, useRef } from "react";
+import { forwardRef, useMemo } from "react";
 import StudentDetails from "../../types/StudentDetails";
-import { ShortStudentInfo } from "../../types/User";
-import { DataGrid, GridColDef, GridRenderEditCellParams, useGridApiContext, GridRenderCellParams, GridColumnMenuProps, GridColumnMenuContainer, SortGridMenuItems, GridFilterMenuItem, HideGridColMenuItem, GridColumnsMenuItem } from '@mui/x-data-grid';
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import useAPIFetch from "../../hooks/useAPIFetch";
+import {
+    DataGrid,
+    GridColDef,
+    GridColumnMenuProps,
+    GridColumnMenuContainer,
+    SortGridMenuItems,
+    GridFilterMenuItem,
+    HideGridColMenuItem,
+    GridColumnsMenuItem,
+    GridToolbar,
+} from '@mui/x-data-grid';
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, MenuItem } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
-import { update } from "firebase/database";
 import { AttendanceRecord } from "../../types/Attendance";
 import { useDialog } from "../../hooks/useDialog";
 import FormTextField from "../../components/form-components/FormTextField";
-import FormDatePicker from "../../components/form-components/FormDatePicker";
 import FormSelect from "../../components/form-components/FormSelect";
 import { useForm } from "react-hook-form";
 import FormDateTimePicker from "../../components/form-components/FormDateTimePicker";
@@ -44,7 +50,7 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
             recordType: data.recordType,
             startTimestamp: Timestamp.fromDate(data.startTimestamp),
             endTimestamp: Timestamp.fromDate(data.endTimestamp),
-            ...data.notes?{ notes: data.notes }:{},
+            ...(data.notes ? { notes: data.notes } : {}),
             metadata: {
                 createdOn: Timestamp.now(),
                 createdBy: {
@@ -147,7 +153,7 @@ const GridColumnMenu = forwardRef<
         </GridColumnMenuContainer>
     );
 });
-  
+
 
 const ViewAttendance = () => {
     const { user } = useAuth()
@@ -206,14 +212,7 @@ const ViewAttendance = () => {
                 description: id,
                 editable: true,
                 type: 'singleSelect',
-                valueOptions: [
-                    {value: '1',label: '1'},
-                    {value: '0', label: '0'},
-                    {value: '迟', label: '迟'},
-                    {value: '特', label: '特'},
-                    {value: '事', label: '事'},
-                    {value: '公', label: '公'},
-                ]
+                valueOptions: ['1','0','迟','特','事','公','病']
             })
             Object.keys(students).forEach(studentid => {
                 if(!combined[studentid]) return;
@@ -258,6 +257,7 @@ const ViewAttendance = () => {
                 density="compact"
                 components={{
                     ColumnMenu: GridColumnMenu,
+                    Toolbar: GridToolbar
                 }}
         
             />

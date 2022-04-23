@@ -4,9 +4,9 @@ import {useAuth} from '../../hooks/useAuth';
 import FullUserProfile from '../../components/FullUserProfile';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useRouter } from 'next/router';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db, docConverter } from '../../config/firebase';
-import { Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
+import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select } from '@mui/material';
 import UserToken from '../../types/UserToken';
 import StudentDetails from '../../types/StudentDetails';
 import { useEffect, useState } from 'react';
@@ -59,6 +59,7 @@ const StudentProfile = () => {
                     <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)}/>} label="Admin Priviliges" />
                     <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)}/>} label="Committee Priviliges" />
                 </div>}
+              
                 <FormControl fullWidth size="small" margin='normal'>
                     <InputLabel id="status-label">Enrollment Status</InputLabel>
                     <Select
