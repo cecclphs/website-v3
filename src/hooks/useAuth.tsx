@@ -8,18 +8,10 @@ import Merge from "../types/Merge";
 import StudentDetails from "../types/StudentDetails";
 import UserToken from "../types/UserToken";
 import { useLocalStorage } from "./useHooks";
+import { useAuthState } from 'react-firebase-hooks/auth';
+export type AuthHook = ReturnType<typeof useAuthProvider>;
 
-export type AuthHook= {
-    user: User | null;
-    userDetails: UserDetails | undefined;
-    userToken: UserToken | undefined;
-    getUserTokenResult: (refresh: boolean) => any;
-    appInstance: number;
-    signOut: () => Promise<void>;
-    initGoogleSignIn: () => Promise<void>;
-    refreshUserToken: () => Promise<void>;
-}
-const authContext = createContext<AuthHook>({ user: null, userDetails:undefined, userToken: undefined, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {}, refreshUserToken: async () => {} });
+const authContext = createContext<ReturnType<typeof useAuthProvider>>({ user: null, userDetails:undefined, userToken: undefined, getUserTokenResult: () => null, appInstance: 0, signOut: async () => {}, initGoogleSignIn: async () => {}, refreshUserToken: async () => {} });
 const { Provider } = authContext;
 
 /**
@@ -38,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactChild | React.
  * @returns authContext
  */
 export const useAuth = () => {
-    return useContext<AuthHook>(authContext);
+    return useContext<ReturnType<typeof useAuthProvider>>(authContext);
 };
 
 /**
@@ -46,9 +38,6 @@ export const useAuth = () => {
  * @returns { user, userDetails, signInWithEmailAndPassword, signOut, initGoogleSignIn }
  */
 
-//Use variable as userDetails might be immediately needed before react even renders
-//@ts-ignore
-let latestUserDetails: UserDetails = {}
 let appInstance = Date.now();
 
 type UserDetails = Merge<
@@ -59,8 +48,8 @@ type UserDetails = Merge<
     }
 >
 
-const useAuthProvider = (): AuthHook => {
-    const [user, setUser] = useState<User | null>(null); 
+const useAuthProvider = () => {
+    const [user, authing, authError] = useAuthState(auth); 
     const [userDetails, setUserDetails] = useState<UserDetails>();
     const [userToken, setUserToken] = useState<UserToken>();
     const [lastCommitted, setLastCommitted] = useLocalStorage<number>("lastCommited", 0);  //The last committed state of our user claims document, decides if token needs to update if outdated
@@ -95,21 +84,6 @@ const useAuthProvider = (): AuthHook => {
         return claims as unknown as UserToken
     };
 
-    /**
-     * Handles when onAuthStateChanged is called, and sets user into User State
-     * @param {firebase.auth.User} user 
-     */
-    const handleAuthStateChanged = (user: User | null) => {
-        if (user) {
-            setUser(user);
-            console.log('logged in as ', user.email);
-        }
-        else {
-            setUser(null);
-            router.push('/');
-        }
-    };
-
     const refreshUserToken = async () => {
         const userToken = await getUserTokenResult(true);
         setUserToken(userToken);
@@ -119,17 +93,19 @@ const useAuthProvider = (): AuthHook => {
      * Signs out the current user
      * @returns null
      */
-     const userSignOut = () => {
-        return signOut(auth).then(() => {
-            setUser(null);
-        });
+    const userSignOut = () => {
+        return signOut(auth)
     };
 
     //Attaches the onAuthStateChanged to listen for changes in authentication eg: login, signout etc.
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, handleAuthStateChanged);
-        return () => unsub();
-    }, []);
+        if (user) {
+            console.log('logged in as ', user.email);
+        }
+        else {
+            router.push('/');
+        }
+    }, [user]);
     
     //Attaches user claims documents to listen for changes in user permissions, if yes update token to ensure no permission errors
     useEffect(() => {
@@ -156,9 +132,9 @@ const useAuthProvider = (): AuthHook => {
         if (user?.uid) {
             // Subscribe to user document on mount
             const unsubscribe = onSnapshot(doc(db,'users',user.uid), async (doc) => {
-                latestUserDetails = doc.data() as UserDetails
-                if(!latestUserDetails?.migrated) router.push('/setup')
-                setUserDetails(latestUserDetails)
+                const userDetails = doc.data() as UserDetails
+                if(!userDetails?.migrated) router.push('/setup')
+                setUserDetails(userDetails)
             })
             var userStatusDatabaseRef = ref(rtdb,'/status/' + user.uid); 
             var isOfflineForDatabase = {
