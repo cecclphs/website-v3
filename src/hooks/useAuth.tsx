@@ -102,7 +102,7 @@ const useAuthProvider = () => {
         if (user) {
             console.log('logged in as ', user.email);
         }
-        else {
+        else if(user === null && authing === false) {
             router.push('/');
         }
     }, [user]);
