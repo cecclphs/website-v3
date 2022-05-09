@@ -13,5 +13,5 @@ export interface AttendanceRecord {
         createdOn?: Timestamp,
     }
     updatedOn: Timestamp
-    students: {[studentid: number]: '1'|'0'|'迟'|'特'|'事'|'公'}
+    students: {[studentid: string]: '1'|'0'|'迟'|'特'|'事'|'公'}
 }

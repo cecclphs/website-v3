@@ -1,9 +1,9 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy } from "firebase/firestore";
+import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
 import { db, docConverter } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { forwardRef, useMemo } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import StudentDetails from "../../types/StudentDetails";
 import {
     DataGrid,
@@ -25,6 +25,9 @@ import FormSelect from "../../components/form-components/FormSelect";
 import { useForm } from "react-hook-form";
 import FormDateTimePicker from "../../components/form-components/FormDateTimePicker";
 import { useRouter } from "next/router";
+import { format } from "date-fns";
+import CircularProgress from "@mui/material/CircularProgress";
+import { Link } from "@mui/icons-material";
 
 
 type RecordForm = {
@@ -114,6 +117,93 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
     </>
 }
 
+const generateUnnoticedAttdFormLink = async (recordId: string) => {
+    const students = (await getDocs<StudentDetails>(query(collection(db, 'students').withConverter(docConverter), where('status', '==', 'enrolled')))).docs.map(s => s.data());
+    const record = (await getDoc<AttendanceRecord>(doc(collection(db, 'attendanceRecords').withConverter(docConverter), recordId))).data();
+    const formlink = 'https://docs.google.com/forms/d/e/1FAIpQLSfvrxT_L-O-bHqPDPEqHaOhu4r-KaZExGZt4W2VJD_dDBUhJQ/viewform';
+    const fields = {
+        CLUB_FIELD: 988307389,
+        SHEET_NUM: 361099120,
+        ABSENT_AMT: 1252643529,
+        ACTIVITY_DATE: 1084221149,
+        STUD_1: 195803756,
+        STUD_2: 264239247,
+        STUD_3: 1146057617,
+        STUD_4: 1655739229,
+        STUD_5: 600378517,
+        STUD_6: 962010138,
+        STUD_7: 1857496131,
+        STUD_8: 677090371,
+        STUD_9: 1803847990,
+        STUD_10: 33257580,
+        RECORDER: 863357130
+    }
+    //filter out students who are in the record and is not == 0
+    const absentees = students.filter(s => {
+        const attendance = record.students[s.studentid]
+        return !attendance || attendance == "0"
+    });
+    //split absentees into arrays of 10
+    const groupArray = absentees.reduce<StudentDetails[][]>((acc, curr, i) => {
+        if (i % 10 === 0) {
+            acc.push([curr]);
+        }
+        else {
+            acc[acc.length - 1].push(curr);
+        }
+        return acc;
+    }, []);
+
+    //create a form link for each group
+    const formLinks = groupArray.map((group, index) => {
+        let uri = `entry.${fields.CLUB_FIELD}=电子创意学会&entry.${fields.SHEET_NUM}=${index + 1}&entry.${fields.ABSENT_AMT}=${absentees.length}&entry.${fields.ACTIVITY_DATE}=${format(record.startTimestamp.toDate(), 'yyyy-MM-dd')}`;
+        // formLink += ``;
+        group.forEach((student, index) => {
+            //学号 名字 班级
+            uri += `&entry.${fields[`STUD_${index+1}`]}=${student.studentid} ${student.chineseName} ${student.class}`;
+        });
+        uri += `&entry.${fields.RECORDER}=秘书，黄宇恩`;
+        
+        return `${formlink}?${encodeURI(uri)}`;
+    })
+
+    return formLinks;
+}
+
+const FormLinksDialog = ({ onClose, recordId }: { onClose: () => void, recordId: string }) => {
+    const [formLinks, setFormLinks] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            const links = await generateUnnoticedAttdFormLink(recordId);
+            setFormLinks(links);
+            setLoading(false);
+        })();
+    }, [recordId]);
+
+    return <>
+        <DialogTitle>
+            Form Links
+        </DialogTitle>
+        <DialogContent>
+            <div className="space-y-2 py-2">
+                {loading ? <div className="flex flex-col items-center justify-center">
+                    <CircularProgress />
+                </div> : <div className="flex flex-col space-y-2">
+                    {formLinks.map((link, index) => <a className="text-blue-800 " href={link} target="_blank" rel="noopener noreferrer">
+                        <Link className="w-5 h-5"/>
+                        Form {index+1}
+                    </a>)}
+                </div>}
+            </div>
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Close</Button>
+        </DialogActions>
+    </>
+}
+
 const GridColumnMenu = forwardRef<
   HTMLUListElement,
   GridColumnMenuProps
@@ -137,6 +227,12 @@ const GridColumnMenu = forwardRef<
         })
     }
 
+    const openLinks = () => {
+        openDialog({
+            children: <FormLinksDialog recordId={currentColumn.description} onClose={closeDialog}/>
+        })
+    }
+
     return (
         <GridColumnMenuContainer ref={ref} {...props}>
             <SortGridMenuItems onClick={hideMenu} column={currentColumn!} />
@@ -147,6 +243,7 @@ const GridColumnMenu = forwardRef<
             <Divider/>
             <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/callout`)}>Callout</MenuItem>
             <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/liveview`)}>Live View</MenuItem>
+            <MenuItem onClick={openLinks}>Generate Form</MenuItem>
             <MenuItem onClick={confirmDelete} color="error">Delete</MenuItem>
             {/* <MenuItem>Edit</MenuItem> */}
             </>}
