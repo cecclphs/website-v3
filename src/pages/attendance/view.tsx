@@ -162,7 +162,7 @@ const generateUnnoticedAttdFormLink = async (recordId: string) => {
             //学号 名字 班级
             uri += `&entry.${fields[`STUD_${index+1}`]}=${student.studentid} ${student.chineseName} ${student.class}`;
         });
-        uri += `&entry.${fields.RECORDER}=秘书，黄宇恩`;
+        uri += `&entry.${fields.RECORDER}=秘书，郭哲谦`;
         
         return `${formlink}?${encodeURI(uri)}`;
     })
