@@ -11,6 +11,7 @@ exports.transactionAdded = functions
     if (change.after.exists && after && !before) {
       const accountId = after.account
       try {
+        const cecRef = db.doc(`finance/CEC`);
         const accountRef = db.doc(`finance/CEC/accounts/${accountId}`);
         const transactionRef = change.after.ref;
         await db.runTransaction(async (transaction) => {
@@ -21,6 +22,10 @@ exports.transactionAdded = functions
           const account = accountDoc.data();
           if(after.type === "income") {
             console.log(`income transaction added, updating account balance to ${accountId} with amount ${after.amount}`);
+            const cecDoc = await transaction.get(cecRef);
+            transaction.update(cecRef, {
+              balance: addNumbersFixed(cecDoc.data().balance, after.amount)
+            });
             transaction.update(transactionRef, {
               status: "successful",
               balanceBefore: account.balance,
@@ -33,6 +38,10 @@ exports.transactionAdded = functions
           }
           else if(after.type === "expense") {
             console.log(`expense transaction added, updating account balance to ${accountId} with amount ${after.amount}`);
+            const cecDoc = await transaction.get(cecRef);
+            transaction.update(cecRef, {
+              balance: addNumbersFixed(cecDoc.data().balance, -after.amount)
+            });
             transaction.update(transactionRef, {
               status: "successful",
               balanceBefore: account.balance,
