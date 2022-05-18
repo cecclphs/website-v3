@@ -106,6 +106,17 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
                 <h4 className="text-sm font-semibold">Details</h4>
                 <FormTextField
                     control={control}
+                    rules={{
+                        transformValue: (value) => parseFloat(value),
+                    }}
+                    name="metadata.price"
+                    type="number"
+                    size="small"
+                    label="Price"
+                    margin="dense"
+                    variant="outlined" />
+                <FormTextField
+                    control={control}
                     name="metadata.serialNumber"
                     size="small"
                     label="Serial Number"
@@ -123,14 +134,6 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
                     name="metadata.brand"
                     size="small"
                     label="Brand"
-                    margin="dense"
-                    variant="outlined" />
-                <FormTextField
-                    control={control}
-                    name="metadata.price"
-                    type="number"
-                    size="small"
-                    label="Price"
                     margin="dense"
                     variant="outlined" />
             </div>

@@ -29,7 +29,7 @@ const RFIDAttend = () => {
         const res = await fetch('/api/terminal/log_attendance', {
             method: 'POST',
             headers: {
-                authorization: 'Bearer ccf9d105-ac59-44a7-89e7-76903a0de0b5',
+                authorization: 'Bearer ' + process.env.NEXT_PUBLIC_TERMINAL_TOKEN,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ cardId: parseInt(cardId) })

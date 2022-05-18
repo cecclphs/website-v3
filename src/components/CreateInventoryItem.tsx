@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import FormTextField from "./form-components/FormTextField";
 import { useAlgolia } from "use-algolia";
 import { Autocomplete, Button, CircularProgress, MenuItem, TextField } from "@mui/material";
@@ -195,6 +195,17 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                 <h4 className="text-sm font-semibold">Details</h4>
                 <FormTextField
                     control={control}
+                    rules={{
+                        transformValue: (value) => parseFloat(value),
+                    }}
+                    name="metadata.price"
+                    type="number"
+                    size="small"
+                    label="Price (per unit)"
+                    margin="dense"
+                    variant="outlined" />
+                <FormTextField
+                    control={control}
                     name="metadata.serialNumber"
                     size="small"
                     label="Serial Number"
@@ -212,14 +223,6 @@ const CreateInventoryItem = ({ parent = null }: { parent?: string | null}) => {
                     name="metadata.brand"
                     size="small"
                     label="Brand"
-                    margin="dense"
-                    variant="outlined" />
-                <FormTextField
-                    control={control}
-                    name="metadata.price"
-                    type="number"
-                    size="small"
-                    label="Price"
                     margin="dense"
                     variant="outlined" />
             </div>

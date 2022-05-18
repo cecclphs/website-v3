@@ -13,6 +13,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   const theme = createTheme({
     typography:{  
       fontFamily: "'Inter', sans-serif",
+    },
+    palette: {
+      primary: {
+        //main should be dark navy blue
+        main: '#004080',
+      }
     }
   })
   return <LocalizationProvider dateAdapter={AdapterDateFns}>

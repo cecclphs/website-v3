@@ -52,7 +52,7 @@ const Links = () => {
                 <div key={id} className='flex flex-row space-x-3 items-center py-2 px-1'>
                     <h2 className='text-xl font-semibold'>{id}</h2>
                     <p className='text-sm flex-1'>{url}</p>
-                    <IconButton onClick={() => deleteDoc(doc(db, 'links', 'id'))}>
+                    <IconButton onClick={() => deleteDoc(doc(db, 'links', id))}>
                         <DeleteTwoTone/>
                     </IconButton>
                 </div>

@@ -86,6 +86,7 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
     return <div className="flex flex-col w-[400px]">
         <div className="space-y-1 py-1">
             <h1 className="text-3xl font-bold text-gray-800">{description} {type == 'item' ? `×${quantity || 1}` : ""}</h1>
+            <p className="text-xs text-gray-400">{id}</p>
             <p className="text-sm">{simpleId}</p>
             <p className="text-sm">Type: {type}</p>
             <p className="text-sm">Status: {status}</p>

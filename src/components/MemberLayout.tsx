@@ -1,5 +1,5 @@
 import React, { Component, FC, PropsWithChildren, PropsWithoutRef, ReactChildren, ReactElement, useState } from 'react';
-import { AccountCircle, AdminPanelSettingsRounded, AppRegistrationTwoTone, AppShortcutTwoTone, AppsTwoTone, ClassRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
+import { AccountCircle, AdminPanelSettingsRounded, AppRegistrationTwoTone, AppShortcutTwoTone, AppsTwoTone, CardMembershipRounded, ClassRounded, DesignServicesTwoTone, Home, LinkRounded, LogoutRounded, PrecisionManufacturingTwoTone } from "@mui/icons-material";
 import Head from "next/head";
 import SlideTransition from "./SlideTransition/SlideTransition";
 import Link from 'next/link';
@@ -55,6 +55,7 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
         { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
             { href: "/admin/fabrication", label: "Fabrication", Icon: DesignServicesTwoTone },
+            { href: "/admin/cards", label: "Cards", Icon: CardMembershipRounded },
         ], Icon: AdminPanelSettingsRounded },
         { href: "/students", label: "Students", permission: ['isAdmin'], Icon: ClassRounded },
         { href: "/attendance/view", permission: ['isAdmin'], label: "Attendance", Icon: AppsTwoTone},

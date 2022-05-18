@@ -25,7 +25,8 @@ export default interface InventoryItem {
             financeRef?: string,
         },
         notes?: string,
-        borrowedBy?: ShortStudentInfo
+        borrowedBy?: ShortStudentInfo,
+        image?: string,
     }
     registeredBy: ShortStudentInfo
     dateRegistered: Timestamp,
