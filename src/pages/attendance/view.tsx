@@ -75,14 +75,12 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
             <div className="space-y-2 py-2">
                 <div className="flex flex-row space-x-2">
                     <FormTextField
-                        fullwidth
                         control={control}
                         rules={{required: true}}
                         name="recordName"
                         label="Record Name"
                         />
                     <FormSelect
-                        fullwidth
                         sx={{minWidth: '100px'}}
                         control={control}
                         rules={{required: true}}
