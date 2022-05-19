@@ -7,6 +7,7 @@ import { SnackbarProvider } from 'notistack';
 import '../styles/globals.css'
 import { LocalizationProvider } from '@mui/lab'
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import SuperJSON from 'superjson';
 
 function MyApp({ Component, pageProps }: AppProps) {
 

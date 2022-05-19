@@ -11,8 +11,9 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import preloadImage from '../../../utils/preloadImage';
 import { AttendanceRecord } from '../../../types/Attendance';
 import useToggle from '../../../hooks/useToggle';
+import { NextPage } from 'next';
 
-const AttendanceCallout = () => {
+const AttendanceCallout: NextPage = () => {
     const { user } = useAuth()
     const router = useRouter();
     const { recordId } = router.query;

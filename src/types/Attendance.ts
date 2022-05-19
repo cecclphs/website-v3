@@ -1,9 +1,16 @@
 import {DocumentReference, Timestamp} from 'firebase/firestore';
 import {ShortStudentInfo} from './User';
+import { CardRecord } from './Cards';
 
 export type AttendanceValue = '1'|'0'|'迟'|'特'|'事'|'公'
 
-export interface AttendanceRecord {
+export type CardScannedRecord = {
+    scannedOn: Timestamp,
+    studentid: string,
+    type: 'in' | 'out',
+} & CardRecord
+
+export type AttendanceRecord = {
     id: string,
     ref: DocumentReference,
     recordName: string,

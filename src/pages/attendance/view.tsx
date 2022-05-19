@@ -336,9 +336,22 @@ const ViewAttendance = () => {
         })
         return newRow
     }
+    function downloadURI(uri: string, name: string) {
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    const printstuff = () => {
+        downloadURI(`/api/attendance/print?from=2022-03-18T03:40:18.792Z&to=2022-05-18T03:40:18.792Z`, 'attendance.pdf')
+    }
 
     return <MemberLayout>
         <Page title="View Attendance">
+            <Button onClick={printstuff}>Print?</Button>
             <Button onClick={handleAddDialog}>New Record</Button>
             <DataGrid
                 autoHeight

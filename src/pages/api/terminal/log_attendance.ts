@@ -3,22 +3,9 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { admin, adminDb, adminRtdb } from "../../../config/firebase-admin";
 import {withTerminalAPI} from '../../../config/middlewares';
 import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
-import {AttendanceRecord} from '../../../types/Attendance';
+import {AttendanceRecord, CardScannedRecord} from '../../../types/Attendance';
+import { CardRecord } from "../../../types/Cards";
 
-type CardRecord = {
-    active: boolean,
-    createdOn: number,
-    englishName: string,
-    chineseName: string,
-    class: string,
-    studentid: string,
-}
-
-type CardScannedRecord = {
-    scannedOn: admin.firestore.Timestamp,
-    studentid: string,
-    type: 'in' | 'out',
-}
 
 export default withTerminalAPI(async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     try {

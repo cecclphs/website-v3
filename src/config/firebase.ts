@@ -8,6 +8,7 @@ import {
   DocumentData,
   DocumentReference,
   enableMultiTabIndexedDbPersistence,
+  FirestoreDataConverter,
   getFirestore,
   initializeFirestore,
   QueryDocumentSnapshot,
@@ -48,14 +49,14 @@ const createCollection = <T>(collectionName: string) => {
   return collection(db, collectionName).withConverter(docConverter) as CollectionReference<T>;
 };
 
-export const docConverter = {
+export const docConverter:FirestoreDataConverter<any> = {
     toFirestore(doc: WithFieldValue<any>): DocumentData {
         const { id, ref, ...docWithoutId } = doc;
         return docWithoutId;
     },
     fromFirestore(
       snapshot: QueryDocumentSnapshot,
-      options: SnapshotOptions
+      options?: SnapshotOptions
     ): {
       id: string,
       ref: DocumentReference,

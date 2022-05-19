@@ -8,6 +8,7 @@ import Head from 'next/head';
 import { useEffect, useMemo, useState } from 'react';
 import {useRouter} from 'next/router';
 import { Tooltip } from '@mui/material';
+import { NextPage } from 'next';
 
 const MatrixDot = ({studentid, englishName, chineseName, attendance = null}: {studentid: string, englishName: string, chineseName: string, attendance: AttendanceRecord['students'][0] | null}) => {
     const color = {
@@ -24,7 +25,7 @@ const MatrixDot = ({studentid, englishName, chineseName, attendance = null}: {st
         <div className={`w-6 h-6 ${color[attendance]}`}></div>
     </Tooltip>
 }
-const LiveAttendance = () => {
+const LiveAttendance: NextPage = () => {
     const router = useRouter();
     const { recordId } = router.query;
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
