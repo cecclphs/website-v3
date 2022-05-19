@@ -2,6 +2,7 @@ import { NextApiHandler } from 'next'
 import puppeteer from 'puppeteer'
 import { withAuth } from '../../../config/middlewares'
 import ApiRequestWithAuth from '../../../types/ApiRequestWithAuth'
+import {isDevelopment} from '../../../utils/environment';
 
 const Handler: NextApiHandler = async (req: ApiRequestWithAuth, res) => {
     if(!req.token.isAdmin) throw new Error('You are not allowed to access this page');
@@ -10,7 +11,7 @@ const Handler: NextApiHandler = async (req: ApiRequestWithAuth, res) => {
     const record = typeof _record === 'string' ? [_record] : _record;
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    await page.goto(`http://localhost:3000/attendance/print?${record.map(id => `record=${id}`).join('&')}`, {
+    await page.goto(`${isDevelopment()?'http://localhost:3000':'https://clphscec.ga'}/attendance/print?${record.map(id => `record=${id}`).join('&')}`, {
         waitUntil: 'networkidle0',
     })
     await page.emulateMediaType('screen')
