@@ -3,7 +3,7 @@ import Page from "../../components/Page";
 import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
 import { db, docConverter } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import StudentDetails from "../../types/StudentDetails";
 import {
     DataGrid,
@@ -15,8 +15,14 @@ import {
     HideGridColMenuItem,
     GridColumnsMenuItem,
     GridToolbar,
+    GridSelectionModel,
+    GridToolbarContainer,
+    GridToolbarColumnsButton,
+    GridToolbarFilterButton,
+    GridToolbarDensitySelector,
+    GridCsvExportMenuItem,
 } from '@mui/x-data-grid';
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, MenuItem } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, Menu, MenuItem } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { AttendanceRecord } from "../../types/Attendance";
 import { useDialog } from "../../hooks/useDialog";
@@ -27,7 +33,10 @@ import FormDateTimePicker from "../../components/form-components/FormDateTimePic
 import { useRouter } from "next/router";
 import { format } from "date-fns";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Link } from "@mui/icons-material";
+import { Download, Link } from "@mui/icons-material";
+import { width } from "@mui/system";
+import { useSnackbar } from "notistack";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 
 
 type RecordForm = {
@@ -249,14 +258,105 @@ const GridColumnMenu = forwardRef<
     );
 });
 
+const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
+    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','desc')));
+    const [selected, setSelected] = useState<GridSelectionModel>([]);
+    const { enqueueSnackbar } = useSnackbar();
+    function downloadURI(uri: string, name: string) {
+        const link = document.createElement("a");
+        link.download = name;
+        link.href = uri;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    const printstuff = () => {
+        downloadURI(`/api/attendance/print?${selected.map(id => `record=${id}`).join('&')}`, 'attendance.pdf')
+        onClose();
+    }
 
+    const columns = [
+        {
+            field: 'recordName',
+            title: 'Name',
+            width: 150
+        },
+        {
+            field: 'recordType',
+            title: 'Type',
+            width: 120
+        }
+    ]
+    
+    return <>
+        <DataGrid
+            autoHeight
+            columns={columns}
+            rows={records}
+            loading={recordsLoad}
+            checkboxSelection={true}
+            getRowId={(row) => row.id}
+            experimentalFeatures={{ newEditingApi: true }}
+            density="compact"
+            onSelectionModelChange={(selected) => {
+                //dont allow exceeding 6 records
+                if(selected.length > 6) {
+                    enqueueSnackbar('You can only select up to 6 records', { variant: 'error' })
+                } else {
+                    setSelected(selected);
+                }
+            }}
+            selectionModel={selected}
+        />
+        <DialogActions>
+            <Button onClick={onClose}>Close</Button>
+            <Button onClick={printstuff}>Generate PDF</Button>
+        </DialogActions>
+    </>
+}
+
+function CustomToolbar() {
+    const [openDialog, closeDialog] = useDialog();
+
+    const handlePrintPDF = () => {
+        //show user a dialog to select date range
+        openDialog({
+            children: <PrintPDFDialog onClose={closeDialog}/>
+        })
+    }
+    return (
+      <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
+        <PopupState variant="popover" popupId="demo-popup-menu">
+        {(popupState) => (
+            <React.Fragment>
+            <Button startIcon={<Download/>} {...bindTrigger(popupState)}>
+                Export
+            </Button>
+            <Menu {...bindMenu(popupState)}>
+                <GridCsvExportMenuItem/>
+                <MenuItem onClick={() => {
+                    handlePrintPDF();
+                    popupState.close();
+                }}>Print PDF</MenuItem>
+            </Menu>
+            </React.Fragment>
+        )}
+        </PopupState>
+      </GridToolbarContainer>
+    );
+  }
+  
+//TODO: Breakup this into multiple files
 const ViewAttendance = () => {
     const { user } = useAuth()
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
     // const { error, data: students = []} = useAPIFetch<StudentDetails[]>('students',{}, user)
     const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','asc')));
-    const [openDialog, closeDialog] = useDialog();
-    
+    const [openDialog, closeDialog] = useDialog()
+
     const handleAddDialog = () => {
         openDialog({
             children: <AddAttendanceRecord onClose={closeDialog}/>,
@@ -336,36 +436,22 @@ const ViewAttendance = () => {
         })
         return newRow
     }
-    function downloadURI(uri: string, name: string) {
-        const link = document.createElement("a");
-        link.download = name;
-        link.href = uri;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-    
-    const printstuff = () => {
-        downloadURI(`/api/attendance/print?from=2022-03-18T03:40:18.792Z&to=2022-05-18T03:40:18.792Z`, 'attendance.pdf')
-    }
 
     return <MemberLayout>
         <Page title="View Attendance">
-            <Button onClick={printstuff}>Print?</Button>
             <Button onClick={handleAddDialog}>New Record</Button>
             <DataGrid
                 autoHeight
                 loading={studentsLoad || recordsLoad}
                 rows={data}
                 columns={columns}
-                disableSelectionOnClick
                 getRowId={(row) => row.studentid}
                 experimentalFeatures={{ newEditingApi: true }} 
                 processRowUpdate={processRowUpdate}
                 density="compact"
                 components={{
                     ColumnMenu: GridColumnMenu,
-                    Toolbar: GridToolbar
+                    Toolbar: CustomToolbar
                 }}
         
             />

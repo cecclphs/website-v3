@@ -1,4 +1,4 @@
-import { add, addHours, format, parseISO, set } from "date-fns";
+import { format } from "date-fns";
 import { Timestamp as ServerTimestamp } from "firebase-admin/firestore";
 import { Timestamp } from "firebase/firestore";
 import { GetServerSideProps, NextPage } from "next";
@@ -7,7 +7,6 @@ import { useAuth } from "../../hooks/useAuth";
 import { AttendanceRecord, AttendanceValue, CardScannedRecord } from "../../types/Attendance";
 import StudentDetails from "../../types/StudentDetails";
 import superjson from 'superjson';
-import { readFile, writeFile } from "fs/promises";
 
 type PrintAttendanceProps = {
     attendance: (Omit<AttendanceRecord, 'students' | 'ref'> & {
@@ -101,16 +100,22 @@ const PrintAttendance: NextPage<{ stringified: string }> = ({ stringified }) => 
 // }
 
 export const getServerSideProps: GetServerSideProps = async ({ res, req, query }) => {
-    const { from, to } = query as { from: string, to: string };
-    const attdDocs = (await adminDb
-        .collection('attendanceRecords').withConverter(adminConverter)
-        .where('startTimestamp', '>=', ServerTimestamp.fromDate(parseISO(from)))
-        .where('startTimestamp', '<=', ServerTimestamp.fromDate(parseISO(to)))
-        .where('recordType', '==', 'activity')
-        .orderBy('startTimestamp', 'asc')
-        .limit(6)
-        .get()
-    ).docs.map(doc => doc.data() as AttendanceRecord);
+    //check auth
+    console.log(res.getHeader('Authorization'))
+    const { record: _record } = query;
+    const record = typeof _record === 'string' ? [_record] : _record;
+    // const attdDocs = (await adminDb
+    //     .collection('attendanceRecords').withConverter(adminConverter)
+    //     .where('startTimestamp', '>=', ServerTimestamp.fromDate(parseISO(from)))
+    //     .where('startTimestamp', '<=', ServerTimestamp.fromDate(parseISO(to)))
+    //     .where('recordType', '==', 'activity')
+    //     .orderBy('startTimestamp', 'asc')
+    //     .limit(6)
+    //     .get()
+    // ).docs.map(doc => doc.data() as AttendanceRecord);
+    //get attend records following records array id
+    const attdRecRef = adminDb.collection('attendanceRecords').withConverter(adminConverter);
+    const attdDocs = (await Promise.all(record.map(id => attdRecRef.doc(id).get()))).map(doc => doc.data() as AttendanceRecord);
 
     const studDocs = (await adminDb
         .collection('students')
@@ -142,7 +147,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, req, query }
             .collection('scanned')
             .orderBy('scannedOn', 'asc')
             .get()
-        ).docs.map(doc => ({id: doc.id, ...doc.data()}) as (CardScannedRecord & {id: string}));
+        ).docs.map(doc => ({id: doc.id, ...doc.data()} as (CardScannedRecord & {id: string})));
         return { ...attd, history };
     }));
 

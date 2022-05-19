@@ -4,11 +4,13 @@ import { withAuth } from '../../../config/middlewares'
 import ApiRequestWithAuth from '../../../types/ApiRequestWithAuth'
 
 const Handler: NextApiHandler = async (req: ApiRequestWithAuth, res) => {
-    const { from, to } = req.query;
+    if(!req.token.isAdmin) throw new Error('You are not allowed to access this page');
+    const { record: _record } = req.query;
+    console.log(req.cookies)
+    const record = typeof _record === 'string' ? [_record] : _record;
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-
-    await page.goto(`http://localhost:3000/attendance/print?from=${from}&to=${to}`, {
+    await page.goto(`http://localhost:3000/attendance/print?${record.map(id => `record=${id}`).join('&')}`, {
         waitUntil: 'networkidle0',
     })
     await page.emulateMediaType('screen')
@@ -30,4 +32,4 @@ const Handler: NextApiHandler = async (req: ApiRequestWithAuth, res) => {
     await browser.close()
 }
 
-export default Handler
+export default withAuth(Handler)
