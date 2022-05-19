@@ -259,20 +259,32 @@ const GridColumnMenu = forwardRef<
 });
 
 const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
+    const { user } = useAuth();
     const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','desc')));
     const [selected, setSelected] = useState<GridSelectionModel>([]);
     const { enqueueSnackbar } = useSnackbar();
-    function downloadURI(uri: string, name: string) {
-        const link = document.createElement("a");
-        link.download = name;
-        link.href = uri;
+    
+    //use fetch to get the pdf and download it
+    const downloadFile = async (url: string, filename: string) => {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${await user.getIdToken()}`
+            }
+        });
+        const blob = await response.blob();
+        const urlCreator = window.URL || window.webkitURL;
+        const imageUrl = urlCreator.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
     
     const printstuff = () => {
-        downloadURI(`/api/attendance/print?${selected.map(id => `record=${id}`).join('&')}`, 'attendance.pdf')
+        downloadFile(`/api/attendance/print?${selected.map(id => `record=${id}`).join('&')}`, 'attendance.pdf')
         onClose();
     }
 
