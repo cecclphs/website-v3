@@ -103,6 +103,7 @@
     "src/**/*.tsx"
 , "postcss.config.js", "tailwind.config.js", "next.config.js"  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "functions"
   ]
 }

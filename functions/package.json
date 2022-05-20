@@ -6,18 +6,25 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "build": "tsc"
   },
   "engines": {
     "node": "14"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "firebase-admin": "^9.12.0",
-    "firebase-functions": "^3.16.0"
+    "firebase-functions": "^3.16.0",
+    "puppeteer": "^14.1.1",
+    "uuid": "^8.3.2",
+    "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
-    "firebase-functions-test": "^0.2.0"
+    "@typescript-eslint/eslint-plugin": "^5.25.0",
+    "@typescript-eslint/parser": "^5.25.0",
+    "firebase-functions-test": "^0.2.0",
+    "typescript": "^4.6.4"
   },
   "private": true
 }

@@ -43,6 +43,7 @@ const AddCardDialog: FC<{onClose: () => void}> = ({ onClose }) => {
             ...rest,
             active: true,
             createdOn: serverTimestamp(),
+            englishName: data.englishName.toUpperCase(),
         });
         onClose();
     }

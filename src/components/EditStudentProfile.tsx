@@ -25,7 +25,8 @@ const EditStudentProfile = ({ student, onClose }: { student: StudentDetails, onC
     const submit = async (data: Omit<StudentDetails, 'id' | 'ref' | 'createdOn' | 'modifiedOn'>) => {
         await updateDoc(doc(db, 'students', student.studentid), {
             ...data,
-            modifiedOn: Timestamp.now()
+            modifiedOn: Timestamp.now(),
+            englishName: data.englishName.toUpperCase(),
         });
         onClose();
     }

@@ -1,7 +1,7 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
 import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
-import { db, docConverter } from "../../config/firebase";
+import { db, docConverter, functions } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import StudentDetails from "../../types/StudentDetails";
@@ -37,6 +37,7 @@ import { Download, Link } from "@mui/icons-material";
 import { width } from "@mui/system";
 import { useSnackbar } from "notistack";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import { httpsCallable } from "firebase/functions";
 
 
 type RecordForm = {
@@ -283,8 +284,24 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
         document.body.removeChild(link);
     }
     
-    const printstuff = () => {
-        downloadFile(`/api/attendance/print?${selected.map(id => `record=${id}`).join('&')}`, 'attendance.pdf')
+    const printstuff = async () => {
+        const generatePdf = httpsCallable<{url: string, pdfOptions: any}, string>(functions, 'generatePdf');
+        const uploadedUrl = await generatePdf({
+            url: `https://clphscec.ga/attendance/print?${selected.map(id => `record=${id}`).join('&')}`,
+            pdfOptions: {
+                format: 'A4',
+                printBackground: true,
+                landscape: true,
+                margin: {
+                    top: '20px',
+                    right: '20px',
+                    bottom: '20px',
+                    left: '20px'
+                }
+            }
+        })
+        
+        downloadFile(uploadedUrl.data, 'attendance.pdf')
         onClose();
     }
 

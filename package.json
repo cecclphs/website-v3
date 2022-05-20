@@ -40,6 +40,7 @@
     "sharp": "^0.30.3",
     "superjson": "^1.9.1",
     "use-algolia": "^1.5.3",
+    "uuid": "^8.3.2",
     "uuid-v4": "^0.1.0"
   },
   "devDependencies": {
