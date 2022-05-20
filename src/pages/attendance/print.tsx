@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { formatInTimeZone } from 'date-fns-tz'
 import { Timestamp as ServerTimestamp } from "firebase-admin/firestore";
 import { Timestamp } from "firebase/firestore";
 import { GetServerSideProps, NextPage } from "next";
@@ -52,7 +52,7 @@ const PrintAttendance: NextPage<{ stringified: string }> = ({ stringified }) => 
             </div>
             <div className="text-right">
                 <p className="text-sm font-medium text-gray-400">{userDetails?.englishName}</p>
-                <p className="text-sm font-medium text-gray-400">{format(new Date(), "yyyy-MM-dd HH:mm:ss")}</p>
+                <p className="text-sm font-medium text-gray-400">{formatInTimeZone(new Date(), 'Asia/Kuala_Lumpur',"yyyy-MM-dd HH:mm:ss")}</p>
             </div>
         </div>
         {/* TABLE IS | 学号 | 名字 | Name | Record -> |In | Out| | */}
@@ -80,8 +80,8 @@ const PrintAttendance: NextPage<{ stringified: string }> = ({ stringified }) => 
                         const attdrec = attendance.students[student.studentid];
                         return <td className="border border-neutral-700 h-full text-center">
                             {attdrec.status === '1' ? <div className="h-full w-full flex flex-row divide-x divide-neutral-300 text-center items-center">
-                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{format(getPresent(attdrec).in.toDate(), "HH:mm")}</p>
-                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{format(getPresent(attdrec).out.toDate(), "HH:mm")}</p>
+                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{formatInTimeZone(getPresent(attdrec).in.toDate(), 'Asia/Kuala_Lumpur', "HH:mm")}</p>
+                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{formatInTimeZone(getPresent(attdrec).out.toDate(), 'Asia/Kuala_Lumpur', "HH:mm")}</p>
                             </div>: <p className="text-sm text-gray-600">{attdrec.status || '-'}</p>}
                         </td>
                     })}
