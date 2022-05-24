@@ -24,16 +24,16 @@ The site is published on Vercel, and will be connected to a custom domain soon *
 - Inventory
     - [X] Create Item
     - [X] Show Item Heirarchy
-    - [ ] Update Item Status
+    - [x] Update Item Status
     - [ ] Borrow Item
     - [ ] Generate General Affairs Report
 - Attendance
-    - [ ] Create Event
-    - [ ] Key in Attendance & Swipe Attendance Interface
+    - [x] Create Event
+    - [x] Key in Attendance & Swipe Attendance Interface
     - [ ] Student Apply Leave & Approval
-    - [ ] Absentee List Generator
-    - [ ] Editing Attendance
-    - [ ] RFID Attendance
+    - [x] Absentee List Generator
+    - [x] Editing Attendance
+    - [x] RFID Attendance
 - Finance
     - [X] Adding New Transactions and Transfer
     - [ ] Claiming and Approval System
