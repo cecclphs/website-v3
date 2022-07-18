@@ -13,7 +13,7 @@ type PrintAttendanceProps = {
         students: {
             [studid: string]: {
                 in: Timestamp,
-                out: Timestamp,
+                out?: Timestamp,
                 status: '1'
             } | {
                 status: Omit<AttendanceValue, '1'>
@@ -38,7 +38,7 @@ const PrintAttendance: NextPage<{ stringified: string }> = ({ stringified }) => 
     const getPresent = (recArr: PrintAttendanceProps['attendance'][number]['students'][string]) => {
         return recArr.status == '1' && recArr as {
             in: Timestamp,
-            out: Timestamp,
+            out?: Timestamp,
             status: '1'
         }
     }
@@ -81,7 +81,7 @@ const PrintAttendance: NextPage<{ stringified: string }> = ({ stringified }) => 
                         return <td className="border border-neutral-700 h-full text-center">
                             {attdrec.status === '1' ? <div className="h-full w-full flex flex-row divide-x divide-neutral-300 text-center items-center">
                                 <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{formatInTimeZone(getPresent(attdrec).in.toDate(), 'Asia/Kuala_Lumpur', "HH:mm")}</p>
-                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{formatInTimeZone(getPresent(attdrec).out.toDate(), 'Asia/Kuala_Lumpur', "HH:mm")}</p>
+                                <p className="flex-1 font-normal text-sm text-gray-600 h-full grid place-items-center">{!!getPresent(attdrec).out?formatInTimeZone(getPresent(attdrec).out.toDate(), 'Asia/Kuala_Lumpur', "HH:mm"):'-'}</p>
                             </div>: <p className="text-sm text-gray-600">{attdrec.status || '-'}</p>}
                         </td>
                     })}
@@ -163,12 +163,17 @@ export const getServerSideProps: GetServerSideProps = async ({ res, req, query }
                 //outdoc is the same as indoc, so no out
                 outdoc = undefined;
             }
+            //if outdoc scanned time is is within 5 minutes of indoc scanned time, ignore outdoc
+            if(outdoc?.scannedOn.toDate().getTime() - indoc?.scannedOn.toDate().getTime() < 300000) {
+                outdoc = undefined;
+            }
+            console.log(outdoc)
             if (record.students[stud.studentid] === '1') {
                 students[stud.studentid] = {
                     //@ts-ignore
                     in: indoc?.scannedOn || record.startTimestamp,
                     //@ts-ignore
-                    out: outdoc?.scannedOn || record.endTimestamp,
+                    out: outdoc? outdoc.scannedOn: (!indoc?.scannedOn ? record.endTimestamp : undefined),
                     status: '1'
                 }
             }
