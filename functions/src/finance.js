@@ -66,7 +66,7 @@ exports.transactionAdded = functions
               balance: addNumbersFixed(account.balance, -after.amount),
               lastTransactionAt: admin.firestore.FieldValue.serverTimestamp(),
             })
-            transaction.update(db.doc(`accounts/${after.toAccount}`), {
+            transaction.update(targetAccountDoc.ref, {
               balance: addNumbersFixed(targetAccount.balance, after.amount),
               lastTransactionAt: admin.firestore.FieldValue.serverTimestamp(),
             })
