@@ -167,7 +167,6 @@ export const getServerSideProps: GetServerSideProps = async ({ res, req, query }
             if(outdoc?.scannedOn.toDate().getTime() - indoc?.scannedOn.toDate().getTime() < 300000) {
                 outdoc = undefined;
             }
-            console.log(outdoc)
             if (record.students[stud.studentid] === '1') {
                 students[stud.studentid] = {
                     //@ts-ignore

@@ -29,6 +29,14 @@ body {
   font-style: normal;  
   font-display: block;
 }
+@font-face {
+  font-family: 'KaiTi';
+  src: url('/public/fonts/KaiTi.ttf') format('ttf'),
+    url('/public/fonts/KaiTi.ttf') format('ttf');
+  font-weight: bold;
+  font-style: normal;  
+  font-display: block;
+}
 
 a {
   color: inherit;
