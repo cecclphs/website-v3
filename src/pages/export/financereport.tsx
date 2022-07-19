@@ -68,7 +68,7 @@ const PrintFinance: NextPage<SerializedProps> = ({ stringified, error }) => {
             </div>
         </div>
         <div className="grid grid-cols-2 min-h-[40vh]">
-            <table className="border-collapse border-2 border-neutral-700 h-full table-fixed">
+            <table className="border-collapse border-l-2 border-b-2 border-neutral-700 h-full table-fixed">
                 <thead className="break-inside-avoid">
                     <td className='border-2 border-neutral-700'>日期</td>
                     <td className='border-2 border-neutral-700'>收入</td>
@@ -114,7 +114,7 @@ const PrintFinance: NextPage<SerializedProps> = ({ stringified, error }) => {
                     </tr> 
                 </tfoot>
             </table>
-            <table className="border-collapse border-2 border-neutral-700 h-full table-fixed">
+            <table className="border-collapse border-x-2 border-b-2 border-neutral-700 h-full table-fixed">
                 <thead className="break-inside-avoid">
                     <td className='border-2 border-neutral-700'>日期</td>
                     <td className='border-2 border-neutral-700'>支出</td>
@@ -255,7 +255,7 @@ export const getServerSideProps: GetServerSideProps<SerializedProps> = async ({ 
         }
         return acc;
     }, 0);
-    startAmount = addNumbersFixed(balance, -totalTransactionSpend);
+    startAmount = addNumbersFixed(addNumbersFixed(balance, -totalTransactionSpend), -totalspentaftermonth);
     
     res.setHeader(
         'Cache-Control',
