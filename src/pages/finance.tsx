@@ -3,18 +3,21 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import MemberLayout from "../components/MemberLayout";
 import NewTransaction from "../components/NewTransaction";
 import Page from "../components/Page";
-import { db, docConverter } from "../config/firebase";
+import {db, docConverter, functions} from '../config/firebase';
 import { FinanceAccountType, Transaction } from "../types/Finance";
 import FinanceAccount from "../components/FinanceAccount";
-import { format } from "date-fns";
+import { format, getMonth, getYear } from "date-fns";
 import {Chip, Tooltip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, DialogContent, DialogActions, Button, DialogTitle} from '@mui/material';
 import {NoteRounded, ReceiptRounded, Delete, MoreVertRounded} from '@mui/icons-material';
-import { useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import AddAccount from "../components/AddAccount";
 import {bindTrigger, bindMenu, usePopupState} from 'material-ui-popup-state/hooks';
 import { useDialog } from "../hooks/useDialog";
 import { fetchAPI } from "../utils/fetchAPI";
 import { useAuth } from "../hooks/useAuth";
+import { useForm } from "react-hook-form";
+import FormTextField from "../components/form-components/FormTextField";
+import {httpsCallable} from 'firebase/functions';
   
 const TransactionLog = ({ transaction, accounts }) => {
     const { user } = useAuth();
@@ -106,9 +109,84 @@ const TransactionLog = ({ transaction, accounts }) => {
     </tr>
 }
 
+type PickReportForm = { year: number, month: number }
+
+const PickReportDateDialog: FC<{ onClose: () => void }> = ({ onClose }) => {
+    const { control, handleSubmit, formState: { isValid, isSubmitting } } = useForm<PickReportForm>({
+        mode: 'onChange',
+        defaultValues: {
+            year: getYear(new Date()),
+            month: getMonth(new Date())
+        }
+    });
+    const { user } = useAuth();
+    //use fetch to get the pdf and download it
+    const downloadFile = async (url: string, filename: string) => {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${await user.getIdToken()}`
+            }
+        });
+        const blob = await response.blob();
+        const urlCreator = window.URL || window.webkitURL;
+        const imageUrl = urlCreator.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    const onSubmit = async (data: PickReportForm) => {
+        const generatePdf = httpsCallable<{url: string, pdfOptions: any}, string>(functions, 'generatePdf');
+        const uploadedUrl = await generatePdf({
+            url: `https://clphscec.ga/export/financereport?month=${data.year}-${data.month}`,
+            pdfOptions: {
+                format: 'A4',
+                printBackground: true,
+                margin: {
+                    top: '0.5in',
+                    right: '0.5in',
+                    bottom: '0.5in',
+                    left: '0.5in'
+                }
+            }
+        })
+        await downloadFile(uploadedUrl.data, `${data.year}-${data.month.toString().padStart(2, '0')} Finance Report.pdf`)
+        onClose();
+    }
+
+    return <>
+        <DialogContent>
+            <FormTextField
+                control={control}
+                name="year"
+                label="Year"
+                rules={{required: true}}
+                type="number"
+                />
+            <FormTextField
+                control={control}
+                name="month"
+                label="Month"
+                type="number"
+                rules={{required: true}}
+                />
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button color="primary" onClick={handleSubmit(onSubmit)} disabled={!isValid || isSubmitting}>Submit</Button>
+        </DialogActions>
+    </>
+}
+
+
 const Finance = () => {
     const [transactions = [], loading, error] = useCollectionData<Transaction>(query(collection(db, 'finance', 'CEC', 'transactions'), orderBy('date', 'desc')).withConverter(docConverter));
     const [accounts = [], loadingAccounts, errorAccounts] = useCollectionData<FinanceAccountType>(collection(db, 'finance', 'CEC', 'accounts').withConverter(docConverter));
+    const [openDialog, closeDialog] = useDialog();
     console.log(transactions)
 
     const addNumbersFixed = (num1, num2) => {
@@ -122,9 +200,16 @@ const Finance = () => {
         }, 0);
     }, [accounts]);
 
+    const handlePrintReport = () => {
+        openDialog({
+            children: <PickReportDateDialog onClose={closeDialog} />,
+        })
+    }
+
     return <MemberLayout>
         <Page title="Financials">
             <NewTransaction/>
+            <Button onClick={handlePrintReport}>Print Report</Button>
             <h2 className="text-2xl font-semibold py-1">Accounts</h2>
             <div className="flex flex-row space-x-2 overflow-x-auto w-full">
                 <FinanceAccount account={{id: 'all', accountName: 'All', balance: accountsSum, type: "bank"}}/>

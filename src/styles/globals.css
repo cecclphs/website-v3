@@ -33,7 +33,7 @@ body {
   font-family: 'KaiTi';
   src: url('/public/fonts/KaiTi.ttf') format('ttf'),
     url('/public/fonts/KaiTi.ttf') format('ttf');
-  font-weight: bold;
+  font-weight: normal;
   font-style: normal;  
   font-display: block;
 }
