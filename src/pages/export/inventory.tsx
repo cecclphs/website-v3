@@ -7,9 +7,19 @@ import { useAuth } from "../../hooks/useAuth";
 import superjson from 'superjson';
 import { endOfMonth, isMatch, parse } from 'date-fns';
 import { Transaction } from '../../types/Finance';
+import InventoryItem from '../../types/Inventory';
 
-const InventoryReport: NextPage<{ stringified: string }> = ({ stringified }) => {
+type Props = {
+    inventory: InventoryItem[]
+}
+
+type PropsString = { stringified?: string, error?: string }
+
+const InventoryReport: NextPage<PropsString> = ({ stringified, error }) => {
     const { user, userDetails } = useAuth();
+
+    if(error) return <div className='h-screen w-screen grid place-items-center text-2xl'>{error}</div>;
+
     superjson.registerCustom<Timestamp, string>(
         {
         isApplicable: (value): value is Timestamp => value instanceof Timestamp,
@@ -18,16 +28,16 @@ const InventoryReport: NextPage<{ stringified: string }> = ({ stringified }) => 
         },
         'firebase-admin/firestore'
     )
-    const { transactions } = superjson.parse<{ transactions: Transaction[] }>(stringified);
+    const { inventory } = superjson.parse<Props>(stringified);
 
-    console.log(transactions);
+    console.log(inventory);
 
 
-    return <div className="min-h-[29.7cm] w-[21cm] flex flex-col px-8 pt-4  overflow-x-hidden">
+    return <div className="min-h-[21cm] w-[29.7cm] flex flex-col px-8 pt-4  overflow-x-hidden">
         <div className="grid grid-cols-[12rem_auto_12rem] pb-8">
             <img src="/cec-logo-gradient-black.png" className="w-28" />
             <div className="text-center">
-                <h1 className="text-xl font-semibold text-black">Attendance Record</h1>
+                <h1 className="text-xl font-semibold text-black">Inventory Record</h1>
                 <p>电子创意学会 Creative Electronics Club</p>
             </div>
             <div className="text-right">
@@ -38,44 +48,45 @@ const InventoryReport: NextPage<{ stringified: string }> = ({ stringified }) => 
         {/* TABLE IS | 学号 | 名字 | Name | Record -> |In | Out| | */}
         <table className="border-collapse border border-neutral-700 h-full">
             <thead className="break-inside-avoid">
+                <tr className="[&_td]:border [&_td]:border-neutral-700 [&_td]:text-sm [&_td]:text-center [&_td]:px-1 [&_td]:font-semibold [&_td]:whitespace-nowrap">
+                    <td>#</td>
+                    <td>Simple ID</td>
+                    <td>Description</td>
+                    <td>Qty</td>
+                    <td>Status</td>
+                    <td>Registerer</td>
+                    <td>Date Registered</td>
+                    <td>Remarks</td>
+                </tr>
             </thead>
             <tbody className="h-full">
+                {inventory.map((item, index) => (
+                    <tr key={item.id} className="[&_td]:border [&_td]:border-neutral-700 [&_td]:text-xs [&_td]:px-1">
+                        <td className='text-center'>{index + 1}</td>
+                        <td>{item.simpleId}</td>
+                        <td>{item.description}</td>
+                        <td className='text-center'>{item.quantity}</td>
+                        <td className='text-center capitalize'>{item.status}</td>
+                        <td className='whitespace-nowrap'>{item.registeredBy.englishName} {item.registeredBy.studentid}</td>
+                        <td className='text-center'>{formatInTimeZone(item.dateRegistered.toDate(), 'Asia/Kuala_Lumpur', 'yyyy-MM-dd')}</td>
+                        <td>{item.metadata.notes}</td>
+                    </tr>
+                ))}
             </tbody>
         </table>
     </div>
 }
 
-// export const getServerSideProps: GetServerSideProps = async ({ res, req, query }) => { 
-//     return {
-//         props: {
-//             stringified: (await readFile('attendance.json')).toString()
-//         }
-//     };
-// }
-
-export const getServerSideProps: GetServerSideProps = async ({ res, req, query }) => {
-    const { month } = query;
-    //return if record is array
-    if (Array.isArray(month)) return { props: { stringified: 'Invalid month' } };
-    //month should eg 2022-05
-    //get dates of first and last day
-    if(!isMatch('yyyy-MM', month)) return { props: { stringified: 'invalid month' } }
-    const firstDay = parse('yyyy-MM-dd', `${month}-01`, new Date());
-    const lastDay = endOfMonth(firstDay);
-    
+export const getServerSideProps: GetServerSideProps<PropsString> = async ({ res, req, query }) => {
     //get transactions within range
-    const transactionsSnapshot = await adminDb
-        .collection('finance')
-        .doc('CEC')
-        .collection('transactions')
-        .where('date', '>=', firstDay)
-        .where('date', '<=', lastDay)
-        .where('type','!=', 'transfer')
-        .orderBy('date', 'asc')
-        .withConverter<Transaction>(adminConverter)
+    const inventorySnapshot = await adminDb
+        .collection('inventory')
+        .where('type','==', 'item')
+        .orderBy('description', 'asc')
+        .withConverter<InventoryItem>(adminConverter)
         .get();
 
-    const transactions = await transactionsSnapshot.docs.map(doc => doc.data());
+    const inventory = await inventorySnapshot.docs.map(doc => doc.data());
     
     res.setHeader(
         'Cache-Control',
@@ -90,13 +101,13 @@ export const getServerSideProps: GetServerSideProps = async ({ res, req, query }
         },
         'firebase-admin/firestore'
     )
-
+    const returnprop: Props = {
+        inventory
+    }
 
     return {
         props: {
-            stringified: superjson.stringify({
-                transactions
-            })
+            stringified: superjson.stringify(returnprop)
         }
     };
 }

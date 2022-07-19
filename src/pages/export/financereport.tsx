@@ -53,7 +53,7 @@ const PrintFinance: NextPage<SerializedProps> = ({ stringified, error }) => {
 
     console.log(expensetotal)
 
-    return <div className="min-h-[29.7cm] w-[21cm] flex flex-col overflow-x-hidden font-[KaiTi]">
+    return <div className="min-h-[29.7cm] w-[21cm] flex flex-col p-[0.5in]  overflow-x-hidden font-[KaiTi]">
         <div className="grid grid-cols-[12rem_auto_12rem] border-2 border-neutral-700">
             <div className='grid place-items-center'>
                 <img src="/cec-logo-gradient-black.png" className="h-16" />

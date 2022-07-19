@@ -146,12 +146,6 @@ const PickReportDateDialog: FC<{ onClose: () => void }> = ({ onClose }) => {
             pdfOptions: {
                 format: 'A4',
                 printBackground: true,
-                margin: {
-                    top: '0.5in',
-                    right: '0.5in',
-                    bottom: '0.5in',
-                    left: '0.5in'
-                }
             }
         })
         await downloadFile(uploadedUrl.data, `${data.year}-${data.month.toString().padStart(2, '0')} Finance Report.pdf`)
