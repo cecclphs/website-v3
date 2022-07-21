@@ -6,7 +6,7 @@ import { useCollectionData } from "react-firebase-hooks/firestore";
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
 import StudentDetails from "../../types/StudentDetails";
 import {
-    DataGrid,
+    DataGridPro,
     GridColDef,
     GridColumnMenuProps,
     GridColumnMenuContainer,
@@ -14,14 +14,12 @@ import {
     GridFilterMenuItem,
     HideGridColMenuItem,
     GridColumnsMenuItem,
-    GridToolbar,
     GridSelectionModel,
     GridToolbarContainer,
     GridToolbarColumnsButton,
     GridToolbarFilterButton,
-    GridToolbarDensitySelector,
     GridCsvExportMenuItem,
-} from '@mui/x-data-grid';
+} from '@mui/x-data-grid-pro';
 import { Button, DialogActions, DialogContent, DialogTitle, Divider, Menu, MenuItem } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { AttendanceRecord } from "../../types/Attendance";
@@ -319,7 +317,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
     ]
     
     return <>
-        <DataGrid
+        <DataGridPro
             autoHeight
             columns={columns}
             rows={records}
@@ -393,7 +391,7 @@ const ViewAttendance = () => {
     }
 
     const baseColumns: GridColDef[] = [
-        { field: 'studentid', headerName: 'ID', width: 70 },
+        { field: 'studentid', headerName: 'ID', width: 70, pinnable: true },
         {
             field: 'chineseName',
             headerName: '名字',
@@ -428,7 +426,7 @@ const ViewAttendance = () => {
         students.forEach(student => {
             combined[student.studentid] = student;
         });
-        records.forEach(record => {
+        records.forEach((record, index) => {
             const { id, ref, recordType, recordName, updatedOn, students } = record;
             baseColumns.push({
                 field: recordName,
@@ -436,20 +434,19 @@ const ViewAttendance = () => {
                 description: id,
                 editable: true,
                 type: 'singleSelect',
-                valueOptions: ['1','0','迟','特','事','公','病']
+                valueOptions: ['1','0','迟','特','事','公','病'],
+                hide: (records.length - index) > 5, 
+                align: 'center'
             })
             Object.keys(students).forEach(studentid => {
                 if(!combined[studentid]) return;
                 combined[studentid][recordName] = students[studentid];
-                console.log(students[studentid])
             })
         })
 
         return [baseColumns, Object.values(combined)];
         
     }, [records, students]);
-
-    console.log(data)
     
     const processRowUpdate = (newRow: StudentDetails) => {
         //get data of same row
@@ -469,7 +466,7 @@ const ViewAttendance = () => {
     return <MemberLayout>
         <Page title="View Attendance">
             <Button onClick={handleAddDialog}>New Record</Button>
-            <DataGrid
+            <DataGridPro
                 autoHeight
                 loading={studentsLoad || recordsLoad}
                 rows={data}
@@ -477,12 +474,16 @@ const ViewAttendance = () => {
                 getRowId={(row) => row.studentid}
                 experimentalFeatures={{ newEditingApi: true }} 
                 processRowUpdate={processRowUpdate}
+                columnThreshold={2}
+                columnBuffer={2}
                 density="compact"
                 components={{
                     ColumnMenu: GridColumnMenu,
                     Toolbar: CustomToolbar
                 }}
-        
+                pinnedColumns={{
+                    left: ['studentid', 'chineseName', 'englishName', 'class']
+                }}
             />
         </Page>
     </MemberLayout>

@@ -6,7 +6,7 @@ import { get, ref, serverTimestamp, set, update } from "firebase/database";
 import { rtdb } from "../../config/firebase";
 import { CardRecord } from "../../types/Cards";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Switch } from "@mui/material";
-import { DataGrid, GridActionsCellItem, GridColDef, GridColumnMenu, GridRowParams, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarFilterButton } from "@mui/x-data-grid";
+import { DataGridPro, GridActionsCellItem, GridColDef, GridColumnMenu, GridRowParams, GridToolbar, GridToolbarColumnsButton, GridToolbarContainer, GridToolbarFilterButton } from "@mui/x-data-grid-pro";
 import {updateDoc} from 'firebase/firestore';
 import StudentDetails from '../../types/StudentDetails';
 import { Add, Delete } from "@mui/icons-material";
@@ -200,7 +200,7 @@ const Cards:FC = () => {
     return <MemberLayout>
         <Page title="Cards">
             <div className="flex flex-col space-y-2">
-            <DataGrid
+            <DataGridPro
                 autoHeight
                 loading={loading}
                 rows={cards}

@@ -7,6 +7,13 @@ import { SnackbarProvider } from 'notistack';
 import '../styles/globals.css'
 import { LocalizationProvider } from '@mui/lab'
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { LicenseInfo } from '@mui/x-license-pro'
+
+//Sorry MUI Developers :( 
+//We're just students and we can't afford such expensive license
+//If there's any real commercial application we'll buy the license back :(
+//Please understand arigato
+LicenseInfo.setLicenseKey(process.env.NEXT_PUBLIC_MUI_LICENSE)
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -21,6 +28,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       }
     }
   })
+
   return <LocalizationProvider dateAdapter={AdapterDateFns}>
       <AuthProvider>
       <ThemeProvider theme={theme}>

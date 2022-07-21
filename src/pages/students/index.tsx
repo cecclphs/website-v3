@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { DataGridPro, GridColDef, GridToolbar } from "@mui/x-data-grid-pro";
 import { collection, query, where } from "firebase/firestore";
 import { useRouter } from "next/router";
 import { useCollectionData } from "react-firebase-hooks/firestore";
@@ -82,7 +82,7 @@ const Students = () => {
         <Page title="Students">
             <Button onClick={handleCreateStudent}>Add Student</Button>
             <table className="w-full table-auto">
-            <DataGrid
+            <DataGridPro
                 loading={loading}
                 autoHeight
                 rows={students}
