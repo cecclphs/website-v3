@@ -15,6 +15,7 @@ type InventoryForm = {
     type: InventoryItem['type']
     metadata: InventoryItem['metadata'],
     quantity: number;
+    status: InventoryItem['status'];
 }
 
 const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: InventoryItem, onComplete: () => void}) => {
@@ -27,6 +28,7 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
             type: inventoryItem.type,
             metadata: inventoryItem.metadata,
             quantity: inventoryItem.quantity,
+            status: inventoryItem.status
         }), [inventoryItem]),
         reValidateMode: 'onChange', // this in pair with mode seems to give the expected result
         mode: 'onChange',
@@ -54,6 +56,8 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
             description: sanitized.description,
             simpleId: sanitized.simpleId,
             metadata: sanitized.metadata,
+            type: sanitized.type,
+            status: sanitized.status,
             ...(type === 'item' ? { quantity: sanitized.quantity } : {}),
         })
         onComplete();
@@ -80,6 +84,7 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
                     { label: "Location", value: "location" },
                     { label: "Container", value: "container" },
                     { label: "Project", value: "project" },
+                    { label: "Item", value: "item" },
                 ]} />}
             <FormTextField
                 autoFocus
@@ -96,9 +101,24 @@ const EditInventoryItem = ({ inventoryItem, onComplete }: { inventoryItem: Inven
                 control={control}
                 name="quantity"
                 size="small"
+                rules={{required: true}}
                 label="Quantity"
                 variant="filled"
                 type="number" />}
+            <FormSelect
+                control={control}
+                name="status"
+                size="small"
+                label="Status"
+                variant="filled"
+                sx={{minWidth: 'fit-content'}}
+                options={[
+                    //status: 'borrowed' | 'available' | 'lost' | 'broken'
+                    { label: "Borrowed", value: "borrowed" },
+                    { label: "Available", value: "available" },
+                    { label: "Lost", value: "lost" },
+                    { label: "Broken", value: "broken" },
+                ]} />
         </div>
         <h3 className="text-xl font-semibold">Metadata - Optional</h3>
         <div className="flex flex-row space-x-2">

@@ -7,7 +7,7 @@ export default interface InventoryItem {
     description: string
     parent: string | null
     children: number
-    status: 'borrowed' | 'available' | 'lost'
+    status: 'borrowed' | 'available' | 'lost' | 'broken'
     type: 'location' | 'container' | 'project' | 'item'
     simpleId: string | null
     quantity?: number

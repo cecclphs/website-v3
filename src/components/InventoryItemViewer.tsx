@@ -1,6 +1,6 @@
 import { Edit, ErrorOutline, InfoRounded, SplitscreenOutlined, DeleteRounded } from '@mui/icons-material';
-import { Button, DialogActions, DialogContent, Divider } from '@mui/material';
-import { updateDoc, deleteDoc } from 'firebase/firestore';
+import { Button, Chip, ChipProps, DialogActions, DialogContent, Divider, ListItem, ListItemIcon, MenuItem, Popover, Tooltip } from '@mui/material';
+import { updateDoc, deleteDoc, getDoc, doc, DocumentReference } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useAuth } from '../hooks/useAuth';
 import { useDialog } from '../hooks/useDialog';
@@ -9,12 +9,17 @@ import { fetchAPI } from '../utils/fetchAPI';
 import SplitInventoryDialog from './SplitInventoryDialog';
 import StudentDetailsChip from './StudentDetailsChip';
 import EditInventoryItem from './EditInventoryItem';
+import { FC, useEffect, useState } from 'react';
+import { db, docConverter } from '../config/firebase';
+import PopupState, { bindPopover, bindTrigger } from 'material-ui-popup-state';
+import { useDocumentData } from 'react-firebase-hooks/firestore';
 
-const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: () => void }) => {
+const InventoryItemViewer: FC<{ item: InventoryItem, onClose: () => void }> = ({ item: _item, onClose }) => {
+    const [item = _item, loading, error] = useDocumentData<InventoryItem>(_item.ref.withConverter(docConverter));
     const { user } = useAuth();
     const [openDialog, closeDialog] = useDialog();
     const router = useRouter();
-    if (!item) return <></>
+    const [itemPath, setItemPath] = useState<InventoryItem[]>([]);
     const {
         id,
         description,
@@ -27,6 +32,23 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
         registeredBy,
         quantity
     } = item || {};
+
+    useEffect(() => {
+        (async () => {
+            if (!parent) return;
+            //if the parent is not null, keep fetching parents till a null parent,
+            //then set the itemPath to the parents
+            let parentArray = [];
+            let currentParent = parent;
+            do {
+                const parentDoc = await getDoc(doc(db, 'inventory', currentParent));
+                const parentItem = parentDoc.data() as InventoryItem;
+                currentParent = parentItem.parent;
+                parentArray = [parentItem, ...parentArray];
+            } while (currentParent !== null);
+            setItemPath(parentArray);
+        })();
+    }, [item])
 
     const handleSplit = () => {
         openDialog({
@@ -57,6 +79,16 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
             </>
         });
     }
+    
+    const handleViewParent = (parentItem: InventoryItem) => () => {
+        openDialog({
+            children: <>
+                <DialogContent>
+                    <InventoryItemViewer item={parentItem} onClose={closeDialog} />
+                </DialogContent>
+            </>
+        });
+    }
 
     const handleEditItem = () => {
         openDialog({
@@ -68,14 +100,12 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
         updateDoc(item.ref, {
             status: 'lost'
         })
-        onClose();
     }
 
     const reportFound = () => {
         updateDoc(item.ref, {
             status: "available"
         })
-        onClose();
     }
     
     const handleSetParent = () => {
@@ -83,14 +113,28 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
         onClose();
     }
 
+    const getStatus = ({
+        available: 'success',
+        lost: 'error',
+        borrowed: 'warning',
+        broken: 'error',
+    } as {[key in InventoryItem['status']]: ChipProps['color']})[status]
+
+    if (!item) return <></>
     return <div className="flex flex-col w-[400px]">
         <div className="space-y-1 py-1">
-            <h1 className="text-3xl font-bold text-gray-800">{description} {type == 'item' ? `×${quantity || 1}` : ""}</h1>
-            <p className="text-xs text-gray-400">{id}</p>
+            <Tooltip title={id}>
+                <h1 className="text-3xl font-bold text-gray-800">{description} {type == 'item' ? `×${quantity || 1}` : ""}</h1>
+            </Tooltip>
             <p className="text-sm">{simpleId}</p>
+            <p className="text-sm">Status: <Chip size='small' label={status} color={getStatus} /></p>
             <p className="text-sm">Type: {type}</p>
-            <p className="text-sm">Status: {status}</p>
             <p className="text-sm">Children: {children || 1}</p>
+            <div className='flex flex-row text-sm space-x-1'>
+                <span>Location: </span>
+                {itemPath.length == 0 && <p>Already at the top</p>}
+                {itemPath.map((p, i) => <p className="cursor-pointer" onClick={handleViewParent(p)}>{p.description}{(i != (itemPath.length -1))? '/':''}</p>)}
+            </div>
         </div>
         <Divider />
         <div className="space-y-1 py-1">
@@ -112,20 +156,49 @@ const InventoryItemViewer = ({ item, onClose }: { item: InventoryItem, onClose: 
         <div className='space-y-1 py-1'>
             <h2 className="text-xl font-bold text-gray-800">Actions</h2>
             <div className="flex flex-row space-x-2">
-                {status == 'lost' && <Button
-                    color="success"
-                    startIcon={<ErrorOutline />}
-                    onClick={reportFound}
-                >
-                    Item Found
-                </Button>}
-                {status != 'lost' && <Button
-                    color="error"
-                    startIcon={<ErrorOutline />}
-                    onClick={reportLost}
-                >
-                    Report Lost
-                </Button>}
+            <PopupState variant="popover" popupId="demo-popup-popover">
+                {(popupState) => (
+                    <div>
+                        <Button
+                            {...bindTrigger(popupState)}
+                            color="error"
+                            startIcon={<ErrorOutline />}
+                        >
+                            Reporting
+                        </Button>
+                    <Popover
+                        {...bindPopover(popupState)}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'center',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                        }}
+                    >
+                        {status == 'lost' ? <MenuItem
+                            color="success"
+                            onClick={reportFound}
+                        >
+                            <ListItemIcon>
+                                <ErrorOutline />
+                            </ListItemIcon>
+                            Item Found
+                        </MenuItem>: 
+                        <MenuItem
+                            color="error"
+                            onClick={reportLost}
+                        >
+                            <ListItemIcon>
+                                <ErrorOutline />
+                            </ListItemIcon>
+                            Report Lost
+                        </MenuItem>}
+                    </Popover>
+                    </div>
+                )}
+                </PopupState>
                 {type == 'item' && 
                 <Button 
                     disabled={quantity <= 1} 

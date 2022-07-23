@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 import CreateInventoryItem from "../components/CreateInventoryItem";
+import InventoryLocator from "../components/InventoryLocator";
 import InventoryTree from "../components/InventoryTree";
 import MemberLayout from "../components/MemberLayout";
 import Page from "../components/Page";
@@ -10,6 +11,7 @@ const Inventory = () => {
         <MemberLayout>
             <Page title="Inventory">
                 <CreateInventoryItem parent={parent as string}/>
+                <InventoryLocator />
                 <InventoryTree parent={parent as string}/>
             </Page>
         </MemberLayout>
