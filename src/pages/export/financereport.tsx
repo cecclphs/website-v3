@@ -175,7 +175,7 @@ const PrintFinance: NextPage<SerializedProps> = ({ stringified, error }) => {
             <div className='flex flex-col items-center'>
                 <p>主席</p>
                 <div className="border-b-2 border-black pt-24 w-full"></div>
-                <p>蔡宇恒</p>
+                <p>庄俊阳</p>
             </div>
         </div>
     </div>
