@@ -285,7 +285,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
     const printstuff = async () => {
         const generatePdf = httpsCallable<{url: string, pdfOptions: any}, string>(functions, 'generatePdf');
         const uploadedUrl = await generatePdf({
-            url: `https://clphscec.ga/attendance/print?${selected.map(id => `record=${id}`).join('&')}`,
+            url: `https://app.cecclphs.com/attendance/print?${selected.map(id => `record=${id}`).join('&')}`,
             pdfOptions: {
                 format: 'A4',
                 printBackground: true,

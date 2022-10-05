@@ -142,7 +142,7 @@ const PickReportDateDialog: FC<{ onClose: () => void }> = ({ onClose }) => {
     const onSubmit = async (data: PickReportForm) => {
         const generatePdf = httpsCallable<{url: string, pdfOptions: any}, string>(functions, 'generatePdf');
         const uploadedUrl = await generatePdf({
-            url: `https://clphscec.ga/export/financereport?month=${data.year}-${data.month}`,
+            url: `https://app.ceccclphs.com/export/financereport?month=${data.year}-${data.month}`,
             pdfOptions: {
                 format: 'A4',
                 printBackground: true,

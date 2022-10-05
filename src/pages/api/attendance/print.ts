@@ -11,7 +11,7 @@ const Handler: NextApiHandler = async (req: ApiRequestWithAuth, res) => {
     const record = typeof _record === 'string' ? [_record] : _record;
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    await page.goto(`${isDevelopment()?'http://localhost:3000':'https://clphscec.ga'}/attendance/print?${record.map(id => `record=${id}`).join('&')}`, {
+    await page.goto(`${isDevelopment()?'http://localhost:3000':'https://app.cecclphs.com'}/attendance/print?${record.map(id => `record=${id}`).join('&')}`, {
         waitUntil: 'networkidle0',
     })
     await page.emulateMediaType('screen')

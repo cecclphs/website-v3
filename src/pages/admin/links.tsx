@@ -29,7 +29,7 @@ const Links = () => {
                     label="Slug" 
                     size='small'
                     InputProps={{
-                        startAdornment: <InputAdornment position="end">clphscec.ga/</InputAdornment>
+                        startAdornment: <InputAdornment position="end">cecclphs.com/</InputAdornment>
                     }}
                     value={newLink.id}
                     onChange={e => setNewLink({...newLink, id: e.target.value})}
