@@ -364,7 +364,7 @@ const StoreComponent: FC<{ register: ShortStudentInfo }> = ({ register }) => {
                     {folderTrace.map((item) => <h2 className="text-lg cursor-pointer hover:underline" key={item.id} onClick={traceback(item)}>{item.description}</h2>)}
                 </Breadcrumbs>
                 {loadStoreItems && <LinearProgress className="w-full my-2"/>}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 p-2 gap-2">
+                <div className="w-full flex flex-row overflow-clip flex-wrap p-2 gap-2">
                     {storeItems.map((item) => <StoreItem key={item.id} item={item} onItemClick={itemClicked}/>)}
                 </div>
             </div>
