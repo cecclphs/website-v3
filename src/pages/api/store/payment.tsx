@@ -52,8 +52,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             ...transaction,
             timestamp: Timestamp.now()
         });
+    }).then(() => {
+        res.send({status: 200, data: { success: true }});
+    }).catch((e) => {
+        res.send({status: 500, data: { error: e.message }});
     })
-
-
-    res.send({status: 200, data: { deleted: true }});
 }
