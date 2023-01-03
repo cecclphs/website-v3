@@ -180,15 +180,15 @@ const StoreItem: FC<{
                 <Folder/>
                 <h5 className="text-2xl font-semibold select-none">{item.description}</h5>
             </div>
-        </div> : <div className="flex flex-col h-full">
-            <img src={item.metadata?.image} className="h-full w-full object-contain flex-1" />
-            <div className="flex flex-col h-[70px] justify-between">
-                <div>
+        </div> : <div className="h-full w-full grid">
+            {/* <img src={item.metadata?.image} className="h-full w-full object-contain flex-1" /> */}
+            <div className="flex flex-col flex-1 justify-between">
+                <div className="flex-1" >
                     <h5 className="text-lg font-semibold -mb-1">{item.description}</h5>
                     <p className="text-sm text-gray-700">{item?.quantity || 1} in stock</p>
                 </div>
                 <div className="flex flex-row justify-end">
-                    <p className="text-xl font-semibold text-gray-700">RM{item.metadata?.price || "Unset"}</p>
+                    <p className="text-xl font-semibold text-gray-700">{item.metadata?.price? ("RM"+ item.metadata.price.toFixed(2)) : <span className="text-red-400">Unset</span>}</p>
                 </div>
             </div>
         </div>}
@@ -364,7 +364,7 @@ const StoreComponent: FC<{ register: ShortStudentInfo }> = ({ register }) => {
                     {folderTrace.map((item) => <h2 className="text-lg cursor-pointer hover:underline" key={item.id} onClick={traceback(item)}>{item.description}</h2>)}
                 </Breadcrumbs>
                 {loadStoreItems && <LinearProgress className="w-full my-2"/>}
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 p-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 p-2 gap-2">
                     {storeItems.map((item) => <StoreItem key={item.id} item={item} onItemClick={itemClicked}/>)}
                 </div>
             </div>
