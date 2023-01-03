@@ -6,14 +6,14 @@ import { db, docConverter } from "../../config/firebase"
 import { StoreTransaction } from "../../types/Store"
 import { FC } from 'react';
 import { NextPage } from "next/types"
-import { format } from "date-fns"
+import { format, formatDistanceToNow } from "date-fns"
 import { Accordion, AccordionDetails, AccordionSummary, Typography } from "@mui/material"
 import { ExpandMore } from "@mui/icons-material"
 
 const TransactionItem: FC<{transaction: StoreTransaction }> = ({ transaction }) => {
     return <div className='flex flex-col space-y-1 py-2 px-1'>
         <h2 className='text-sm font-semibold text-gray-400'>Trx: #{transaction.id}</h2>
-        <h2 className='text-lg font-semibold'>{format(transaction.timestamp.toDate(), "yyyy/MM/dd hh:MM:ss")}</h2>
+        <h2 className='text-lg font-semibold'>{format(transaction.timestamp.toDate(), "yyyy/MM/dd hh:MM:ss")} ({formatDistanceToNow(transaction.timestamp.toDate())} ago)</h2>
         <h2>{transaction.purchaser.englishName} - {transaction.purchaser.studentid}</h2>
         <h2 className='text-lg font-semibold'>Total: RM {transaction.total.toFixed(2)}</h2>
         <Accordion>
