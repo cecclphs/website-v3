@@ -1,8 +1,8 @@
 import Head from 'next/head';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 
 export default function Page ({children, title}:{children:React.ReactNode, title:string}) {
-    return <div className='px-4 py-8'>
+    return <div className='px-4 py-8 min-h-screen'>
         <Head>
             <title>{title} - CEC</title>
         </Head>
