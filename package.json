@@ -40,7 +40,7 @@
     "react-intersection-observer": "^8.32.1",
     "react-medium-image-zoom": "^4.3.5",
     "react-transition-group": "^4.4.2",
-    "sharp": "^0.30.3",
+    "sharp": "^0.30.5",
     "superjson": "^1.9.1",
     "use-algolia": "^1.5.3",
     "uuid": "^8.3.2",
