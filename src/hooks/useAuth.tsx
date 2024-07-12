@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, signOut, User, ParsedToken } from "@firebase/auth";
+import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User, ParsedToken } from "@firebase/auth";
 import { onDisconnect, onValue, ref, serverTimestamp, set } from "@firebase/database";
 import { collection, doc, onSnapshot, Timestamp, DocumentData } from "@firebase/firestore";
 import { useRouter } from "next/dist/client/router";
@@ -59,7 +59,7 @@ const useAuthProvider = () => {
      * Sign in user with a Google Account with a redirect
      */
     const initGoogleSignIn = async () => {
-        await signInWithRedirect(auth, new GoogleAuthProvider()
+        await signInWithPopup(auth, new GoogleAuthProvider()
                 .setCustomParameters({
                     prompt: "select_account",
                     hd: "clphs.edu.my"
