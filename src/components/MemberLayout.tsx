@@ -51,18 +51,12 @@ const MemberLayout: FC<{children: React.ReactChild | React.ReactChildren}>  =  (
     const links = [
         { href: "/dashboard", label: "Dashboard", Icon: Home },
         { href: "/profile", label: "Profile", Icon: AccountCircle },
-        { href: "/facility", label: "Facility", Icon: PrecisionManufacturingTwoTone },
         { label: "Admin", href: "/admin", permission: ['isAdmin'], children: [
             { href: "/admin/links", label: "Links", Icon: LinkRounded },
-            { href: "/admin/fabrication", label: "Fabrication", Icon: DesignServicesTwoTone },
             { href: "/admin/cards", label: "Cards", Icon: CardMembershipRounded },
-            { href: "/admin/store", label: "Store Transactions", Icon: StoreRounded },
         ], Icon: AdminPanelSettingsRounded },
         { href: "/students", label: "Students", permission: ['isAdmin'], Icon: ClassRounded },
         { href: "/attendance/view", permission: ['isAdmin'], label: "Attendance", Icon: AppsTwoTone},
-        { href: "/finance", permission: ['isAdmin'], label: "Finance", Icon: AccountBalanceTwoToneIcon },
-        { href: "/inventory", permission: ['isAdmin'], label: "Inventory", Icon: AppsTwoTone},
-        { href: "/store/storefront", label: "Store", Icon: StoreRounded },
     ]
 
     return <div className="min-h-screen w-screen pb-12 sm:pb-0 sm:grid grid-cols-[14rem_1fr] gap-1 max-w-[84rem] sm:px-4">
