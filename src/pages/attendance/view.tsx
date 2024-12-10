@@ -1,6 +1,6 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
+import { addDoc, collection, query, Timestamp, updateDoc, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
 import { db, docConverter, functions } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
@@ -115,6 +115,11 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
                         rules={{required: true}}
                         />
                 </div>
+                <ul>
+                    <li>* The "start" time refers to the beginning of the activity.</li>
+                    <li>* Students can start scanning their attendance 30 minutes before the "start" time.</li>
+                    <li>* After the "end" time, the attendance record will be closed and no further scans will be accepted.</li>
+                </ul>
             </div>
         </DialogContent>
         <DialogActions>
