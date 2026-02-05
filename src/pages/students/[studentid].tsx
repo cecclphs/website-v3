@@ -4,18 +4,32 @@ import {useAuth} from '../../hooks/useAuth';
 import FullUserProfile from '../../components/FullUserProfile';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useRouter } from 'next/router';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, Timestamp } from 'firebase/firestore';
 import { db, docConverter } from '../../config/firebase';
-import { Button, Checkbox, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Button, Checkbox, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, CircularProgress, Container, Alert, Skeleton } from '@mui/material';
 import UserToken from '../../types/UserToken';
 import StudentDetails from '../../types/StudentDetails';
 import { useEffect, useState } from 'react';
 import { useDialog } from '../../hooks/useDialog';
 import LinkAccountDialog from '../../components/LinkAccountDialog';
+import { useSnackbar } from 'notistack';
 const StudentProfile = () => {
     const { userToken } = useAuth();
     const router = useRouter();
-    const [studentDetails, loading, error] = useDocumentData<StudentDetails>(doc(db, 'students/' + router.query.studentid).withConverter(docConverter));
+    const { enqueueSnackbar } = useSnackbar();
+    const [studentid, setStudentid] = useState<string | null>(null);
+    const [updating, setUpdating] = useState(false);
+
+    // Wait for router to be ready before accessing query params
+    useEffect(() => {
+        if (router.isReady && router.query.studentid) {
+            setStudentid(router.query.studentid as string);
+        }
+    }, [router.isReady, router.query.studentid]);
+
+    const [studentDetails, loading, dbError] = useDocumentData<StudentDetails>(
+        studentid ? doc(db, 'students', studentid).withConverter(docConverter) : null
+    );
     const [studentPerm, setStudentPerm] = useState<UserToken>({
         studentid: '',
         englishName: '',
@@ -26,35 +40,111 @@ const StudentProfile = () => {
     });
     const noAccounts = !studentDetails?.linkedAccounts || studentDetails?.linkedAccounts.length === 0 || !studentPerm;
     const [openDialog, closeDialog] = useDialog();
+
+    // Early returns for loading and error states
+    if (!router.isReady || !studentid) {
+        return (
+            <MemberLayout>
+                <Container maxWidth="lg" sx={{ mt: 4 }}>
+                    <CircularProgress />
+                </Container>
+            </MemberLayout>
+        );
+    }
+
+    if (loading) {
+        return (
+            <MemberLayout>
+                <Container maxWidth="lg" sx={{ mt: 4 }}>
+                    <Skeleton variant="rectangular" height={400} />
+                </Container>
+            </MemberLayout>
+        );
+    }
+
+    if (dbError || !studentDetails) {
+        return (
+            <MemberLayout>
+                <Container maxWidth="lg" sx={{ mt: 4 }}>
+                    <Alert severity="error">Failed to load student details</Alert>
+                </Container>
+            </MemberLayout>
+        );
+    }
     useEffect(() => {
-        (async () => {
-            if (!loading && studentDetails && studentDetails.linkedAccounts?.length > 0) {;
-                const firstAcc = studentDetails.linkedAccounts[0];
-                return onSnapshot(doc(db, 'user_claims', firstAcc), (snapshot) => {
-                    setStudentPerm(snapshot.data() as UserToken);
-                });
+        if (!router.isReady || loading || !studentDetails?.linkedAccounts?.length) {
+            return;
+        }
+
+        const firstAcc = studentDetails.linkedAccounts[0];
+        const unsubscribe = onSnapshot(
+            doc(db, 'user_claims', firstAcc),
+            (snapshot) => {
+                setStudentPerm(snapshot.data() as UserToken);
+            },
+            (error) => {
+                console.error('Error loading permissions:', error);
             }
-        })();
-    },[studentDetails, loading, router.query.studentid])
+        );
 
-    const setPerm = (perm: keyof Omit<UserToken, 'englishName' | 'chineseName' | 'studentid'>, enabled: boolean) => {
-        if(!studentDetails.linkedAccounts) return;
-        studentDetails.linkedAccounts.forEach(account => {
-            updateDoc(doc(db, `user_claims/${account}`), {
-                [perm]: enabled
-            })
-        })
-    }
+        return () => unsubscribe();
+    }, [studentDetails?.linkedAccounts, loading, router.isReady]);
 
-    const setStatus = (status: StudentDetails['status']) => {
-        updateDoc(doc(db, `students/${router.query.studentid}`), {
-            status
-        })
-    }
+    const setStatus = async (status: StudentDetails['status']) => {
+        if (!router.isReady || !studentid || !studentDetails || updating) {
+            return;
+        }
+
+        setUpdating(true);
+
+        try {
+            await updateDoc(doc(db, `students/${studentid}`), {
+                status,
+                modifiedOn: Timestamp.now()
+            });
+
+            enqueueSnackbar(`Status updated to ${status}`, { variant: 'success' });
+        } catch (error) {
+            console.error('Update status error:', error);
+            enqueueSnackbar('Failed to update status', { variant: 'error' });
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const setPerm = async (perm: keyof Omit<UserToken, '_lastCommitted'>, enabled: boolean) => {
+        if (!studentDetails?.linkedAccounts?.length || updating) {
+            enqueueSnackbar('No linked accounts found', { variant: 'warning' });
+            return;
+        }
+
+        setUpdating(true);
+
+        try {
+            await Promise.all(
+                studentDetails.linkedAccounts.map(account =>
+                    updateDoc(doc(db, `user_claims/${account}`), {
+                        [perm]: enabled,
+                        _lastCommitted: Timestamp.now()
+                    })
+                )
+            );
+
+            enqueueSnackbar(
+                `Permission ${perm} ${enabled ? 'granted' : 'revoked'}`,
+                { variant: 'success' }
+            );
+        } catch (error) {
+            console.error('Update permission error:', error);
+            enqueueSnackbar('Failed to update permissions', { variant: 'error' });
+        } finally {
+            setUpdating(false);
+        }
+    };
 
     const handleLinkAccount = () => {
         openDialog({
-            children: <LinkAccountDialog onClose={closeDialog} studentid={router.query.studentid as string}/>
+            children: <LinkAccountDialog onClose={closeDialog} studentid={studentid}/>
         })
     }
 
@@ -67,12 +157,12 @@ const StudentProfile = () => {
                 </div>:<div className='flex flex-col'>
                     <h3 className="font-semibold text-lg">User Permissions</h3>
                     <p>{studentDetails.linkedAccounts.length} Accounts</p>
-                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)}/>} label="Admin Priviliges" />
-                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)}/>} label="Committee Priviliges" />
+                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)} disabled={updating}/>} label="Admin Priviliges" />
+                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)} disabled={updating}/>} label="Committee Priviliges" />
                     </div>}
                     <Button variant="contained" color="primary" onClick={handleLinkAccount}>Link An Account</Button>
                 </div>
-                <FormControl fullWidth size="small" margin='normal'>
+                <FormControl fullWidth size="small" margin='normal' disabled={updating}>
                     <InputLabel id="status-label">Enrollment Status</InputLabel>
                     <Select
                         labelId="status-label"
@@ -81,7 +171,7 @@ const StudentProfile = () => {
                         size="small"
                         onChange={e => setStatus(e.target.value as StudentDetails['status'])}>
                         <MenuItem value="enrolled">Enrolled</MenuItem>
-                        <MenuItem value="graduated">Graduated</MenuItem> 
+                        <MenuItem value="graduated">Graduated</MenuItem>
                         <MenuItem value="transfered">Transfered</MenuItem>
                     </Select>
                 </FormControl>
