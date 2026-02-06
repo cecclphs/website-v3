@@ -10,8 +10,18 @@ import vision from '@google-cloud/vision';
 
 const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     const { uid, email, studentid } = req.token;
+
     //check if user is logged in, else send 403
-    if(!uid) res.status(403).json({ error: "You are not logged in" });
+    if(!uid) {
+        res.status(403).json({ error: "You are not logged in" });
+        return;
+    }
+
+    if (!studentid) {
+        res.status(400).json({ error: "Student ID not found in token" });
+        return;
+    }
+
     //get new picture
     const { image } = req.body;
 

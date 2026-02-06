@@ -47,8 +47,11 @@ const migrate = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         }, { merge: true })
         res.status(200).send(JSON.stringify({status:200, success: true, message: "Migration Successful"}))
     } catch(e) {
-        console.error(e)
-        throw new Error("An Error Occurred")
+        console.error('Migration error:', e);
+        return res.status(500).json({
+            error: "An error occurred during migration",
+            message: e instanceof Error ? e.message : 'Unknown error'
+        });
     }
 }
 

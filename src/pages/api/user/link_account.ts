@@ -35,27 +35,36 @@ const linkAccount = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         if(linkedAccounts.size > 0) {
             throw new Error("Account already linked to other students");
         }
-        //add student to linkedAccounts
-        await adminDb.doc(`students/${studentid}`).update({
-            linkedAccounts: FieldValue.arrayUnion(newAccUID)
-        })
-        //set acc with student data
-        await adminDb.doc(`user_claims/${newAccUID}`).set({
-            englishName: student.englishName,
-            chineseName: student.chineseName,
-            studentid: studentid,
-            isStudent: true,
-        }, { merge: true })
-        //set acc users to data
-        await adminDb.doc(`users/${newAccUID}`).set({
-            ...student,
-            migrated: true,
-            linkedAccounts: FieldValue.arrayUnion(newAccUID),
-            photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
-            createdOn: FieldValue.serverTimestamp(),
-            modifiedOn: FieldValue.serverTimestamp()
-        }, { merge: true })
-        res.status(200).send(JSON.stringify({status:200, message: "Create Account Successful"}))
+
+        // Update all documents with proper error handling
+        await Promise.all([
+            adminDb.doc(`students/${studentid}`).update({
+                linkedAccounts: FieldValue.arrayUnion(newAccUID)
+            }),
+            adminDb.doc(`user_claims/${newAccUID}`).set({
+                uid: newAccUID,
+                englishName: student.englishName,
+                chineseName: student.chineseName,
+                studentid: studentid,
+                isStudent: true,
+                isAdmin: false,
+                isCommittee: false,
+                _lastCommitted: FieldValue.serverTimestamp()
+            }, { merge: true }),
+            adminDb.doc(`users/${newAccUID}`).set({
+                uid: newAccUID,
+                englishName: student.englishName,
+                chineseName: student.chineseName,
+                studentid: studentid,
+                email: email,
+                photoURL: student.photoURL || null
+            }, { merge: true })
+        ]);
+
+        res.status(200).json({
+            success: true,
+            message: 'Account linked successfully'
+        });
     } catch(e) {
         console.error(e)
         res.status(500).send(JSON.stringify({status:500, message: e.message}))
