@@ -152,19 +152,19 @@ const StudentProfile = () => {
 
     return <MemberLayout>
         <Page title={`${studentDetails?.englishName || "Member"}'s Profile`}>
-            <div className="flex flex-row overflow-hidden">
-                <div className="flex flex-col">
+            <div className="flex flex-col sm:flex-row gap-4 overflow-hidden">
+                <div className="flex flex-col flex-1">
                 {noAccounts?<div className='flex flex-col'>
                     <h3 className="font-semibold text-lg">User has no accounts linked</h3>
                 </div>:<div className='flex flex-col'>
                     <h3 className="font-semibold text-lg">User Permissions</h3>
-                    <p>{studentDetails.linkedAccounts.length} Accounts</p>
-                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)} disabled={updating}/>} label="Admin Priviliges" />
-                    <FormControlLabel control={<Checkbox defaultChecked checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)} disabled={updating}/>} label="Committee Priviliges" />
+                    <p className="text-sm text-gray-600">{studentDetails.linkedAccounts.length} Account(s)</p>
+                    <FormControlLabel control={<Checkbox checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)} disabled={updating}/>} label="Admin Priviliges" />
+                    <FormControlLabel control={<Checkbox checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)} disabled={updating}/>} label="Committee Priviliges" />
                     </div>}
-                    <Button variant="contained" color="primary" onClick={handleLinkAccount}>Link An Account</Button>
+                    <Button variant="contained" color="primary" onClick={handleLinkAccount} size="small" sx={{ alignSelf: 'flex-start', mt: 1 }}>Link An Account</Button>
                 </div>
-                <FormControl fullWidth size="small" margin='normal' disabled={updating}>
+                <FormControl size="small" margin='normal' disabled={updating} sx={{ minWidth: 180, maxWidth: { xs: '100%', sm: 200 } }}>
                     <InputLabel id="status-label">Enrollment Status</InputLabel>
                     <Select
                         labelId="status-label"

@@ -13,19 +13,19 @@ import { db } from '../config/firebase';
 
 const DataRow = ({title, info}: {title: string, info: string}) => {
     return <tr>
-        <td className='text-sm font-semibold py-2 w-[200px]'>{title}</td>
-        <td>{info}</td>
+        <td className='text-xs sm:text-sm font-semibold py-2 w-[120px] sm:w-[200px] align-top'>{title}</td>
+        <td className='text-sm sm:text-base py-2 break-words'>{info}</td>
     </tr>
 }
 
 const DataRowEditable = ({title, ...props}: {title: string} & React.InputHTMLAttributes<HTMLInputElement> & { inputRef?: React.Ref<HTMLInputElement> }) => {
     const { inputRef, ...inputProps } = props;
     return <tr>
-        <td className='text-sm font-semibold py-2 w-[200px]'>{title}</td>
+        <td className='text-xs sm:text-sm font-semibold py-2 w-[120px] sm:w-[200px] align-top'>{title}</td>
         <td>
             <input
                 ref={inputRef}
-                className="text-base appearance-none w-full border-b border-solid border-indigo-400 bg-indigo-50 px-1 py-0.5 rounded-t"
+                className="text-sm sm:text-base appearance-none w-full border-b border-solid border-indigo-400 bg-indigo-50 px-1 py-0.5 rounded-t"
                 {...inputProps}
             />
         </td>
@@ -133,8 +133,8 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
             <LinearProgress />
         </div>:
         <div className="flex flex-col">
-            <div className='flex flex-row space-x-3 items-center mb-3'>
-                <div className='relative w-20 h-20'>
+            <div className='flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 items-start sm:items-center mb-3'>
+                <div className='relative w-16 h-16 sm:w-20 sm:h-20'>
                     <label className="absolute left-0 top-0" htmlFor="pfpicture">
                         <input
                             disabled={!isUser}
@@ -144,15 +144,15 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                             type="file"
                             onChange={handleUpload}
                         />
-                        <div id="pfpicture" className={`w-20 h-20 grid place-items-center transition opacity-0 bg-black/30 ${isUser?'hover:opacity-100 cursor-pointer':''} rounded-full`}>
+                        <div id="pfpicture" className={`w-16 h-16 sm:w-20 sm:h-20 grid place-items-center transition opacity-0 bg-black/30 ${isUser?'hover:opacity-100 cursor-pointer':''} rounded-full`}>
                             <EditRounded className="text-white"/>
                         </div>
                     </label>
-                    <img src={userDetails?.photoURL+'?'+Date.now()} className="w-20 h-20 rounded-full object-cover border-[6px] border-solid border-white shadow-xl" alt="User Profile"/>
+                    <img src={userDetails?.photoURL+'?'+Date.now()} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-[4px] sm:border-[6px] border-solid border-white shadow-xl" alt="User Profile"/>
                 </div>
                 <div className="flex flex-col flex-1">
-                    <h1 className='text-2xl font-semibold'>{chineseName} {englishName}</h1>
-                    <h2 className='font-semibold'>{className} {studentid}</h2>
+                    <h1 className='text-xl sm:text-2xl font-semibold'>{chineseName} {englishName}</h1>
+                    <h2 className='text-sm sm:text-base font-semibold'>{className} {studentid}</h2>
                 </div>
                 {canEdit && !editMode && (
                     <Button variant="outlined" startIcon={<EditRounded />} onClick={startEdit}>
