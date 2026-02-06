@@ -3,7 +3,7 @@ import Page from "../../components/Page";
 import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc, writeBatch } from "firebase/firestore";
 import { db, docConverter, functions } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
-import React, { forwardRef, useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useMemo, useState } from "react";
 import StudentDetails from "../../types/StudentDetails";
 import {
     DataGridPro,
@@ -472,9 +472,10 @@ const ArchivedRecordsDialog = ({ onClose }: { onClose: () => void }) => {
 
 // ─── Bulk Archive Dialog ──────────────────────────────────────────────────
 const BulkArchiveDialog = ({ onClose }: { onClose: () => void }) => {
-    const [records = [], loading] = useCollectionData<AttendanceRecord>(
-        query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '!=', true), orderBy('archived'), orderBy('startTimestamp', 'desc'))
+    const [allRecords = [], loading] = useCollectionData<AttendanceRecord>(
+        query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp', 'desc'))
     );
+    const records = useMemo(() => allRecords.filter(r => r.archived !== true), [allRecords]);
     const [selected, setSelected] = useState<GridSelectionModel>([]);
     const [archiving, setArchiving] = useState(false);
     const { enqueueSnackbar } = useSnackbar();
@@ -596,7 +597,8 @@ function CustomToolbar() {
 const ViewAttendance = () => {
     const { user } = useAuth()
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
-    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '!=', true), orderBy('archived'), orderBy('startTimestamp','asc')));
+    const [allRecords = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','asc')));
+    const records = useMemo(() => allRecords.filter(r => r.archived !== true), [allRecords]);
     const [openDialog, closeDialog] = useDialog()
 
     const handleAddDialog = () => {
