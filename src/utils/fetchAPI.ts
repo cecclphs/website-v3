@@ -8,13 +8,16 @@ export const fetchAPI = async (apiMethod: string, user: User | null | undefined,
     const token = await user.getIdToken();
 
     try {
+        const method = (options.method ?? 'GET').toUpperCase();
+        const headers: HeadersInit = {
+            ...options.headers,
+            authorization: `Bearer ${token}`,
+            ...(method !== 'GET' ? { 'Content-Type': 'application/json' } : {}),
+        };
+
         const response = await fetch(`/api/${apiMethod}`, {
             ...options,
-            headers: {
-                ...options.headers,
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
+            headers,
         });
 
         // Check if response is ok

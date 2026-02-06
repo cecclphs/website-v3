@@ -4,7 +4,7 @@ import {useAuth} from '../../hooks/useAuth';
 import FullUserProfile from '../../components/FullUserProfile';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useRouter } from 'next/router';
-import { doc, onSnapshot, updateDoc, Timestamp } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { db, docConverter } from '../../config/firebase';
 import { Button, Checkbox, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, CircularProgress, Container, Alert, Skeleton } from '@mui/material';
 import UserToken from '../../types/UserToken';
@@ -41,6 +41,26 @@ const StudentProfile = () => {
     const noAccounts = !studentDetails?.linkedAccounts || studentDetails?.linkedAccounts.length === 0 || !studentPerm;
     const [openDialog, closeDialog] = useDialog();
 
+    // Subscribe to permission changes - must be before early returns (Rules of Hooks)
+    useEffect(() => {
+        if (!router.isReady || loading || !studentDetails?.linkedAccounts?.length) {
+            return;
+        }
+
+        const firstAcc = studentDetails.linkedAccounts[0];
+        const unsubscribe = onSnapshot(
+            doc(db, 'user_claims', firstAcc),
+            (snapshot) => {
+                setStudentPerm(snapshot.data() as UserToken);
+            },
+            (error) => {
+                console.error('Error loading permissions:', error);
+            }
+        );
+
+        return () => unsubscribe();
+    }, [studentDetails?.linkedAccounts, loading, router.isReady]);
+
     // Early returns for loading and error states
     if (!router.isReady || !studentid) {
         return (
@@ -71,24 +91,6 @@ const StudentProfile = () => {
             </MemberLayout>
         );
     }
-    useEffect(() => {
-        if (!router.isReady || loading || !studentDetails?.linkedAccounts?.length) {
-            return;
-        }
-
-        const firstAcc = studentDetails.linkedAccounts[0];
-        const unsubscribe = onSnapshot(
-            doc(db, 'user_claims', firstAcc),
-            (snapshot) => {
-                setStudentPerm(snapshot.data() as UserToken);
-            },
-            (error) => {
-                console.error('Error loading permissions:', error);
-            }
-        );
-
-        return () => unsubscribe();
-    }, [studentDetails?.linkedAccounts, loading, router.isReady]);
 
     const setStatus = async (status: StudentDetails['status']) => {
         if (!router.isReady || !studentid || !studentDetails || updating) {
@@ -100,7 +102,7 @@ const StudentProfile = () => {
         try {
             await updateDoc(doc(db, `students/${studentid}`), {
                 status,
-                modifiedOn: Timestamp.now()
+                modifiedOn: serverTimestamp()
             });
 
             enqueueSnackbar(`Status updated to ${status}`, { variant: 'success' });
@@ -125,7 +127,7 @@ const StudentProfile = () => {
                 studentDetails.linkedAccounts.map(account =>
                     updateDoc(doc(db, `user_claims/${account}`), {
                         [perm]: enabled,
-                        _lastCommitted: Timestamp.now()
+                        _lastCommitted: serverTimestamp()
                     })
                 )
             );

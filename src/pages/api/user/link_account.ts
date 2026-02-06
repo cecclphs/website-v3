@@ -57,7 +57,11 @@ const linkAccount = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
                 chineseName: student.chineseName,
                 studentid: studentid,
                 email: email,
-                photoURL: student.photoURL || null
+                photoURL: student.photoURL || `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
+                migrated: true,
+                linkedAccounts: FieldValue.arrayUnion(newAccUID),
+                createdOn: FieldValue.serverTimestamp(),
+                modifiedOn: FieldValue.serverTimestamp()
             }, { merge: true })
         ]);
 
