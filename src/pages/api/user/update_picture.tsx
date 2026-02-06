@@ -9,7 +9,7 @@ import { ToFixedSizePNG } from "../../../utils/api/image";
 import vision from '@google-cloud/vision';
 
 const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
-    const { uid, email, studentid } = req.token;
+    const { uid, studentid, isAdmin } = req.token;
 
     //check if user is logged in, else send 403
     if(!uid) {
@@ -17,13 +17,22 @@ const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         return;
     }
 
-    if (!studentid) {
-        res.status(400).json({ error: "Student ID not found in token" });
+    //get new picture and optional target student
+    const { image, targetStudentId } = req.body;
+
+    // Determine which student ID to update
+    const updateStudentId = targetStudentId || studentid;
+
+    if (!updateStudentId) {
+        res.status(400).json({ error: "Student ID not found" });
         return;
     }
 
-    //get new picture
-    const { image } = req.body;
+    // If updating another student's picture, must be admin
+    if (targetStudentId && targetStudentId !== studentid && !isAdmin) {
+        res.status(403).json({ error: "Admin privileges required to update other student profiles" });
+        return;
+    }
 
     const base64EncodedImageString = image.replace(/^data:image\/\w+;base64,/, '');
     const imageBuffer = Buffer.from(base64EncodedImageString, 'base64');
@@ -44,9 +53,9 @@ const updatePicture = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     }
     console.log('generating profile picture...');
     console.log('uploading profile picture...');
-    const imageUrl = await UploadPublicFile(await ToFixedSizePNG(imageBuffer, 512, 512), `profiles/${studentid}.png`);
+    const imageUrl = await UploadPublicFile(await ToFixedSizePNG(imageBuffer, 512, 512), `profiles/${updateStudentId}.png`);
     //get student document
-    const studentSnap = await adminDb.collection("students").doc(studentid).get();
+    const studentSnap = await adminDb.collection("students").doc(updateStudentId).get();
     const { linkedAccounts } = studentSnap.data() as StudentDetails
     //update user photoURL for each user
     for(const linkedAccount of linkedAccounts) {

@@ -397,9 +397,10 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
 
 // ─── Archived Records Viewer ─────────────────────────────────────────────
 const ArchivedRecordsDialog = ({ onClose }: { onClose: () => void }) => {
-    const [records = [], loading] = useCollectionData<AttendanceRecord>(
-        query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '==', true), orderBy('startTimestamp', 'desc'))
+    const [allRecords = [], loading] = useCollectionData<AttendanceRecord>(
+        query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp', 'desc'))
     );
+    const records = useMemo(() => allRecords.filter(r => r.archived === true), [allRecords]);
     const { enqueueSnackbar } = useSnackbar();
 
     const handleUnarchive = async (recordId: string) => {
@@ -607,38 +608,38 @@ const ViewAttendance = () => {
         })
     }
 
-    const baseColumns: GridColDef[] = [
-        { field: 'studentid', headerName: 'ID', width: 70, pinnable: true },
-        {
-            field: 'chineseName',
-            headerName: '名字',
-            width: 80,
-        },
-        {
-            field: 'englishName',
-            headerName: 'Name',
-            width: 150,
-        },
-        {
-            field: 'class',
-            headerName: 'Class',
-            width: 80,
-        },
-        {
-            field: 'gender',
-            headerName: 'Gender',
-            width: 80
-        },
-        {
-            field: 'enrollmentDate',
-            headerName: 'Enrolled',
-            width: 110
-        }
-      ];
-
-
     const [columns, data] = useMemo(() => {
         if(students.length === 0) return [[] ,[]];
+
+        const baseColumns: GridColDef[] = [
+            { field: 'studentid', headerName: 'ID', width: 70, pinnable: true },
+            {
+                field: 'chineseName',
+                headerName: '名字',
+                width: 80,
+            },
+            {
+                field: 'englishName',
+                headerName: 'Name',
+                width: 150,
+            },
+            {
+                field: 'class',
+                headerName: 'Class',
+                width: 80,
+            },
+            {
+                field: 'gender',
+                headerName: 'Gender',
+                width: 80
+            },
+            {
+                field: 'enrollmentDate',
+                headerName: 'Enrolled',
+                width: 110
+            }
+        ];
+
         const combined = {} as {[studentid: number]: StudentDetails};
         students.forEach(student => {
             combined[student.studentid] = student;
