@@ -20,8 +20,16 @@ const handler = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         return res.status(404).json({status: 404, success: false, message: "Student Not Found"});
 
     const studentdoc = await adminDb.collection('students').doc(studentid).get();
-    const { linkedAccounts, modifiedOn, createdOn, ...student } = (studentdoc.data() || {}) as Omit<StudentDetails, "id"| "ref"> ;
-    
+    const data = studentdoc.data();
+    if (!data) {
+        return res.status(404).json({
+            error: "Student not found",
+            studentid
+        });
+    }
+
+    const { linkedAccounts, modifiedOn, createdOn, ...student } = data as Omit<StudentDetails, "id"| "ref">;
+
     //Get user and omit useless data
     const studentData = studentDocs[0].data();
     console.log('found student for user: '+ studentDocs[0].id)

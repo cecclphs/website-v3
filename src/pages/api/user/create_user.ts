@@ -5,6 +5,14 @@ import ApiRequestWithAuth from "../../../types/ApiRequestWithAuth";
 
 const createUser = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     try {
+        const { email, uid } = req.token;
+
+        //Check if email is student email, else don't give a fck
+        if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) {
+            res.status(403).json({ error: "You are not a student" });
+            return;
+        }
+
         const { userDetails:{
             createdOn,
             modifiedOn,
@@ -12,11 +20,7 @@ const createUser = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
             status,
             permission,
             ...details
-        } } = req.body
-        const { email, uid } = req.token
-    
-        //Check if email is student email, else don't give a fck
-        if(!/(s[0-9]{5}@clphs.edu.my)/g.test(email)) throw new Error("You are not a student");
+        } } = req.body;
         
         //Fetch user existing data, if snapshot is empty, throw error
         const studentid = email.substring(1,6);
@@ -44,8 +48,11 @@ const createUser = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
         }, { merge: true })
         res.status(200).send(JSON.stringify({status:200, message: "Create Account Successful"}))
     } catch(e) {
-        console.error(e)
-        throw new Error("An Error Occurred")
+        console.error('Create user error:', e);
+        return res.status(500).json({
+            error: "An error occurred while creating user",
+            message: e instanceof Error ? e.message : 'Unknown error'
+        });
     }
 }
 

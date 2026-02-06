@@ -8,7 +8,29 @@ import InventoryItem from '../../../types/Inventory';
 
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+    // Validate request body
+    if (!req.body || typeof req.body !== 'object') {
+        res.status(400).json({ error: "Invalid request body" });
+        return;
+    }
+
     const { transaction } = req.body;
+
+    if (!transaction || typeof transaction !== 'object') {
+        res.status(400).json({ error: "Invalid transaction data" });
+        return;
+    }
+
+    // Validate required fields
+    if (typeof transaction.total !== 'number') {
+        res.status(400).json({ error: "Invalid transaction total" });
+        return;
+    }
+
+    if (!Array.isArray(transaction.cart) || transaction.cart.length === 0) {
+        res.status(400).json({ error: "Invalid or empty cart" });
+        return;
+    }
 
     adminDb.runTransaction(async (t) => {
         // await adminDb.collection('store').doc('CEC').collection("transactions").add({
