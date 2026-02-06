@@ -22,11 +22,33 @@ const AddStudentProfile = ({ onClose }: { onClose: () => void}) => {
     });
     
     const submit = async (data: Omit<StudentDetails, 'id' | 'ref' | 'createdOn' | 'modifiedOn'>) => {
-        await setDoc(doc(db, 'students', data.studentid), {
+        // Trim all string fields to prevent whitespace issues
+        const trimmedData = {
             ...data,
+            studentid: data.studentid.trim(),
+            englishName: data.englishName.trim(),
+            chineseName: data.chineseName.trim(),
+            class: data.class?.trim(),
+            gender: data.gender?.trim(),
+            identification: data.identification?.trim(),
+            phone: data.phone?.trim(),
+            facebookURL: data.facebookURL?.trim(),
+            email: data.email?.trim(),
+            address: data.address?.trim(),
+            motherName: data.motherName?.trim(),
+            motherPhone: data.motherPhone?.trim(),
+            fatherName: data.fatherName?.trim(),
+            fatherPhone: data.fatherPhone?.trim(),
+            emergencyphone: data.emergencyphone?.trim(),
+            emergencyrelation: data.emergencyrelation?.trim(),
+            specials: data.specials?.trim(),
+        };
+
+        await setDoc(doc(db, 'students', trimmedData.studentid), {
+            ...trimmedData,
             migrated: true,
             linkedAccounts: [],
-            photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${data.studentid}.png`,
+            photoURL: `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${trimmedData.studentid}.png`,
             status: "enrolled",
             createdOn: Timestamp.now(),
             modifiedOn: Timestamp.now()
@@ -41,7 +63,13 @@ const AddStudentProfile = ({ onClose }: { onClose: () => void}) => {
                 {/* @ts-ignore */}
                 <DataRowInput {...register("englishName", { required: true })} title="English Name"/>
                 <DataRowInput {...register("chineseName", { required: true })} title="Chinese Name"/>
-                <DataRowInput {...register("studentid", { required: true })} title="Student ID"/>
+                <DataRowInput {...register("studentid", {
+                    required: "Student ID is required",
+                    validate: {
+                        noWhitespace: (value) => value.trim() === value || "Student ID cannot have leading or trailing spaces",
+                        notEmpty: (value) => value.trim().length > 0 || "Student ID cannot be empty"
+                    }
+                })} title="Student ID"/>
                 <DataRowInput {...register("class", { required: true })} title="Class"/>
                 <DataRowInput {...register("gender", { required: true })} title="Gender (Male or Female)"/>
                 <DataRowInput {...register("enrollmentDate", { required: true })} title="Enrollment Date (yyyy-mm-dd)"/>
