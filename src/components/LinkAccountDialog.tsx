@@ -15,10 +15,10 @@ const LinkAccountDialog: FC<{ onClose: () => void, studentid: string }> = ({ onC
             return enqueueSnackbar('Please enter an email address', { variant: 'error' });
         }
 
-        // Validate email format
-        const emailRegex = /^s\d{5}@clphs\.edu\.my$/;
+        // Validate basic email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.trim())) {
-            return enqueueSnackbar('Email must be in format: s12345@clphs.edu.my', { variant: 'error' });
+            return enqueueSnackbar('Please enter a valid email address', { variant: 'error' });
         }
 
         setLoading(true);
@@ -56,8 +56,8 @@ const LinkAccountDialog: FC<{ onClose: () => void, studentid: string }> = ({ onC
                 variant="outlined"
                 fullWidth
                 disabled={loading}
-                placeholder="s12345@clphs.edu.my"
-                helperText="Enter the student email to link"
+                placeholder="user@example.com"
+                helperText="Enter the email address of the account to link"
             />
         </DialogContent>
         <DialogActions>
