@@ -1,9 +1,9 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, User, ParsedToken } from "@firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "@firebase/auth";
 import { onDisconnect, onValue, ref, serverTimestamp, set } from "@firebase/database";
-import { collection, doc, onSnapshot, Timestamp, DocumentData } from "@firebase/firestore";
+import { doc, onSnapshot, Timestamp } from "@firebase/firestore";
 import { useRouter } from "next/dist/client/router";
 import React, { useState, useEffect, useContext, createContext } from "react";
-import { auth, db, firebase, rtdb } from "../config/firebase";
+import { auth, db, rtdb } from "../config/firebase";
 import Merge from "../types/Merge";
 import StudentDetails from "../types/StudentDetails";
 import UserToken from "../types/UserToken";
@@ -49,10 +49,10 @@ type UserDetails = Merge<
 >
 
 const useAuthProvider = () => {
-    const [user, authing, authError] = useAuthState(auth); 
+    const [user, authing, authError] = useAuthState(auth);
     const [userDetails, setUserDetails] = useState<UserDetails>();
     const [userToken, setUserToken] = useState<UserToken>();
-    const [lastCommitted, setLastCommitted] = useLocalStorage<number>("lastCommited", 0);  //The last committed state of our user claims document, decides if token needs to update if outdated
+    const [lastCommitted, setLastCommitted] = useLocalStorage<number>("lastCommited", 0);
     const router = useRouter()
 
     /**
@@ -67,18 +67,17 @@ const useAuthProvider = () => {
                     return { error };
                 });
     };
-    
+
     /**
      * Get firebase user tokens with custom claims for permission use, only refreshes if is true
-     * @param {boolean} refresh 
+     * @param {boolean} refresh
      * @returns userClaims
      */
     const getUserTokenResult = async (refresh: boolean = false) => {
         if (!user) return;
         let { claims } = await user.getIdTokenResult(refresh);
-        
-        //If user on homepage, redirect to dashboard
-        if (router.asPath == '/') {
+
+        if (router.asPath === '/') {
             router.push('/dashboard');
         }
         return claims as unknown as UserToken
@@ -99,44 +98,39 @@ const useAuthProvider = () => {
 
     //Attaches the onAuthStateChanged to listen for changes in authentication eg: login, signout etc.
     useEffect(() => {
-        if (user) {
-            console.log('logged in as ', user.email);
-        }
-        else if(user === null && authing === false) {
+        if(user === null && authing === false) {
             router.push('/');
         }
     }, [user]);
-    
+
     //Attaches user claims documents to listen for changes in user permissions, if yes update token to ensure no permission errors
     useEffect(() => {
         if (!user) return;
         (async () => setUserToken(await getUserTokenResult()))();
         return onSnapshot(doc(db,'user_claims',user.uid), async (snap) => {
             const data = snap.data();
-            
+
             if(!data?._lastCommitted) return;
 
             if (lastCommitted && !(data?._lastCommitted || {}).isEqual(lastCommitted)) {
-                console.log('updating user token')
                 setUserToken(await getUserTokenResult(true));
             }
             setLastCommitted(data?._lastCommitted);
         },
         error => {
-            console.log(error)
+            console.error('user_claims listener error:', error);
         });
-    }, [user?.uid]); //Only reattach if user uid is updated :(
+    }, [user?.uid]);
 
     //Attaches the user document to listen for changes in the document
     useEffect(() => {
         if (user?.uid) {
-            // Subscribe to user document on mount
             const unsubscribe = onSnapshot(doc(db,'users',user.uid), async (doc) => {
                 const userDetails = doc.data() as UserDetails
                 if(!userDetails?.migrated) router.push('/setup')
                 setUserDetails(userDetails)
             })
-            var userStatusDatabaseRef = ref(rtdb,'/status/' + user.uid); 
+            var userStatusDatabaseRef = ref(rtdb,'/status/' + user.uid);
             var isOfflineForDatabase = {
                 state: 'offline',
                 last_changed: serverTimestamp(),
@@ -147,13 +141,12 @@ const useAuthProvider = () => {
                 last_changed: serverTimestamp(),
             };
             onValue(ref(rtdb,'.info/connected'), (snapshot) => {
-                // If we're not currently connected, don't do anything.
-                if (snapshot.val() == false) return;
+                if (snapshot.val() === false) return;
                 onDisconnect(userStatusDatabaseRef).set(isOfflineForDatabase).then(function() {
                     set(userStatusDatabaseRef, isOnlineForDatabase);
                 });
             }, (error) => {
-                console.error(error);
+                console.error('RTDB connection error:', error);
             })
 
             return () => {

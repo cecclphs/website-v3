@@ -18,6 +18,7 @@ export type AttendanceRecord = {
     startTimestamp?: Timestamp,
     endTimestamp?: Timestamp,
     notes?: string,
+    archived?: boolean,
     metadata?: {
         createdBy?: ShortStudentInfo,
         createdOn?: Timestamp,

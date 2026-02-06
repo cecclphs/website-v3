@@ -44,7 +44,8 @@
     "superjson": "^1.9.1",
     "use-algolia": "^1.5.3",
     "uuid": "^8.3.2",
-    "uuid-v4": "^0.1.0"
+    "uuid-v4": "^0.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^17.0.22",

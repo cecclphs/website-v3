@@ -25,12 +25,12 @@ const Dashboard = () => {
   }, [user]);
   return (
     <MemberLayout>
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         <Head>
           <title>Creative Electronics Club - Dashboard</title>
         </Head>
-        <div className="flex flex-col space-y-6">
-          <h1 className="text-3xl font-bold text-gray-800">Your Attendance</h1>
+        <div className="flex flex-col space-y-4 sm:space-y-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Your Attendance</h1>
 
           {loading ? (
             <div className="flex justify-center items-center py-12">
@@ -41,14 +41,14 @@ const Dashboard = () => {
               No attendance records found
             </Paper>
           ) : (
-            <Paper elevation={2} className="overflow-hidden">
-              <table className="w-full table-auto border-collapse">
+            <Paper elevation={2} className="overflow-x-auto">
+              <table className="w-full table-auto border-collapse min-w-[320px]">
                 <thead className="bg-gradient-to-r from-blue-600 to-indigo-700">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-white uppercase tracking-wider">
                       Status
                     </th>
                   </tr>
@@ -58,14 +58,14 @@ const Dashboard = () => {
                     .sort(
                       (a, b) => new Date(b).getTime() - new Date(a).getTime(),
                     )
-                    .map((key, index) => {
+                    .map((key) => {
                       const isPresent = studentAttendance[key] !== "0";
                       return (
                         <tr
                           key={key}
                           className={`transition-colors hover:bg-gray-50 ${isPresent ? "" : "bg-red-50"}`}
                         >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                             {new Date(key).toLocaleDateString("en-US", {
                               weekday: "short",
                               year: "numeric",
@@ -73,18 +73,18 @@ const Dashboard = () => {
                               day: "numeric",
                             })}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
                             {isPresent ? (
-                              <div className="flex items-center justify-center space-x-2 text-green-600">
-                                <CheckCircle className="w-5 h-5" />
-                                <span className="text-sm font-semibold">
+                              <div className="flex items-center justify-center space-x-1 sm:space-x-2 text-green-600">
+                                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="text-xs sm:text-sm font-semibold">
                                   Present
                                 </span>
                               </div>
                             ) : (
-                              <div className="flex items-center justify-center space-x-2 text-red-600">
-                                <Cancel className="w-5 h-5" />
-                                <span className="text-sm font-semibold">
+                              <div className="flex items-center justify-center space-x-1 sm:space-x-2 text-red-600">
+                                <Cancel className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="text-xs sm:text-sm font-semibold">
                                   Absent
                                 </span>
                               </div>
