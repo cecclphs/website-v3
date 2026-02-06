@@ -6,7 +6,7 @@ import imageCompression from 'browser-image-compression';
 import { useRouter } from 'next/router';
 import StudentDetails from '../types/StudentDetails';
 import { useSnackbar } from 'notistack';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { doc, Timestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -18,19 +18,20 @@ const DataRow = ({title, info}: {title: string, info: string}) => {
     </tr>
 }
 
-const DataRowEditable = ({title, ...props}: {title: string} & React.InputHTMLAttributes<HTMLInputElement> & { inputRef?: React.Ref<HTMLInputElement> }) => {
-    const { inputRef, ...inputProps } = props;
-    return <tr>
-        <td className='text-xs sm:text-sm font-semibold py-2 w-[120px] sm:w-[200px] align-top'>{title}</td>
-        <td>
-            <input
-                ref={inputRef}
-                className="text-sm sm:text-base appearance-none w-full border-b border-solid border-indigo-400 bg-indigo-50 px-1 py-0.5 rounded-t"
-                {...inputProps}
-            />
-        </td>
-    </tr>
-}
+const DataRowEditable = forwardRef<HTMLInputElement, {title: string} & React.InputHTMLAttributes<HTMLInputElement>>(
+    ({title, ...inputProps}, ref) => {
+        return <tr>
+            <td className='text-xs sm:text-sm font-semibold py-2 w-[120px] sm:w-[200px] align-top'>{title}</td>
+            <td>
+                <input
+                    ref={ref}
+                    className="text-sm sm:text-base appearance-none w-full border-b border-solid border-indigo-400 bg-indigo-50 px-1 py-0.5 rounded-t"
+                    {...inputProps}
+                />
+            </td>
+        </tr>
+    }
+);
 
 type EditableFields = Omit<StudentDetails, 'id' | 'ref' | 'createdOn' | 'modifiedOn' | 'linkedAccounts' | 'photoURL' | 'status'>;
 
