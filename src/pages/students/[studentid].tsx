@@ -72,10 +72,10 @@ const StudentProfile = () => {
 
         const fetchEmails = async () => {
             try {
-                const response = await fetchAPI('/api/user/get_account_emails', {
+                const response = await fetchAPI('user/get_account_emails', user, {
                     method: 'POST',
                     body: JSON.stringify({ uids: studentDetails.linkedAccounts })
-                }, user);
+                });
 
                 if (response.accounts) {
                     setAccountEmails(response.accounts);
