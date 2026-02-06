@@ -1,14 +1,29 @@
-import * as admin from 'firebase-admin';
-import { DocumentData, DocumentReference, FirestoreDataConverter, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import * as admin from "firebase-admin";
+import {
+  DocumentData,
+  DocumentReference,
+  FirestoreDataConverter,
+  QueryDocumentSnapshot,
+} from "firebase-admin/firestore";
+
+// Process the private key - handle both escaped and literal newlines
+const getPrivateKey = () => {
+  const key = process.env.FIREBASE_PRIVATE_KEY;
+  if (!key) {
+    throw new Error("FIREBASE_PRIVATE_KEY environment variable is not set");
+  }
+  // Handle escaped newlines and trim any extra whitespace
+  return key.replace(/\\n/g, "\n").trim();
+};
 
 const adminConfig = {
   credential: admin.credential.cert({
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+    privateKey: getPrivateKey(),
   }),
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-}
+};
 
 if (!admin.apps.length) {
   admin.initializeApp(adminConfig);
@@ -17,19 +32,17 @@ if (!admin.apps.length) {
 const adminDb = admin.firestore();
 const adminAuth = admin.auth();
 const adminRtdb = admin.database();
-const adminStorage = admin.storage().bucket('gs://cecdbfirebase.appspot.com');
+const adminStorage = admin.storage().bucket("gs://cecdbfirebase.appspot.com");
 
-export const adminConverter:FirestoreDataConverter<any> = {
+export const adminConverter: FirestoreDataConverter<any> = {
   toFirestore(doc: any): DocumentData {
-      const { id, ref, ...docWithoutId } = doc;
-      return docWithoutId;
+    const { id, ref, ...docWithoutId } = doc;
+    return docWithoutId;
   },
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-  ): {
-    id: string,
-    ref: DocumentReference,
-    [x: string]: any
+  fromFirestore(snapshot: QueryDocumentSnapshot): {
+    id: string;
+    ref: DocumentReference;
+    [x: string]: any;
   } {
     const data = snapshot.data();
     return {
@@ -40,4 +53,4 @@ export const adminConverter:FirestoreDataConverter<any> = {
   },
 };
 
-export { adminDb, adminAuth, adminRtdb, adminStorage, admin, adminConfig }
+export { adminDb, adminAuth, adminRtdb, adminStorage, admin, adminConfig };
