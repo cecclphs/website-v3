@@ -98,7 +98,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
     } = userDetails || {};
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if(!user || !isUser) return;
+        if(!user || !canEdit) return;
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
@@ -116,6 +116,7 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                 },
                 body: JSON.stringify({
                     image: reader.result as string,
+                    ...(isUser ? {} : { targetStudentId: userDetails.studentid })
                 })
             }).then(async res => {
                 const { error } = await res.json()
@@ -138,14 +139,14 @@ const FullUserProfile = ({ userDetails, isUser = false }:{ userDetails: StudentD
                 <div className='relative w-16 h-16 sm:w-20 sm:h-20'>
                     <label className="absolute left-0 top-0" htmlFor="pfpicture">
                         <input
-                            disabled={!isUser}
+                            disabled={!canEdit}
                             className="hidden"
                             accept="image/*"
                             id="pfpicture"
                             type="file"
                             onChange={handleUpload}
                         />
-                        <div id="pfpicture" className={`w-16 h-16 sm:w-20 sm:h-20 grid place-items-center transition opacity-0 bg-black/30 ${isUser?'hover:opacity-100 cursor-pointer':''} rounded-full`}>
+                        <div id="pfpicture" className={`w-16 h-16 sm:w-20 sm:h-20 grid place-items-center transition opacity-0 bg-black/30 ${canEdit?'hover:opacity-100 cursor-pointer':''} rounded-full`}>
                             <EditRounded className="text-white"/>
                         </div>
                     </label>
