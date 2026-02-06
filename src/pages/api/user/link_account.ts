@@ -7,7 +7,17 @@ import { FieldValue } from "firebase-admin/firestore";
 
 const linkAccount = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
     try {
-        const { email, studentid } = req.body;
+        const { email: rawEmail, studentid: rawStudentid } = req.body;
+
+        // Trim inputs to prevent whitespace issues
+        const email = rawEmail?.trim();
+        const studentid = rawStudentid?.trim();
+
+        if (!email || !studentid) {
+            return res.status(400).json({
+                error: "Email and student ID are required"
+            });
+        }
 
         //get student data
         const studentData = await adminDb.doc(`students/${studentid}`).get();
@@ -57,7 +67,11 @@ const linkAccount = async (req: ApiRequestWithAuth, res: NextApiResponse) => {
                 chineseName: student.chineseName,
                 studentid: studentid,
                 email: email,
-                photoURL: student.photoURL || null
+                photoURL: student.photoURL || `https://storage.googleapis.com/cecdbfirebase.appspot.com/profiles/${studentid}.png`,
+                migrated: true,
+                linkedAccounts: FieldValue.arrayUnion(newAccUID),
+                createdOn: FieldValue.serverTimestamp(),
+                modifiedOn: FieldValue.serverTimestamp()
             }, { merge: true })
         ]);
 

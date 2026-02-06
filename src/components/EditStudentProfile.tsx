@@ -23,10 +23,31 @@ const EditStudentProfile = ({ student, onClose }: { student: StudentDetails, onC
     });
     
     const submit = async (data: Omit<StudentDetails, 'id' | 'ref' | 'createdOn' | 'modifiedOn'>) => {
-        await updateDoc(doc(db, 'students', student.studentid), {
+        // Trim all string fields to prevent whitespace issues
+        const trimmedData = {
             ...data,
+            studentid: data.studentid?.trim(),
+            englishName: data.englishName?.trim().toUpperCase(),
+            chineseName: data.chineseName?.trim(),
+            class: data.class?.trim(),
+            gender: data.gender?.trim(),
+            identification: data.identification?.trim(),
+            phone: data.phone?.trim(),
+            facebookURL: data.facebookURL?.trim(),
+            email: data.email?.trim(),
+            address: data.address?.trim(),
+            motherName: data.motherName?.trim(),
+            motherPhone: data.motherPhone?.trim(),
+            fatherName: data.fatherName?.trim(),
+            fatherPhone: data.fatherPhone?.trim(),
+            emergencyphone: data.emergencyphone?.trim(),
+            emergencyrelation: data.emergencyrelation?.trim(),
+            specials: data.specials?.trim(),
+        };
+
+        await updateDoc(doc(db, 'students', student.studentid), {
+            ...trimmedData,
             modifiedOn: Timestamp.now(),
-            englishName: data.englishName.toUpperCase(),
         });
         onClose();
     }
