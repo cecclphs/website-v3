@@ -1,6 +1,6 @@
 import MemberLayout from "../../components/MemberLayout";
 import Page from "../../components/Page";
-import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc } from "firebase/firestore";
+import { addDoc, collection, query, Timestamp, updateDoc, where, deleteDoc, doc, orderBy, getDocs, getDoc, writeBatch } from "firebase/firestore";
 import { db, docConverter, functions } from "../../config/firebase";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 import React, { forwardRef, useEffect, useMemo, useState } from "react";
@@ -20,7 +20,7 @@ import {
     GridToolbarFilterButton,
     GridCsvExportMenuItem,
 } from '@mui/x-data-grid-pro';
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, Menu, MenuItem } from "@mui/material";
+import { Button, DialogActions, DialogContent, DialogTitle, Divider, Menu, MenuItem, Tab, Tabs, Chip, Alert } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import { AttendanceRecord } from "../../types/Attendance";
 import { useDialog } from "../../hooks/useDialog";
@@ -31,8 +31,7 @@ import FormDateTimePicker from "../../components/form-components/FormDateTimePic
 import { useRouter } from "next/router";
 import { format } from "date-fns";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Download, Link } from "@mui/icons-material";
-import { width } from "@mui/system";
+import { Download, Link, Archive, Unarchive } from "@mui/icons-material";
 import { useSnackbar } from "notistack";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { httpsCallable } from "firebase/functions";
@@ -48,31 +47,47 @@ type RecordForm = {
 
 const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
     const { userToken } = useAuth();
-    const { register, handleSubmit, setValue, control, watch, formState: { isValid, errors }, reset } = useForm<RecordForm>({
+    const { enqueueSnackbar } = useSnackbar();
+    const { register, handleSubmit, setValue, control, watch, formState: { isValid, errors, isSubmitting }, reset } = useForm<RecordForm>({
         defaultValues: {
+            recordName: '',
+            recordType: 'activity',
             startTimestamp: new Date(),
             endTimestamp: new Date(),
+            notes: '',
         }
     });
 
     const handleCreate = async (data: RecordForm) => {
-        await addDoc(collection(db, 'attendanceRecords'), {
-            recordName: data.recordName,
-            recordType: data.recordType,
-            startTimestamp: Timestamp.fromDate(data.startTimestamp),
-            endTimestamp: Timestamp.fromDate(data.endTimestamp),
-            ...(data.notes ? { notes: data.notes } : {}),
-            metadata: {
-                createdOn: Timestamp.now(),
-                createdBy: {
-                    studentid: userToken.studentid,
-                    englishName: userToken.englishName,
+        if (!data.recordName?.trim()) {
+            enqueueSnackbar('Record name is required', { variant: 'error' });
+            return;
+        }
+
+        try {
+            await addDoc(collection(db, 'attendanceRecords'), {
+                recordName: data.recordName.trim(),
+                recordType: data.recordType,
+                startTimestamp: Timestamp.fromDate(data.startTimestamp),
+                endTimestamp: Timestamp.fromDate(data.endTimestamp),
+                ...(data.notes?.trim() ? { notes: data.notes.trim() } : {}),
+                archived: false,
+                metadata: {
+                    createdOn: Timestamp.now(),
+                    createdBy: {
+                        studentid: userToken.studentid,
+                        englishName: userToken.englishName,
+                    },
                 },
-            },
-            students:{}
-        } as Omit<AttendanceRecord, 'id' | 'ref'>);
-        reset();
-        onClose();
+                students: {}
+            } as Omit<AttendanceRecord, 'id' | 'ref'>);
+            enqueueSnackbar('Attendance record created', { variant: 'success' });
+            reset();
+            onClose();
+        } catch (error) {
+            console.error('Create record error:', error);
+            enqueueSnackbar('Failed to create record', { variant: 'error' });
+        }
     }
 
     return <>
@@ -84,10 +99,13 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
                 <div className="flex flex-row space-x-2">
                     <FormTextField
                         control={control}
-                        rules={{required: true}}
+                        rules={{ required: 'Record name is required' }}
                         name="recordName"
                         label="Record Name"
-                        />
+                        fullWidth
+                        error={!!errors.recordName}
+                        helperText={errors.recordName?.message}
+                    />
                     <FormSelect
                         sx={{minWidth: '100px'}}
                         control={control}
@@ -99,7 +117,7 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
                             { value: 'special', label: 'Special' },
                             { value: 'other', label: 'Other' },
                         ]}
-                        />
+                    />
                 </div>
                 <div className="flex flex-row space-x-2">
                     <FormDateTimePicker
@@ -107,18 +125,33 @@ const AddAttendanceRecord = ({ onClose }: { onClose: () => void }) => {
                         name="startTimestamp"
                         label="Start Time"
                         rules={{required: true}}
-                        />
+                    />
                     <FormDateTimePicker
                         control={control}
                         name="endTimestamp"
                         label="End Time"
                         rules={{required: true}}
-                        />
+                    />
                 </div>
+                <FormTextField
+                    control={control}
+                    name="notes"
+                    label="Notes (optional)"
+                    fullWidth
+                    multiline
+                    rows={2}
+                />
             </div>
         </DialogContent>
         <DialogActions>
-            <Button onClick={handleSubmit(handleCreate)}>Create</Button>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button
+                onClick={handleSubmit(handleCreate)}
+                variant="contained"
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? <CircularProgress size={20} /> : 'Create'}
+            </Button>
         </DialogActions>
     </>
 }
@@ -147,7 +180,7 @@ const generateUnnoticedAttdFormLink = async (recordId: string) => {
     //filter out students who are in the record and is not == 0
     const absentees = students.filter(s => {
         const attendance = record.students[s.studentid]
-        return !attendance || attendance == "0"
+        return !attendance || attendance === "0"
     });
     //split absentees into arrays of 10
     const groupArray = absentees.reduce<StudentDetails[][]>((acc, curr, i) => {
@@ -163,13 +196,12 @@ const generateUnnoticedAttdFormLink = async (recordId: string) => {
     //create a form link for each group
     const formLinks = groupArray.map((group, index) => {
         let uri = `entry.${fields.CLUB_FIELD}=电子创意学会&entry.${fields.SHEET_NUM}=${index + 1}&entry.${fields.ABSENT_AMT}=${absentees.length}&entry.${fields.ACTIVITY_DATE}=${format(record.startTimestamp.toDate(), 'yyyy-MM-dd')}`;
-        // formLink += ``;
         group.forEach((student, index) => {
             //学号 名字 班级
             uri += `&entry.${fields[`STUD_${index+1}`]}=${student.studentid} ${student.chineseName} ${student.class}`;
         });
         uri += `&entry.${fields.RECORDER}=秘书，郭哲谦`;
-        
+
         return `${formlink}?${encodeURI(uri)}`;
     })
 
@@ -197,7 +229,7 @@ const FormLinksDialog = ({ onClose, recordId }: { onClose: () => void, recordId:
                 {loading ? <div className="flex flex-col items-center justify-center">
                     <CircularProgress />
                 </div> : <div className="flex flex-col space-y-2">
-                    {formLinks.map((link, index) => <a className="text-blue-800 " href={link} target="_blank" rel="noopener noreferrer">
+                    {formLinks.map((link, index) => <a key={index} className="text-blue-800 " href={link} target="_blank" rel="noopener noreferrer">
                         <Link className="w-5 h-5"/>
                         Form {index+1}
                     </a>)}
@@ -215,23 +247,41 @@ const GridColumnMenu = forwardRef<
   GridColumnMenuProps
 >(function GridColumnMenu(props: GridColumnMenuProps, ref) {
     const [openDialog, closeDialog] = useDialog()
+    const { enqueueSnackbar } = useSnackbar();
     const { hideMenu, currentColumn } = props;
     const router = useRouter();
     const isRecord = !['studentid','chineseName','englishName','class','gender','enrollmentDate'].includes(currentColumn.field)
-    
+
     const confirmDelete = () => {
         openDialog({
             children: <>
                 <DialogContent>Are you sure you want to delete this record?</DialogContent>
                 <DialogActions>
+                    <Button onClick={closeDialog}>Cancel</Button>
                     <Button color="error" variant="contained" onClick={() => {
                         deleteDoc(doc(collection(db, 'attendanceRecords'), currentColumn.description))
-                            .then(() => closeDialog())
+                            .then(() => {
+                                enqueueSnackbar('Record deleted', { variant: 'success' });
+                                closeDialog();
+                            })
+                            .catch(() => enqueueSnackbar('Failed to delete record', { variant: 'error' }))
                     }}>Delete</Button>
                 </DialogActions>
             </>
         })
     }
+
+    const handleArchive = async () => {
+        try {
+            await updateDoc(doc(db, 'attendanceRecords', currentColumn.description), {
+                archived: true
+            });
+            enqueueSnackbar('Record archived', { variant: 'success' });
+        } catch (error) {
+            enqueueSnackbar('Failed to archive record', { variant: 'error' });
+        }
+        hideMenu(null as any);
+    };
 
     const openLinks = () => {
         openDialog({
@@ -250,8 +300,10 @@ const GridColumnMenu = forwardRef<
             <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/callout`)}>Callout</MenuItem>
             <MenuItem onClick={() => router.push(`/attendance/${currentColumn.description}/liveview`)}>Live View</MenuItem>
             <MenuItem onClick={openLinks}>Generate Form</MenuItem>
+            <MenuItem onClick={handleArchive}>
+                <Archive sx={{ mr: 1, fontSize: 18 }} /> Archive
+            </MenuItem>
             <MenuItem onClick={confirmDelete} color="error">Delete</MenuItem>
-            {/* <MenuItem>Edit</MenuItem> */}
             </>}
         </GridColumnMenuContainer>
     );
@@ -262,7 +314,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
     const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','desc')));
     const [selected, setSelected] = useState<GridSelectionModel>([]);
     const { enqueueSnackbar } = useSnackbar();
-    
+
     //use fetch to get the pdf and download it
     const downloadFile = async (url: string, filename: string) => {
         const response = await fetch(url, {
@@ -281,7 +333,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
         link.click();
         document.body.removeChild(link);
     }
-    
+
     const printstuff = async () => {
         const generatePdf = httpsCallable<{url: string, pdfOptions: any}, string>(functions, 'generatePdf');
         const uploadedUrl = await generatePdf({
@@ -298,7 +350,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
                 }
             }
         })
-        
+
         downloadFile(uploadedUrl.data, 'attendance.pdf')
         onClose();
     }
@@ -315,7 +367,7 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
             width: 120
         }
     ]
-    
+
     return <>
         <DataGridPro
             autoHeight
@@ -343,15 +395,173 @@ const PrintPDFDialog = ({ onClose }: { onClose: () => void }) => {
     </>
 }
 
+// ─── Archived Records Viewer ─────────────────────────────────────────────
+const ArchivedRecordsDialog = ({ onClose }: { onClose: () => void }) => {
+    const [records = [], loading] = useCollectionData<AttendanceRecord>(
+        query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '==', true), orderBy('startTimestamp', 'desc'))
+    );
+    const { enqueueSnackbar } = useSnackbar();
+
+    const handleUnarchive = async (recordId: string) => {
+        try {
+            await updateDoc(doc(db, 'attendanceRecords', recordId), { archived: false });
+            enqueueSnackbar('Record unarchived', { variant: 'success' });
+        } catch {
+            enqueueSnackbar('Failed to unarchive record', { variant: 'error' });
+        }
+    };
+
+    const columns: GridColDef[] = [
+        { field: 'recordName', headerName: 'Name', width: 200 },
+        { field: 'recordType', headerName: 'Type', width: 100 },
+        {
+            field: 'startTimestamp',
+            headerName: 'Date',
+            width: 150,
+            valueGetter: (params) => {
+                const ts = params.row.startTimestamp;
+                return ts?.toDate ? format(ts.toDate(), 'yyyy-MM-dd HH:mm') : '';
+            }
+        },
+        {
+            field: 'studentCount',
+            headerName: 'Students',
+            width: 80,
+            valueGetter: (params) => Object.keys(params.row.students || {}).length
+        },
+        {
+            field: 'actions',
+            headerName: '',
+            width: 120,
+            sortable: false,
+            renderCell: (params) => (
+                <Button
+                    size="small"
+                    startIcon={<Unarchive />}
+                    onClick={() => handleUnarchive(params.row.id)}
+                >
+                    Unarchive
+                </Button>
+            )
+        }
+    ];
+
+    return <>
+        <DialogTitle>Archived Attendance Records</DialogTitle>
+        <DialogContent>
+            {loading ? (
+                <div className="flex justify-center py-4"><CircularProgress /></div>
+            ) : records.length === 0 ? (
+                <Alert severity="info" sx={{ my: 2 }}>No archived records</Alert>
+            ) : (
+                <DataGridPro
+                    autoHeight
+                    rows={records}
+                    columns={columns}
+                    getRowId={(row) => row.id}
+                    density="compact"
+                    disableSelectionOnClick
+                />
+            )}
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Close</Button>
+        </DialogActions>
+    </>;
+};
+
+// ─── Bulk Archive Dialog ──────────────────────────────────────────────────
+const BulkArchiveDialog = ({ onClose }: { onClose: () => void }) => {
+    const [records = [], loading] = useCollectionData<AttendanceRecord>(
+        query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '!=', true), orderBy('archived'), orderBy('startTimestamp', 'desc'))
+    );
+    const [selected, setSelected] = useState<GridSelectionModel>([]);
+    const [archiving, setArchiving] = useState(false);
+    const { enqueueSnackbar } = useSnackbar();
+
+    const handleBulkArchive = async () => {
+        if (selected.length === 0) return;
+        setArchiving(true);
+        try {
+            const batch = writeBatch(db);
+            selected.forEach(id => {
+                batch.update(doc(db, 'attendanceRecords', id as string), { archived: true });
+            });
+            await batch.commit();
+            enqueueSnackbar(`Archived ${selected.length} record(s)`, { variant: 'success' });
+            setSelected([]);
+            onClose();
+        } catch {
+            enqueueSnackbar('Failed to archive records', { variant: 'error' });
+        } finally {
+            setArchiving(false);
+        }
+    };
+
+    const columns: GridColDef[] = [
+        { field: 'recordName', headerName: 'Name', width: 200 },
+        { field: 'recordType', headerName: 'Type', width: 100 },
+        {
+            field: 'startTimestamp',
+            headerName: 'Date',
+            width: 150,
+            valueGetter: (params) => {
+                const ts = params.row.startTimestamp;
+                return ts?.toDate ? format(ts.toDate(), 'yyyy-MM-dd HH:mm') : '';
+            }
+        },
+    ];
+
+    return <>
+        <DialogTitle>Select Records to Archive</DialogTitle>
+        <DialogContent>
+            <DataGridPro
+                autoHeight
+                rows={records}
+                columns={columns}
+                loading={loading}
+                getRowId={(row) => row.id}
+                checkboxSelection
+                density="compact"
+                onSelectionModelChange={setSelected}
+                selectionModel={selected}
+            />
+        </DialogContent>
+        <DialogActions>
+            <Button onClick={onClose}>Cancel</Button>
+            <Button
+                onClick={handleBulkArchive}
+                variant="contained"
+                disabled={archiving || selected.length === 0}
+                startIcon={<Archive />}
+            >
+                {archiving ? 'Archiving...' : `Archive ${selected.length} Record(s)`}
+            </Button>
+        </DialogActions>
+    </>;
+};
+
 function CustomToolbar() {
     const [openDialog, closeDialog] = useDialog();
 
     const handlePrintPDF = () => {
-        //show user a dialog to select date range
         openDialog({
             children: <PrintPDFDialog onClose={closeDialog}/>
         })
     }
+
+    const handleViewArchived = () => {
+        openDialog({
+            children: <ArchivedRecordsDialog onClose={closeDialog} />
+        });
+    };
+
+    const handleBulkArchive = () => {
+        openDialog({
+            children: <BulkArchiveDialog onClose={closeDialog} />
+        });
+    };
+
     return (
       <GridToolbarContainer>
         <GridToolbarColumnsButton />
@@ -372,16 +582,21 @@ function CustomToolbar() {
             </React.Fragment>
         )}
         </PopupState>
+        <Button startIcon={<Archive />} size="small" onClick={handleBulkArchive}>
+            Archive Records
+        </Button>
+        <Button startIcon={<Unarchive />} size="small" onClick={handleViewArchived}>
+            View Archived
+        </Button>
       </GridToolbarContainer>
     );
   }
-  
+
 //TODO: Breakup this into multiple files
 const ViewAttendance = () => {
     const { user } = useAuth()
     const [students = [], studentsLoad, studentsError] = useCollectionData<StudentDetails>(query(collection(db, "students").withConverter(docConverter), where('status', '==', 'enrolled')));
-    // const { error, data: students = []} = useAPIFetch<StudentDetails[]>('students',{}, user)
-    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), orderBy('startTimestamp','asc')));
+    const [records = [], recordsLoad, recordsError] = useCollectionData<AttendanceRecord>(query(collection(db, "attendanceRecords").withConverter(docConverter), where('archived', '!=', true), orderBy('archived'), orderBy('startTimestamp','asc')));
     const [openDialog, closeDialog] = useDialog()
 
     const handleAddDialog = () => {
@@ -418,10 +633,10 @@ const ViewAttendance = () => {
             width: 110
         }
       ];
-      
+
 
     const [columns, data] = useMemo(() => {
-        if(students.length == 0) return [[] ,[]];
+        if(students.length === 0) return [[] ,[]];
         const combined = {} as {[studentid: number]: StudentDetails};
         students.forEach(student => {
             combined[student.studentid] = student;
@@ -435,7 +650,7 @@ const ViewAttendance = () => {
                 editable: true,
                 type: 'singleSelect',
                 valueOptions: ['1','0','迟','特','事','公','病'],
-                hide: (records.length - index) > 5, 
+                hide: (records.length - index) > 5,
                 align: 'center'
             })
             Object.keys(students).forEach(studentid => {
@@ -445,18 +660,18 @@ const ViewAttendance = () => {
         })
 
         return [baseColumns, Object.values(combined)];
-        
+
     }, [records, students]);
-    
+
     const processRowUpdate = (newRow: StudentDetails) => {
         //get data of same row
-        const oldRow = data.find(row => row.studentid == newRow.studentid);
+        const oldRow = data.find(row => row.studentid === newRow.studentid);
         //get the updated key and value
-        const key = Object.keys(newRow).find(key => newRow[key] != oldRow[key]);
+        const key = Object.keys(newRow).find(key => newRow[key] !== oldRow[key]);
         const value = newRow[key];
         //update the data
         //get the record from key
-        const record = records.find(record => record.recordName == key);
+        const record = records.find(record => record.recordName === key);
         updateDoc(record.ref, {
             [`students.${newRow.studentid}`]: value
         })
@@ -465,14 +680,14 @@ const ViewAttendance = () => {
 
     return <MemberLayout>
         <Page title="View Attendance">
-            <Button onClick={handleAddDialog}>New Record</Button>
+            <Button onClick={handleAddDialog} variant="contained" size="small" sx={{ mb: 1 }}>New Record</Button>
             <DataGridPro
                 autoHeight
                 loading={studentsLoad || recordsLoad}
                 rows={data}
                 columns={columns}
                 getRowId={(row) => row.studentid}
-                experimentalFeatures={{ newEditingApi: true }} 
+                experimentalFeatures={{ newEditingApi: true }}
                 processRowUpdate={processRowUpdate}
                 columnThreshold={2}
                 columnBuffer={2}
