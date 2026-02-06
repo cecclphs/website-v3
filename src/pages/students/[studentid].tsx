@@ -6,19 +6,21 @@ import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { useRouter } from 'next/router';
 import { doc, onSnapshot, updateDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 import { db, docConverter } from '../../config/firebase';
-import { Button, Checkbox, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, CircularProgress, Container, Alert, Skeleton } from '@mui/material';
+import { Button, Checkbox, DialogContent, DialogTitle, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, CircularProgress, Container, Alert, Skeleton, List, ListItem, ListItemText } from '@mui/material';
 import UserToken from '../../types/UserToken';
 import StudentDetails from '../../types/StudentDetails';
 import { useEffect, useState } from 'react';
 import { useDialog } from '../../hooks/useDialog';
 import LinkAccountDialog from '../../components/LinkAccountDialog';
 import { useSnackbar } from 'notistack';
+import fetchAPI from '../../utils/fetchAPI';
 const StudentProfile = () => {
-    const { userToken } = useAuth();
+    const { userToken, user } = useAuth();
     const router = useRouter();
     const { enqueueSnackbar } = useSnackbar();
     const [studentid, setStudentid] = useState<string | null>(null);
     const [updating, setUpdating] = useState(false);
+    const [accountEmails, setAccountEmails] = useState<Array<{uid: string, email: string | null, displayName: string | null}>>([]);
 
     // Wait for router to be ready before accessing query params
     useEffect(() => {
@@ -60,6 +62,31 @@ const StudentProfile = () => {
 
         return () => unsubscribe();
     }, [studentDetails?.linkedAccounts, loading, router.isReady]);
+
+    // Fetch account emails when linked accounts change
+    useEffect(() => {
+        if (!studentDetails?.linkedAccounts?.length || !user) {
+            setAccountEmails([]);
+            return;
+        }
+
+        const fetchEmails = async () => {
+            try {
+                const response = await fetchAPI('/api/user/get_account_emails', {
+                    method: 'POST',
+                    body: JSON.stringify({ uids: studentDetails.linkedAccounts })
+                }, user);
+
+                if (response.accounts) {
+                    setAccountEmails(response.accounts);
+                }
+            } catch (error) {
+                console.error('Failed to fetch account emails:', error);
+            }
+        };
+
+        fetchEmails();
+    }, [studentDetails?.linkedAccounts, user]);
 
     // Early returns for loading and error states
     if (!router.isReady || !studentid) {
@@ -158,7 +185,25 @@ const StudentProfile = () => {
                     <h3 className="font-semibold text-lg">User has no accounts linked</h3>
                 </div>:<div className='flex flex-col'>
                     <h3 className="font-semibold text-lg">User Permissions</h3>
-                    <p className="text-sm text-gray-600">{studentDetails.linkedAccounts.length} Account(s)</p>
+                    <p className="text-sm text-gray-600 mb-2">{studentDetails.linkedAccounts.length} Account(s)</p>
+                    {accountEmails.length > 0 && (
+                        <div className="mb-3">
+                            <p className="text-xs font-medium text-gray-600 mb-1">Login emails:</p>
+                            <List dense disablePadding>
+                                {accountEmails.map((account) => (
+                                    <ListItem key={account.uid} disableGutters sx={{ py: 0.25 }}>
+                                        <ListItemText
+                                            primary={account.email || 'No email'}
+                                            primaryTypographyProps={{
+                                                variant: 'body2',
+                                                color: account.email ? 'text.primary' : 'text.disabled'
+                                            }}
+                                        />
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </div>
+                    )}
                     <FormControlLabel control={<Checkbox checked={studentPerm.isAdmin} onChange={e => setPerm('isAdmin',e.target.checked)} disabled={updating}/>} label="Admin Priviliges" />
                     <FormControlLabel control={<Checkbox checked={studentPerm.isCommittee} onChange={e => setPerm('isCommittee',e.target.checked)} disabled={updating}/>} label="Committee Priviliges" />
                     </div>}
